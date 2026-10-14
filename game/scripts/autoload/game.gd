@@ -1,0 +1,372 @@
+extends Node
+## Autoload `Game`: nơi duy nhất giữ state (tiền, máu, súng, đạn, nhiệm vụ, truy nã, cài đặt),
+## lưu/nạp save.json và chuyển cảnh.
+
+signal money_changed(money: int)
+signal vitals_changed
+signal weapons_changed
+signal wanted_changed(stars: int)
+signal objective_changed
+signal notice(text: String)
+
+const MENU_SCENE := "res://scenes/menu.tscn"
+const CITY_SCENE := "res://scenes/city.tscn"
+const ENDING_SCENE := "res://scenes/ending.tscn"
+const SAVE_PATH := "user://save.json"
+const MISSIONS_PATH := "res://data/missions.json"
+const MISSION_COUNT := 3
+const AUDIO_SETTLE_MS := 200
+
+var save_path := SAVE_PATH
+var money := 0
+var health := Tuning.MAX_HEALTH
+var armor := 0.0
+var owned := {}  # id súng -> {"mag": int, "reserve": int}; reserve -1 là vô hạn
+var current := "pistol"
+var missions_done: Array = []
+var objective := ""
+var objective_params := {}
+var heat := 0.0
+var stars := 0
+var settings := {"lang": "", "music": 0.7, "sfx": 0.8}
+var missions: Array = []
+
+var _fade: ColorRect
+var _busy := false
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	InputSetup.register()
+	missions = JSON.parse_string(FileAccess.get_file_as_string(MISSIONS_PATH))
+	var layer := CanvasLayer.new()
+	layer.layer = 120
+	add_child(layer)
+	_fade = ColorRect.new()
+	_fade.color = Color.BLACK
+	_fade.modulate.a = 0.0
+	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(_fade)
+	UiTheme.install()
+	reset_progress()
+	load_game()
+	get_tree().auto_accept_quit = false
+	var timer := Timer.new()
+	timer.wait_time = Tuning.AUTOSAVE_INTERVAL
+	timer.autostart = true
+	timer.timeout.connect(_autosave)
+	add_child(timer)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		quit()
+	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_autosave()
+
+
+## Trên Web, đóng tab không báo cho game: lưu định kỳ và khi chuyển tab/mất focus (chỉ khi đang chơi).
+func _autosave() -> void:
+	var scene := get_tree().current_scene
+	if scene and scene.scene_file_path == CITY_SCENE:
+		save_game()
+
+
+# --- Tiến trình và lưu game ---
+
+func reset_progress() -> void:
+	money = Tuning.START_MONEY
+	health = Tuning.MAX_HEALTH
+	armor = 0.0
+	owned = {}
+	_give_weapon("pistol")
+	current = "pistol"
+	missions_done = []
+	clear_objective()
+	clear_wanted()
+
+
+func has_progress() -> bool:
+	return FileAccess.file_exists(save_path) and SaveIO.read(save_path).has("money")
+
+
+func save_game() -> void:
+	SaveIO.write(save_path, {
+		"money": money, "owned": owned, "current": current,
+		"missions_done": missions_done, "settings": settings,
+	})
+
+
+func load_game() -> void:
+	var d := SaveIO.read(save_path)
+	if d.has("settings"):
+		settings.merge(d.settings, true)
+	if d.has("money"):
+		money = int(d.money)
+		owned = {}
+		for id in d.owned:
+			if not DataDB.weapon(id).is_empty():
+				owned[id] = {"mag": int(d.owned[id].mag), "reserve": int(d.owned[id].reserve)}
+		if not owned.has("pistol"):
+			_give_weapon("pistol")
+		current = d.current if owned.has(d.current) else "pistol"
+		missions_done = d.missions_done.map(func(n: Variant) -> int: return int(n))
+	apply_settings()
+
+
+func apply_settings() -> void:
+	I18n.set_language(settings.lang if settings.lang != "" else I18n.system_language())
+	Sfx.set_volume("Music", settings.music)
+	Sfx.set_volume("SFX", settings.sfx)
+
+
+func set_setting(key: String, value: Variant) -> void:
+	settings[key] = value
+	apply_settings()
+	save_game()
+
+
+func new_game() -> void:
+	reset_progress()
+	save_game()
+	go(CITY_SCENE)
+
+
+func continue_game() -> void:
+	reset_progress()
+	load_game()
+	go(CITY_SCENE)
+
+
+# --- Tiền và máu ---
+
+func add_money(amount: int) -> void:
+	money = maxi(money + amount, 0)
+	money_changed.emit(money)
+
+
+func spend(amount: int) -> bool:
+	if money < amount:
+		notice.emit(tr("SHOP_NOT_ENOUGH"))
+		return false
+	add_money(-amount)
+	return true
+
+
+## Giáp đỡ đòn trước. Trả về true nếu người chơi chết.
+func damage_player(amount: float) -> bool:
+	var absorbed := minf(armor, amount)
+	armor -= absorbed
+	health = maxf(health - (amount - absorbed), 0.0)
+	vitals_changed.emit()
+	return health <= 0.0
+
+
+func heal(amount: float) -> void:
+	health = minf(health + amount, Tuning.MAX_HEALTH)
+	vitals_changed.emit()
+
+
+func add_armor(amount: float) -> void:
+	armor = minf(armor + amount, Tuning.MAX_ARMOR)
+	vitals_changed.emit()
+
+
+## Hồi sinh ở bệnh viện: mất 10% tiền, mất hết sao, giữ súng. Trả về số tiền viện phí.
+func hospital_respawn() -> int:
+	var fee := int(money * Tuning.DEATH_FEE)
+	add_money(-fee)
+	clear_wanted()
+	revive()
+	return fee
+
+
+func revive() -> void:
+	health = Tuning.MAX_HEALTH
+	vitals_changed.emit()
+
+
+# --- Súng và đạn ---
+
+func weapon_def(id := "") -> Dictionary:
+	return DataDB.weapon(current if id == "" else id)
+
+
+func ammo(id := "") -> Dictionary:
+	return owned.get(current if id == "" else id, {"mag": 0, "reserve": 0})
+
+
+func is_unlocked(id: String) -> bool:
+	var need := int(weapon_def(id).unlock)
+	return need == 0 or need in missions_done
+
+
+func select_weapon(id: String) -> void:
+	if owned.has(id) and id != current:
+		current = id
+		weapons_changed.emit()
+
+
+func cycle_weapon(step: int) -> void:
+	var ids := owned_ids()
+	var i := ids.find(current)
+	select_weapon(ids[posmod(i + step, ids.size())])
+
+
+func owned_ids() -> Array:
+	return DataDB.weapons().map(func(w: Dictionary) -> String: return w.id).filter(func(id: String) -> bool: return owned.has(id))
+
+
+func consume_ammo() -> bool:
+	var a: Dictionary = owned[current]
+	if a.mag <= 0:
+		return false
+	a.mag -= 1
+	weapons_changed.emit()
+	return true
+
+
+func can_reload() -> bool:
+	var a := ammo()
+	return a.mag < int(weapon_def().mag) and a.reserve != 0
+
+
+func finish_reload() -> void:
+	var a: Dictionary = owned[current]
+	var need := int(weapon_def().mag) - int(a.mag)
+	var take := need if a.reserve < 0 else mini(need, a.reserve)
+	a.mag += take
+	if a.reserve >= 0:
+		a.reserve -= take
+	weapons_changed.emit()
+
+
+func buy_weapon(id: String) -> bool:
+	if owned.has(id) or not is_unlocked(id) or not spend(int(weapon_def(id).price)):
+		return false
+	_give_weapon(id)
+	select_weapon(id)
+	save_game()
+	return true
+
+
+func ammo_full(id: String) -> bool:
+	var w := weapon_def(id)
+	var a := ammo(id)
+	return int(w.reserve_max) < 0 or (a.mag >= int(w.mag) and a.reserve >= int(w.reserve_max))
+
+
+func buy_ammo(id: String) -> bool:
+	if not owned.has(id) or ammo_full(id) or not spend(int(weapon_def(id).ammo_price)):
+		return false
+	give_ammo(id)
+	save_game()
+	return true
+
+
+func give_ammo(id: String) -> void:
+	var w := weapon_def(id)
+	var a: Dictionary = owned[id]
+	if int(w.reserve_max) < 0:
+		return
+	var total := mini(int(a.mag) + int(a.reserve) + int(w.ammo_pack), int(w.mag) + int(w.reserve_max))
+	a.mag = mini(total, int(w.mag))
+	a.reserve = total - a.mag
+	weapons_changed.emit()
+
+
+func _give_weapon(id: String) -> void:
+	var w := weapon_def(id)
+	var mag := mini(int(w.start_ammo), int(w.mag))
+	owned[id] = {"mag": mag, "reserve": -1 if int(w.reserve_max) < 0 else int(w.start_ammo) - mag}
+	weapons_changed.emit()
+
+
+# --- Truy nã ---
+
+func add_heat(amount: float) -> void:
+	heat = minf(heat + amount, Tuning.MAX_HEAT)
+	_update_stars()
+
+
+func set_stars(n: int) -> void:
+	heat = maxf(heat, Tuning.STAR_HEAT[n - 1])
+	_update_stars()
+
+
+func lose_star() -> void:
+	heat = Tuning.STAR_HEAT[stars - 2] if stars >= 2 else 0.0
+	_update_stars()
+
+
+func clear_wanted() -> void:
+	heat = 0.0
+	_update_stars()
+
+
+func _update_stars() -> void:
+	var n := Tuning.STAR_HEAT.filter(func(h: float) -> bool: return heat >= h).size()
+	if n != stars:
+		if n > stars:
+			Sfx.play("star")
+		stars = n
+		wanted_changed.emit(stars)
+
+
+# --- Nhiệm vụ ---
+
+func mission(n: int) -> Dictionary:
+	return missions[n - 1]
+
+
+func next_mission() -> int:
+	for n in range(1, MISSION_COUNT + 1):
+		if not n in missions_done:
+			return n
+	return 0
+
+
+func set_objective(key: String, params := {}) -> void:
+	objective = key
+	objective_params = params
+	objective_changed.emit()
+
+
+func clear_objective() -> void:
+	set_objective("")
+
+
+## Trả về danh sách id súng vừa được mở bán.
+func complete_mission(n: int) -> Array:
+	add_money(int(mission(n).reward))
+	missions_done.append(n)
+	clear_objective()
+	save_game()
+	return DataDB.weapons().filter(func(w: Dictionary) -> bool: return int(w.unlock) == n).map(func(w: Dictionary) -> String: return w.id)
+
+
+# --- Chuyển cảnh và thoát ---
+
+func go(scene: String) -> void:
+	if _busy:
+		return
+	_busy = true
+	var tween := create_tween()
+	tween.tween_property(_fade, "modulate:a", 1.0, Tuning.FADE_TIME)
+	await tween.finished
+	get_tree().paused = false
+	get_tree().change_scene_to_file(scene)
+	await get_tree().process_frame
+	tween = create_tween()
+	tween.tween_property(_fade, "modulate:a", 0.0, Tuning.FADE_TIME)
+	_busy = false
+
+
+## Hàm thoát duy nhất: lưu, tắt mọi âm thanh, chờ cho audio dừng hẳn rồi mới quit.
+func quit(code := 0) -> void:
+	save_game()
+	Sfx.stop_all()
+	Music.stop()
+	await get_tree().create_timer(AUDIO_SETTLE_MS / 1000.0, true, false, true).timeout
+	get_tree().quit(code)

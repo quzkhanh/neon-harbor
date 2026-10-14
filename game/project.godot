@@ -1,0 +1,59 @@
+; Engine configuration file.
+config_version=5
+
+[application]
+
+config/name="Neon Harbor"
+run/main_scene="res://scenes/menu.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+boot_splash/bg_color=Color(0.051, 0.059, 0.098, 1)
+boot_splash/show_image=false
+
+[autoload]
+
+I18n="*res://scripts/autoload/i18n.gd"
+Sfx="*res://scripts/autoload/sfx.gd"
+Music="*res://scripts/autoload/music.gd"
+Game="*res://scripts/autoload/game.gd"
+Ads="*res://scripts/autoload/ads.gd"
+Shot="*res://scripts/autoload/shot.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=4
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=false
+
+[internationalization]
+
+locale/fallback="en"
+pseudolocalization/expansion_ratio=0.4
+pseudolocalization/double_vowels=false
+pseudolocalization/replace_with_accents=true
+pseudolocalization/skip_placeholders=true
+
+[layer_names]
+
+2d_physics/layer_1="world"
+2d_physics/layer_2="actors"
+2d_physics/layer_3="vehicles"
+2d_physics/layer_4="pickups"
+
+[physics]
+
+2d/default_gravity=0.0
+common/physics_ticks_per_second=60
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+renderer/rendering_method.web="gl_compatibility"
+textures/canvas_textures/default_texture_filter=1
+environment/defaults/default_clear_color=Color(0.051, 0.059, 0.098, 1)

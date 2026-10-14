@@ -1,0 +1,153 @@
+class_name City
+extends Node2D
+## Cảnh thành phố: dựng bản đồ, người chơi, camera, xe đậu sẵn, các hệ thống (dân, cảnh sát,
+## nhiệm vụ, tương tác) và giao diện. State nằm ở autoload Game; cảnh này chỉ điều phối.
+
+signal player_respawned
+
+var map: CityMap
+var data: MapData
+var nav: AStarGrid2D
+var drive_nav: AStarGrid2D
+var player: Player
+var camera: CameraRig
+var actors: Node2D
+var effects: Node2D
+var hud: Hud
+var population: Population
+var police: Police
+var missions: Missions
+var interactions: Interactions
+var overlays: Overlays
+
+
+func _ready() -> void:
+	if Game.health <= 0.0:
+		Game.revive()
+	map = CityMap.new()
+	add_child(map)
+	map.build()
+	data = map.data
+	_build_nav()
+	effects = Node2D.new()
+	effects.name = "Effects"
+	add_child(effects)
+	Fx.root = effects
+	actors = Node2D.new()
+	actors.name = "Actors"
+	add_child(actors)
+	var night := CanvasModulate.new()
+	night.color = Palette.NIGHT_TINT
+	add_child(night)
+	player = Player.new()
+	player.global_position = MapData.cell_center(data.find("P"))
+	actors.add_child(player)
+	player.died.connect(_on_player_died)
+	camera = CameraRig.new()
+	add_child(camera)
+	camera.setup(data.world_rect(), player)
+	for cell in data.find_all("c"):
+		spawn_vehicle("car", cell, randf() * TAU)
+	for cell in data.find_all("m"):
+		spawn_vehicle("moto", cell, -PI * 0.5)
+	population = Population.new(self)
+	add_child(population)
+	police = Police.new(self)
+	add_child(police)
+	interactions = Interactions.new(self)
+	add_child(interactions)
+	missions = Missions.new(self)
+	add_child(missions)
+	hud = Hud.new(self)
+	add_child(hud)
+	overlays = Overlays.new(self)
+	add_child(overlays)
+	if TouchControls.wanted():
+		add_child(TouchControls.new())
+	Music.play()
+
+
+func _exit_tree() -> void:
+	Fx.root = null
+
+
+## Hai lưới A*: đi bộ (mọi ô không đặc) và lái xe (ưu tiên lòng đường).
+func _build_nav() -> void:
+	nav = _grid(1.0)
+	drive_nav = _grid(Tuning.OFFROAD_COST)
+
+
+func _grid(offroad_cost: float) -> AStarGrid2D:
+	var grid := AStarGrid2D.new()
+	grid.region = Rect2i(Vector2i.ZERO, data.size)
+	grid.cell_size = Vector2.ONE * Tuning.TILE
+	grid.offset = Vector2.ONE * Tuning.TILE * 0.5
+	grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
+	grid.update()
+	for y in data.size.y:
+		for x in data.size.x:
+			var cell := Vector2i(x, y)
+			if data.is_solid(cell):
+				grid.set_point_solid(cell)
+			elif not data.is_road(cell):
+				grid.set_point_weight_scale(cell, offroad_cost)
+	return grid
+
+
+## Đường đi (toạ độ thế giới) giữa hai điểm qua các ô không đặc; `driving` thì ưu tiên lòng đường.
+func path(from: Vector2, to: Vector2, driving := false) -> PackedVector2Array:
+	var a := _open_cell(MapData.world_to_cell(from))
+	var b := _open_cell(MapData.world_to_cell(to))
+	if a == Vector2i(-1, -1) or b == Vector2i(-1, -1):
+		return PackedVector2Array()
+	return (drive_nav if driving else nav).get_point_path(a, b, true)
+
+
+func _open_cell(cell: Vector2i) -> Vector2i:
+	if nav.is_in_boundsv(cell) and not nav.is_point_solid(cell):
+		return cell
+	for d in MapData.DIRS:
+		if nav.is_in_boundsv(cell + d) and not nav.is_point_solid(cell + d):
+			return cell + d
+	return Vector2i(-1, -1)
+
+
+func spawn_vehicle(kind: String, cell: Vector2i, angle: float, sprite := "") -> Vehicle:
+	var v := Vehicle.new().setup(kind, sprite)
+	v.global_position = MapData.cell_center(cell)
+	v.rotation = angle
+	actors.add_child(v)
+	return v
+
+
+func spawn_npc(script: GDScript, pos: Vector2) -> Npc:
+	var npc: Npc = script.new()
+	npc.city = self
+	npc.global_position = pos
+	actors.add_child(npc)
+	return npc
+
+
+func view_rect() -> Rect2:
+	return camera.view_rect()
+
+
+func _on_player_died(_human: Human) -> void:
+	missions.on_player_died()
+	await get_tree().create_timer(Tuning.DEATH_SCREEN_DELAY).timeout
+	overlays.show_death()
+
+
+## Hồi sinh ở bệnh viện (mất 10% tiền, mất sao) hoặc tại chỗ (quảng cáo revive_here).
+func respawn(at_hospital: bool) -> void:
+	var pos := player.global_position
+	if at_hospital:
+		var fee := Game.hospital_respawn()
+		pos = MapData.cell_center(data.find("H"))
+		Game.notice.emit(I18n.fmt("NOTICE_HOSPITAL", {"fee": I18n.money(fee)}))
+		police.clear_all()
+	else:
+		Game.revive()
+	player.respawn(pos)
+	camera.global_position = pos
+	player_respawned.emit()

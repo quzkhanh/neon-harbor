@@ -1,0 +1,118 @@
+keys,en,vi
+GAME_TITLE,Neon Harbor,Neon Harbor
+FMT_MONEY,${amount},{amount} $
+FMT_THOUSANDS,",",.
+MENU_TAGLINE,A port city that never sleeps.,Thành phố cảng không bao giờ ngủ.
+MENU_CONTINUE,Continue,Chơi tiếp
+MENU_NEW_GAME,New Game,Chơi mới
+MENU_SETTINGS,Settings,Cài đặt
+MENU_QUIT,Quit,Thoát
+MENU_CREDITS,"Art, UI and sounds: Kenney (CC0) · Fonts: Be Vietnam Pro, Noto Sans (OFL)","Hình ảnh, giao diện, âm thanh: Kenney (CC0) · Phông chữ: Be Vietnam Pro, Noto Sans (OFL)"
+MENU_CONFIRM_NEW,Start a new game? Your current progress will be lost.,Bắt đầu lại từ đầu? Tiến trình hiện tại sẽ bị mất.
+CONFIRM_YES,"Yes, start over","Có, chơi lại"
+CONFIRM_NO,Cancel,Huỷ
+SETTINGS_TITLE,Settings,Cài đặt
+SETTINGS_LANGUAGE,Language,Ngôn ngữ
+SETTINGS_MUSIC,Music volume,Âm lượng nhạc
+SETTINGS_SFX,Effects volume,Âm lượng hiệu ứng
+SETTINGS_BACK,Back,Quay lại
+LANG_EN,English,English
+LANG_VI,Tiếng Việt,Tiếng Việt
+PAUSE_TITLE,Paused,Tạm dừng
+PAUSE_RESUME,Resume,Tiếp tục
+PAUSE_TO_MENU,Main menu,Về menu chính
+HUD_AMMO,{mag} / {reserve},{mag} / {reserve}
+AMMO_INFINITE,∞,∞
+HINT_ENTER,[{key}] Get in,[{key}] Lên xe
+HINT_EXIT,[{key}] Get out,[{key}] Xuống xe
+HINT_SELL,[{key}] Sell this car for {price},[{key}] Bán xe này được {price}
+DIALOG_CONTINUE,[{key}] or click to continue,[{key}] hoặc nhấp để tiếp tục
+SIGN_SHOP,GUN SHOP,CỬA HÀNG SÚNG
+SIGN_HOSPITAL,HOSPITAL,BỆNH VIỆN
+SIGN_GARAGE,GARAGE,GARA
+NAME_ROSA,Rosa,Rosa
+NAME_JAY,Jay,Jay
+MISSION_1_TITLE,First Delivery,Chuyến giao đầu tiên
+MISSION_2_TITLE,Debt Collection,Đòi nợ
+MISSION_3_TITLE,Harbor Heist,Phi vụ bến cảng
+M1_INTRO_1,You're the new courier? Good. This package goes to the old warehouse yard on the north-east side. Don't open it.,Cậu là người giao hàng mới hả? Tốt. Gói này phải tới bãi kho cũ phía đông bắc. Đừng mở ra.
+M1_INTRO_2,"Just a delivery, right? No questions asked.","Chỉ là giao hàng thôi, đúng không? Tôi không hỏi gì."
+M1_INTRO_3,"Take the motorbike parked out front. The client hates waiting, so be quick.","Lấy chiếc xe máy đậu ngoài kia. Khách không thích chờ đâu, nhanh lên."
+M1_OUTRO_1,Right on time. I like that. Come back when you want real money.,Đúng giờ. Tôi thích thế. Muốn kiếm tiền thật thì quay lại tìm tôi.
+M2_INTRO_1,The Red Fangs took a case of mine and think they can keep it. They're holed up on the east docks.,Bọn Red Fangs lấy mất chiếc vali của tôi và nghĩ chúng giữ được. Chúng đang cố thủ ở bến tàu phía đông.
+M2_INTRO_2,How many of them?,Bao nhiêu tên?
+M2_INTRO_3,"Six. Gear up at the gun shop, take them down and bring my case back.","Sáu tên. Ghé cửa hàng súng trang bị đi, hạ hết chúng rồi mang vali về cho tôi."
+M2_OUTRO_1,"Not a scratch on it. You're full of surprises, Jay.","Không một vết xước. Cậu đúng là đầy bất ngờ đấy, Jay."
+M3_INTRO_1,One last job. A Red Fangs boss keeps his fancy car at the west docks. I want it.,Việc cuối cùng. Một tay trùm Red Fangs để chiếc xe xịn ở bến tàu phía tây. Tôi muốn nó.
+M3_INTRO_2,The NHPD watch that harbor like hawks.,Cảnh sát NHPD canh bến cảng đó kỹ lắm.
+M3_INTRO_3,"Then lose them. Bring the car to my garage, and don't bring any cops with it.","Thì cắt đuôi chúng. Đưa xe về gara của tôi, đừng để cảnh sát bám theo."
+M3_OUTRO_1,"The harbor is ours now. Welcome to the family, Jay.","Bến cảng giờ là của chúng ta. Chào mừng đến với gia đình, Jay."
+M1_OBJ_BIKE,Get on the motorbike,Lên xe máy
+M1_OBJ_DELIVER,Deliver the package to the marker: {time}s left,Giao gói hàng tới điểm đánh dấu: còn {time} giây
+M1_FAIL_LATE,the client got tired of waiting,khách đã hết kiên nhẫn
+M1_FAIL_BIKE,the motorbike was destroyed,chiếc xe máy đã bị phá huỷ
+M2_OBJ_KILL,Take down the last Red Fang,Hạ tên Red Fangs cuối cùng
+M2_OBJ_KILL_PLURAL,Take down the Red Fangs: {n} left,Hạ bọn Red Fangs: còn {n} tên
+M2_OBJ_CASE,Pick up the briefcase,Nhặt chiếc vali
+M2_OBJ_RETURN,Bring the briefcase back to Rosa,Mang vali về cho Rosa
+M3_OBJ_STEAL,Steal the target car at the west docks,Cướp chiếc xe mục tiêu ở bến tàu phía tây
+M3_OBJ_LOSE,Lose the cops,Cắt đuôi cảnh sát
+M3_OBJ_GARAGE,Bring the car to the garage,Đưa xe về gara
+M3_OBJ_BACK,Get back in the target car,Quay lại chiếc xe mục tiêu
+M3_FAIL_CAR,the target car was destroyed,chiếc xe mục tiêu đã bị phá huỷ
+FAIL_DIED,you went down,bạn đã gục ngã
+NOTICE_MISSION_FAILED,Mission failed: {reason},Nhiệm vụ thất bại: {reason}
+NOTICE_HOSPITAL,Hospital bill: {fee},Viện phí: {fee}
+NOTICE_SOLD,Car sold for {price},Đã bán xe được {price}
+NOTICE_VEHICLE_FIRE,Your vehicle is on fire. Get out!,Xe đang bốc cháy. Xuống ngay!
+MISSION_COMPLETE,Mission complete,Hoàn thành nhiệm vụ
+REWARD,Reward,Phần thưởng
+REWARD_AMOUNT,+{money},+{money}
+UNLOCKED_WEAPON,Now in the gun shop: {weapon},Đã mở bán ở cửa hàng: {weapon}
+AD_DOUBLE_REWARD,Double the reward (watch an ad),Nhân đôi phần thưởng (xem quảng cáo)
+REWARD_DOUBLED,Reward doubled!,Đã nhân đôi phần thưởng!
+CONTINUE,Continue,Tiếp tục
+DEATH_TITLE,You're down,Bạn đã gục
+DEATH_FEE,Hospital bill if you wake up there: {fee},Viện phí nếu tỉnh dậy ở bệnh viện: {fee}
+AD_REVIVE_HERE,Get up right here (watch an ad),Đứng dậy ngay tại chỗ (xem quảng cáo)
+DEATH_HOSPITAL,Wake up at the hospital,Tỉnh dậy ở bệnh viện
+SHOP_TITLE,Gun Shop,Cửa hàng súng
+SHOP_CLOSE,Close,Đóng
+SHOP_OWNED,Owned,Đã có
+SHOP_STAT_DAMAGE,Damage,Sát thương
+SHOP_STAT_RATE,Fire rate,Tốc độ bắn
+SHOP_STAT_ACCURACY,Accuracy,Độ chính xác
+SHOP_STAT_MAG,Magazine,Băng đạn
+SHOP_LOCKED,Locked: complete mission {mission} to unlock,Đang khoá: hoàn thành nhiệm vụ {mission} để mở bán
+SHOP_AMMO_OWNED,Ammo: {mag} / {reserve},Đạn: {mag} / {reserve}
+SHOP_NOT_OWNED,Not owned yet,Chưa sở hữu
+SHOP_BUY,Buy: {price},Mua: {price}
+SHOP_BUY_AMMO,Ammo +{amount}: {price},Đạn +{amount}: {price}
+SHOP_ARMOR,Armor: {price},Giáp: {price}
+SHOP_MEDKIT,Medkit: {price},Hộp máu: {price}
+AD_FREE_AMMO,Free ammo (watch an ad),Đạn miễn phí (xem quảng cáo)
+SHOP_BOUGHT,Purchased!,Đã mua!
+SHOP_FREE_AMMO_DONE,Ammo restocked for every weapon,Đã nạp thêm đạn cho mọi khẩu súng
+SHOP_NOT_ENOUGH,Not enough money,Không đủ tiền
+WEAPON_PISTOL,Pistol,Súng lục
+WEAPON_SMG,SMG,Tiểu liên
+WEAPON_SHOTGUN,Shotgun,Súng săn
+WEAPON_RIFLE,Assault Rifle,Súng trường
+WEAPON_SNIPER,Sniper Rifle,Súng bắn tỉa
+WEAPON_GRENADE,Grenade,Lựu đạn
+WEAPON_FLAMETHROWER,Flamethrower,Súng phun lửa
+WEAPON_BAZOOKA,Rocket Launcher,Súng phóng tên lửa
+AD_BADGE,AD,QUẢNG CÁO
+AD_REWARDED,Rewarded ad (debug),Quảng cáo có thưởng (giả lập)
+AD_INTERSTITIAL,Interstitial ad (debug),Quảng cáo chen ngang (giả lập)
+AD_PLACEMENT,Placement: {placement},Vị trí: {placement}
+AD_FINISH,Watch to the end,Xem hết
+AD_SKIP,Skip,Bỏ qua
+ENDING_TITLE,The Harbor Is Yours,Bến cảng là của bạn
+ENDING_TEXT,"The Red Fangs are broken and the boss's car sits in Rosa's garage. The streets of Neon Harbor have learned a new name: Jay. The night is still young, and the city is yours to roam.","Red Fangs đã tan rã, chiếc xe của tay trùm nằm trong gara của Rosa. Đường phố Neon Harbor giờ đã biết một cái tên mới: Jay. Đêm còn dài, cả thành phố là của bạn."
+ENDING_MONEY,Cash: {money},Tiền mặt: {money}
+ENDING_FREE_ROAM,Keep playing,Chơi tiếp tự do
+TOUCH_INTERACT,Use,Dùng
+TOUCH_SWAP,Swap,Đổi súng
+TOUCH_RELOAD,Reload,Nạp đạn
+TOUCH_PAUSE,Pause,Dừng

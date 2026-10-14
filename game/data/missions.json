@@ -1,0 +1,5 @@
+[
+ {"id": 1, "title": "MISSION_1_TITLE", "reward": 500, "intro": [{"who": "rosa", "line": "M1_INTRO_1"}, {"who": "jay", "line": "M1_INTRO_2"}, {"who": "rosa", "line": "M1_INTRO_3"}], "outro": [{"who": "rosa", "line": "M1_OUTRO_1"}]},
+ {"id": 2, "title": "MISSION_2_TITLE", "reward": 1500, "intro": [{"who": "rosa", "line": "M2_INTRO_1"}, {"who": "jay", "line": "M2_INTRO_2"}, {"who": "rosa", "line": "M2_INTRO_3"}], "outro": [{"who": "rosa", "line": "M2_OUTRO_1"}]},
+ {"id": 3, "title": "MISSION_3_TITLE", "reward": 4000, "intro": [{"who": "rosa", "line": "M3_INTRO_1"}, {"who": "jay", "line": "M3_INTRO_2"}, {"who": "rosa", "line": "M3_INTRO_3"}], "outro": [{"who": "rosa", "line": "M3_OUTRO_1"}]}
+]

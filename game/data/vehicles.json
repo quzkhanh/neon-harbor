@@ -1,0 +1,6 @@
+{
+ "moto": {"sprites": ["motorcycle_red", "motorcycle_blue", "motorcycle_green", "motorcycle_yellow", "motorcycle_black"], "hp": 140, "max_speed": 560, "accel": 720, "brake": 950, "reverse": 170, "turn": 3.4, "grip": 8.0, "engine_pitch": 1.5},
+ "car": {"sprites": ["car_red_1", "car_red_2", "car_red_3", "car_blue_1", "car_blue_2", "car_blue_3", "car_green_1", "car_green_2", "car_green_3", "car_yellow_1", "car_yellow_3", "car_black_2", "car_black_3"], "hp": 180, "max_speed": 440, "accel": 380, "brake": 720, "reverse": 180, "turn": 2.7, "grip": 6.0, "engine_pitch": 1.0},
+ "police": {"sprites": ["car_black_1"], "hp": 220, "max_speed": 530, "accel": 480, "brake": 800, "reverse": 200, "turn": 2.9, "grip": 6.5, "engine_pitch": 1.15, "siren": true},
+ "sports": {"sprites": ["car_red_5"], "hp": 200, "max_speed": 570, "accel": 540, "brake": 850, "reverse": 200, "turn": 3.0, "grip": 6.5, "engine_pitch": 1.25}
+}

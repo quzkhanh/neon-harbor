@@ -1,0 +1,22 @@
+# Godot cache
+.godot/
+
+# Exported builds
+/build/
+
+# Python cache
+__pycache__/
+
+# Notes and docs that are not part of the game
+*.md
+!README.md
+/docs/
+
+# Local reference material and verification screenshots
+/reference/
+
+# Bản dịch sinh ra khi import strings.csv
+game/i18n/*.translation
+
+# Bộ asset Kenney gốc: game chỉ dùng phần đã chép vào game/assets/vendor/ (tools/assets/copy_vendor.sh)
+/vendor/

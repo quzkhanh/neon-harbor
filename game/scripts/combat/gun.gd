@@ -1,0 +1,53 @@
+class_name Gun
+extends RefCounted
+## Nhịp bắn và nạp đạn. Người chơi dùng đạn trong Game; NPC đạn vô hạn.
+
+var def: Dictionary
+var uses_game_ammo := false
+var cooldown := 0.0
+var reloading := 0.0
+
+
+func _init(weapon: Dictionary = {}, player := false) -> void:
+	def = weapon
+	uses_game_ammo = player
+	if not player and not weapon.is_empty():
+		def = weapon.duplicate()
+		def.rate = float(weapon.rate) * Tuning.NPC_RATE_SCALE
+		def.damage = float(weapon.damage) * Tuning.NPC_DAMAGE_SCALE
+
+
+## Trả về true khi vừa nạp xong.
+func tick(delta: float) -> bool:
+	cooldown -= delta
+	if reloading > 0.0:
+		reloading -= delta
+		if reloading <= 0.0:
+			if uses_game_ammo:
+				Game.finish_reload()
+			return true
+	return false
+
+
+func try_fire(shooter: Node2D, origin: Vector2, angle: float, exclude: Array[RID]) -> bool:
+	if cooldown > 0.0 or reloading > 0.0:
+		return false
+	if uses_game_ammo and not Game.consume_ammo():
+		if not start_reload():
+			Sfx.play("empty")
+			cooldown = 0.3
+		return false
+	cooldown = 1.0 / float(def.rate)
+	Combat.fire(shooter, def, origin, angle, exclude)
+	if uses_game_ammo and int(Game.ammo().mag) == 0:
+		start_reload()
+	return true
+
+
+func start_reload() -> bool:
+	if reloading > 0.0 or (uses_game_ammo and not Game.can_reload()):
+		return false
+	reloading = float(def.reload)
+	if def.kind != "throw":
+		Sfx.play("reload", -4.0)
+	return true

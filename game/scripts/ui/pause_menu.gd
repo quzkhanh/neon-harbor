@@ -1,0 +1,12 @@
+class_name PauseMenu
+extends Modal
+## Tạm dừng: Tiếp tục / Cài đặt / Về menu.
+
+
+func _build(content: VBoxContainer) -> void:
+	content.custom_minimum_size.x = 380
+	content.add_child(Ui.label("PAUSE_TITLE", "HeaderLabel"))
+	var buttons := button_column(["PAUSE_RESUME", "MENU_SETTINGS", "PAUSE_TO_MENU"], {"PAUSE_RESUME": "AccentButton"})
+	buttons[0].pressed.connect(close)
+	buttons[1].pressed.connect(close.bind("settings"))
+	buttons[2].pressed.connect(close.bind("menu"))
