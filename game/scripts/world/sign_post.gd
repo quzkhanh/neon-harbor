@@ -13,7 +13,7 @@ static func make(parent: Node, pos: Vector2, sign_color: Color, key: String, map
 	s.color = sign_color
 	s.icon = map_icon
 	s.global_position = pos
-	s.z_index = 22
+	s.z_index = 23
 	var panel := PanelContainer.new()
 	var style := UiTheme.box(Color(Palette.BG, 0.85), 8, 2, sign_color)
 	style.content_margin_left = PAD.x

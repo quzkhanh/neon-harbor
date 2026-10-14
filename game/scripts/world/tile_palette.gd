@@ -16,6 +16,7 @@ const PLAZA := [13, 14]
 const PARKING := 35  # vạch trắng mép trái: lặp lại thành ô đỗ xe
 const LANE_EDGE := {"<": 57, ">": 30, "v": 29, "^": 28}  # vạch vàng giữa hai làn
 const TREES := [183, 186]
+const TREES_ON_PAVING := [183]  # chỉ bụi xanh trên gạch/đất (bụi cam lẫn vào nền cam)
 const CRATES := [129, 130, 156, 157]
 const ROOF_PROPS := {
 	"orange": [171, 196, 197, 198],

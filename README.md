@@ -22,7 +22,9 @@ Made with Godot 4.7.2 (GDScript, Compatibility renderer).
   into `TileMapLayer`s: nine districts (Hillside, Downtown, Uptown Park, Night Market, Midtown, Eastside, Rail Yard,
   The Harbor, Marina Beach), a river crossed by four bridges, and a waterfront. The district name appears when you
   enter it. Building roofs are auto-tiled from Kenney's wall tiles (47 edge/corner shapes in three colours);
-  neon strips glow under the eaves and market stalls have canopies you can walk under.
+  neon strips glow under the eaves and market stalls have canopies you can walk under. Buildings stand out like in
+  GTA 2: wall and roof layers scale around the camera centre, so roofs lean away from you and show their walls
+  (two building heights), roofs are tinted apart from the road, and buildings, trees and crates cast drop shadows.
 - On foot: 8 weapons defined as data (`game/data/weapons.json`): pistol, SMG, shotgun, assault rifle,
   sniper rifle (pierces 3 targets), grenades, flamethrower (sets targets on fire), rocket launcher.
   Muzzle flash, ejected casings, tracers, screen shake, knockback and hit flash. Wounded people show a small health

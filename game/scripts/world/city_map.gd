@@ -8,8 +8,8 @@ const TENT_SCALE := 0.62
 const NEON_EVERY := 5
 const NEON_SCALE := Vector2(0.9, 0.14)
 const TREE_HALF := 22.0
+const PAVED := [":", "."]
 const CRATE_HALF := 26.0
-const ROOF_PROP_EVERY := 7
 const LAMP_EVERY := 7
 const LAMP_SCALE := 1.5
 
@@ -39,7 +39,12 @@ func build(map: MapData = null) -> void:
 	_walls = _layer("Walls", tileset, 20)
 	_props = _layer("Props", tileset, 21)
 	_paint_floors()
-	_paint_buildings()
+	var depth := BuildingDepth.new()
+	depth.name = "BuildingDepth"
+	depth.z_index = 22
+	add_child(depth)
+	depth.build(data, tileset, _walls, _wall_table)
+	_paint_shadows(tileset)
 	_place_lamps()
 	_place_neon()
 	_place_tents()
@@ -61,7 +66,8 @@ func _paint_floors() -> void:
 			var ch := data.at(cell)
 			_put(_ground, cell, _floor_tile(cell, data.floor_of(cell)))
 			if ch == "T":
-				_put(_props, cell, _pick(TilePalette.TREES, cell))
+				var trees := TilePalette.TREES_ON_PAVING if data.floor_of(cell) in PAVED else TilePalette.TREES
+				_put(_props, cell, _pick(trees, cell))
 			elif ch == "x":
 				_put(_props, cell, _pick(TilePalette.CRATES, cell))
 
@@ -91,55 +97,15 @@ func _floor_tile(cell: Vector2i, ch: String) -> int:
 	return _pick(TilePalette.SIDEWALK, cell)
 
 
-func _paint_buildings() -> void:
-	var style_of := _building_styles()
-	for cell in style_of:
-		var style: String = style_of[cell]
-		var sig := _signature(cell)
-		var table: Dictionary = _wall_table[style]
-		_put(_walls, cell, int(table.get(str(sig), table["0"])))
-		if sig == 0 and _hash(cell) % ROOF_PROP_EVERY == 0:
-			_put(_props, cell, _pick(TilePalette.ROOF_PROPS[style], cell))
-
-
-## Mỗi khối nhà liền nhau nhận một kiểu viền, xoay vòng theo thứ tự quét.
-func _building_styles() -> Dictionary:
-	var style_of := {}
-	var index := 0
-	for y in data.size.y:
-		for x in data.size.x:
-			var start := Vector2i(x, y)
-			if data.at(start) != "#" or style_of.has(start):
-				continue
-			var style: String = TilePalette.BUILDING_STYLES[index % TilePalette.BUILDING_STYLES.size()]
-			index += 1
-			var stack: Array[Vector2i] = [start]
-			style_of[start] = style
-			while stack.size() > 0:
-				var c: Vector2i = stack.pop_back()
-				for d in MapData.DIRS:
-					var n: Vector2i = c + d
-					if data.at(n) == "#" and data.in_bounds(n) and not style_of.has(n):
-						style_of[n] = style
-						stack.append(n)
-	return style_of
-
-
-## Bit T,R,B,L,tl,tr,br,bl bật khi đoạn biên đó có viền (khớp tools/assets/build_wall_table.py).
-func _signature(cell: Vector2i) -> int:
-	var open := func(dx: int, dy: int) -> bool: return data.at(cell + Vector2i(dx, dy)) != "#"
-	var t: bool = open.call(0, -1)
-	var r: bool = open.call(1, 0)
-	var b: bool = open.call(0, 1)
-	var l: bool = open.call(-1, 0)
-	var bits := [t, r, b, l,
-		t or l or open.call(-1, -1), t or r or open.call(1, -1),
-		b or r or open.call(1, 1), b or l or open.call(-1, 1)]
-	var sig := 0
-	for i in bits.size():
-		if bits[i]:
-			sig |= 1 << i
-	return sig
+## Bóng đổ của nhà, cây, thùng: chép ô sang một lớp đen mờ, lệch chéo, nằm trên mặt đất và dưới người/xe.
+func _paint_shadows(tileset: TileSet) -> void:
+	var shadows := _layer("Shadows", tileset, -18)
+	shadows.collision_enabled = false
+	shadows.modulate = Palette.GROUND_SHADOW
+	shadows.position = Tuning.SHADOW_OFFSET
+	for layer in [_walls, _props]:
+		for cell in layer.get_used_cells():
+			shadows.set_cell(cell, 0, layer.get_cell_atlas_coords(cell))
 
 
 ## Đèn đường: quầng sáng ấm trên vỉa hè sát đường, cách đều nhau.
@@ -165,17 +131,17 @@ func _place_lamps() -> void:
 
 ## Dải đèn neon dưới mép mái các mặt tiền nhìn ra phố (nhịp ngẫu nhiên theo ô, màu xoay vòng).
 func _place_neon() -> void:
-	var neon := _decor_layer("Neon", 22)
+	var neon := _decor_layer("Neon", 21)
 	var tex := Fx.tex("glow")
 	for y in data.size.y:
 		for x in data.size.x:
 			var cell := Vector2i(x, y)
-			if data.at(cell) != "#" or not data.is_ped_walkable(cell + Vector2i.DOWN) or _hash(cell) % NEON_EVERY != 0:
+			if data.at(cell) != "#" or not data.is_ped_walkable(cell + Vector2i.DOWN) or hash_cell(cell) % NEON_EVERY != 0:
 				continue
 			var glow := Sprite2D.new()
 			glow.texture = tex
 			glow.material = Fx.additive()
-			glow.modulate = Palette.NEON[_hash(cell) % Palette.NEON.size()]
+			glow.modulate = Palette.NEON[hash_cell(cell) % Palette.NEON.size()]
 			glow.scale = NEON_SCALE
 			glow.position = MapData.cell_center(cell) + Vector2(0, Tuning.TILE * 0.5)
 			neon.add_child(glow)
@@ -186,7 +152,7 @@ func _place_tents() -> void:
 	var tents := _decor_layer("Tents", 21)
 	for cell in data.find_all("M"):
 		var s := Sprite2D.new()
-		s.texture = load(TENTS[_hash(cell) % TENTS.size()])
+		s.texture = load(TENTS[hash_cell(cell) % TENTS.size()])
 		s.scale = Vector2.ONE * TENT_SCALE
 		s.position = MapData.cell_center(cell)
 		tents.add_child(s)
@@ -205,8 +171,8 @@ func _put(layer: TileMapLayer, cell: Vector2i, tile: int) -> void:
 
 
 func _pick(options: Array, cell: Vector2i) -> int:
-	return options[_hash(cell) % options.size()]
+	return options[hash_cell(cell) % options.size()]
 
 
-func _hash(cell: Vector2i) -> int:
+static func hash_cell(cell: Vector2i) -> int:
 	return absi(cell.x * 73856093 ^ cell.y * 19349663) % 1000003

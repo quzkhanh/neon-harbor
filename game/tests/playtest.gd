@@ -242,6 +242,7 @@ func _carjack_sell(city: Node) -> void:
 		return
 	var car: Node = cars[0]
 	p.global_position = car.global_position + Vector2(0, 70)
+	city.camera.global_position = p.global_position  # camera trôi chậm: không đưa theo thì xe có thể bị dọn trước khi kịp cướp
 	await physics(2)
 	await key(KEY_E)
 	expect(p.vehicle == car, "không cướp được xe đang chạy")

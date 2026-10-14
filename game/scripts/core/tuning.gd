@@ -148,6 +148,14 @@ const AD_INTERSTITIAL_GRACE := 180.0  # không chiếu trong 3 phút đầu phi�
 const AD_INTERSTITIAL_GAP := 180.0
 const AD_DEBUG_DURATION := 2.0
 
+# Nhà nổi khối (BuildingDepth): mái lệch = (vị trí - tâm camera) × hệ số; ở mép màn hình 640px lệch 640 × hệ số
+const BUILDING_RISE_LOW := 0.06
+const BUILDING_RISE_HIGH := 0.11
+const WALL_DARKEN := 0.5  # lớp tường sát đất tối hơn lớp sát mái chừng này
+const ROOF_TINT_AMOUNT := 0.6  # mái: kéo màu tile về Palette.ROOF_TINT chừng này (giữ nét viền)
+const WALL_TINT_AMOUNT := 0.85  # tường gần như phẳng màu, không lộ viền thành sọc
+const SHADOW_OFFSET := Vector2(10, 14)  # bóng đổ chéo xuống phải
+
 # Dáng đi (Kenney không có frame bước: nhún và lắc sprite)
 const BOB_FREQ := 11.0
 const BOB_SCALE := 0.05

@@ -55,7 +55,8 @@ static func make(parent: Node, pos: Vector2, item: String, expires := true) -> P
 	glow.scale = Vector2.ONE * 0.6
 	glow.show_behind_parent = true
 	p.add_child(glow)
-	parent.add_child(p)
+	# Hoãn tới cuối frame: vật rơi thường sinh ra trong callback va chạm (xe tông chết người), lúc đó không được thêm Area2D.
+	parent.add_child.call_deferred(p)
 	return p
 
 

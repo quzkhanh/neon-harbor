@@ -8,6 +8,8 @@ const SHOOT := 100
 const DRIVE := 260
 const BRAKE := 90
 const SETTLE := 50  # tổng = 600 frame vật lý (chưa kể bước hồi quy xe nổ)
+const TILE := 64  # khớp Tuning.TILE
+const GREEN_BUSH := Vector2i(20, 6)  # tile 183 của Kenney: (183 - 1) % 27, (183 - 1) / 27
 
 
 func _run() -> void:
@@ -33,6 +35,8 @@ func _run() -> void:
 	await frames(3)
 	expect(city.get_node_or_null("Tutorial") == null, "tắt hướng dẫn trong Cài đặt mà khung hướng dẫn vẫn hiện")
 	game.settings.tutorial = true
+	await _check_building_depth(city)
+	await _check_drop_in_physics_callback(city)
 
 	var walk_start: Vector2 = player.global_position
 	Input.action_press(&"move_left")
@@ -106,3 +110,91 @@ func _run() -> void:
 	expect(ending.find_children("*", "Button", true, false).size() >= 2, "màn kết: thiếu nút")
 	print("smoke: đi bộ %d px, lái xe %d px" % [walked, driven])
 	finish("SMOKE")
+
+
+## Nhà nổi khối: mái ô nhà ở tâm camera không lệch; camera dời sang trái thì mái lệch sang phải (ra xa tâm).
+## Vòng nhiệm vụ vẽ trên mái.
+func _check_building_depth(city: Node) -> void:
+	var depth: Node = city.map.get_node_or_null("BuildingDepth")
+	expect(depth != null, "không có BuildingDepth")
+	if depth == null:
+		return
+	var cell := _inner_building(city.data)
+	var p := Vector2(cell) * TILE + Vector2.ONE * TILE * 0.5
+	var camera: Node = city.camera
+	var target: Node = camera.target
+	camera.target = null
+	camera.global_position = p
+	await frames(3)
+	var still := _roof_shift(depth, cell, p)
+	expect(still.length() < 1.0, "mái nhà ở tâm camera vẫn lệch %s" % still)
+	camera.global_position = p - Vector2(300, 0)
+	await frames(3)
+	var shift := _roof_shift(depth, cell, p)
+	expect(shift.x > 5.0 and absf(shift.y) < 1.0, "camera bên trái mà mái không lệch sang phải: %s" % shift)
+	camera.global_position = target.global_position  # trả camera về chỗ cũ, dân/xe sinh quanh khung hình
+	camera.target = target
+	# Rung màn hình đổi tâm camera mỗi frame: mái phải dùng tâm của chính frame đó, không trễ một frame.
+	var roof: int = _roof_index(depth, cell)
+	camera.add_trauma(100.0)
+	for i in 6:
+		await frames(1)
+		var want: Vector2 = (p - camera.get_screen_center_position()) * depth._rise[roof]
+		var got := _roof_shift(depth, cell, p)
+		expect(got.distance_to(want) < 0.5, "mái trễ so với camera khi rung: lệch %s, đúng ra %s" % [got, want])
+	# Đổi transform node TileMapLayer làm Godot cập nhật lại mọi ô (đo có cửa sổ: thêm ~3,5 ms/frame, headless không thấy),
+	# nên lớp phải giữ transform node gốc và chỉ dịch qua RenderingServer.
+	for layer in depth.get_children():
+		expect(layer.transform == Transform2D.IDENTITY, "lớp %s bị đổi transform node (tốn CPU mỗi frame)" % layer.name)
+	for m in get_nodes_in_group("markers"):
+		expect(m.z_index > depth.z_index, "vòng nhiệm vụ bị mái che (z %d <= %d)" % [m.z_index, depth.z_index])
+	var shadows: Node = city.map.get_node_or_null("Shadows")
+	expect(shadows != null and shadows.get_cell_source_id(cell) != -1, "nhà không có bóng đổ")
+	for tree in city.data.find_all("T"):
+		if city.data.floor_of(tree) in [":", "."]:
+			var coords: Vector2i = city.map.get_node("Props").get_cell_atlas_coords(tree)
+			expect(coords == GREEN_BUSH, "bụi cam đứng trên nền gạch/đất ở %s" % tree)
+
+
+func _roof_shift(depth: Node, cell: Vector2i, p: Vector2) -> Vector2:
+	var i := _roof_index(depth, cell)
+	return Vector2.INF if i < 0 else depth.view_transform(i) * p - p
+
+
+## Thứ tự lớp mái chứa ô `cell` trong BuildingDepth (-1 nếu không có).
+func _roof_index(depth: Node, cell: Vector2i) -> int:
+	for layer in depth.get_children():
+		if layer.name in ["Roof0", "Roof1"] and layer.get_cell_source_id(cell) != -1:
+			return layer.get_index()
+	return -1
+
+
+## Một ô nhà cách biên map đủ xa để camera không bị limit_* chặn.
+func _inner_building(data: Object) -> Vector2i:
+	for cell in data.find_all("#"):
+		if cell.x > 20 and cell.y > 20 and cell.x < data.size.x - 20 and cell.y < data.size.y - 20:
+			return cell
+	return Vector2i(-1, -1)
+
+
+## Vật rơi (tiền/hộp máu) sinh ra ngay trong callback va chạm (xe tông chết tên băng đảng) không được gây lỗi
+## "Can't change this state while flushing queries"; harness bắt lỗi engine nên chỉ cần tái hiện đúng tình huống.
+func _check_drop_in_physics_callback(city: Node) -> void:
+	var probe := Area2D.new()
+	probe.collision_mask = city.player.collision_layer
+	var shape := CollisionShape2D.new()
+	shape.shape = CircleShape2D.new()
+	shape.shape.radius = TILE
+	probe.add_child(shape)
+	var pickup_script := load("res://scripts/actors/pickup.gd")
+	var spawned := [0]
+	probe.body_entered.connect(func(_body: Node) -> void:
+		pickup_script.spawn_cash(city.effects, city.player.global_position, 1)
+		spawned[0] += 1)
+	probe.global_position = city.player.global_position + Vector2(0, TILE * 3)
+	city.add_child(probe)
+	await physics(3)
+	probe.global_position = city.player.global_position
+	await physics(5)
+	expect(spawned[0] > 0, "không tái hiện được: callback va chạm không chạy")
+	probe.queue_free()
