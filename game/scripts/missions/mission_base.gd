@@ -16,6 +16,10 @@ func mark(pos: Vector2, label_key := "") -> void:
 	_marker = Marker.make(city.effects, pos, Palette.MARKER, label_key)
 
 
+func marker() -> Marker:
+	return _marker
+
+
 func unmark() -> void:
 	if _marker:
 		_marker.queue_free()

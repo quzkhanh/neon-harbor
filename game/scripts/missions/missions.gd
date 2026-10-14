@@ -12,6 +12,8 @@ const GIVER_OFFSET := Vector2(52, -8)
 
 var city: City
 var current: MissionBase
+var current_n := 0
+var retry_mission := 0  # nhiệm vụ vừa thất bại vì người chơi chết (màn chết cho thử lại)
 var _start_marker: Marker
 var _busy := false
 
@@ -46,6 +48,12 @@ func cell_pos_of(ch: String) -> Vector2:
 	return MapData.cell_center(city.data.find(ch))
 
 
+## Điểm cần tới lúc này (đích của nhiệm vụ đang làm, hoặc điểm nhận nhiệm vụ kế tiếp) để chỉ đường.
+func target() -> Marker:
+	var m: Marker = current.marker() if current else _start_marker
+	return m if is_instance_valid(m) else null
+
+
 func _refresh_marker() -> void:
 	if _start_marker:
 		_start_marker.queue_free()
@@ -63,12 +71,14 @@ func _process(_delta: float) -> void:
 		start(n)
 
 
-func start(n: int) -> void:
+func start(n: int, intro := true) -> void:
 	_busy = true
 	if city.player.vehicle:
 		city.player.exit_vehicle()
-	await city.overlays.show_dialog(Game.mission(n).intro)
+	if intro:
+		await city.overlays.show_dialog(Game.mission(n).intro)
 	_busy = false
+	current_n = n
 	current = load(SCRIPTS[n]).new()
 	current.city = city
 	current.completed.connect(_on_completed.bind(n))
@@ -107,5 +117,6 @@ func _end_current() -> void:
 
 func on_player_died() -> void:
 	if current:
+		retry_mission = current_n
 		_on_failed("FAIL_DIED")
 

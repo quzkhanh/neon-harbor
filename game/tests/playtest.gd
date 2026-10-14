@@ -1,6 +1,6 @@
 extends "res://tests/harness.gd"
 ## Chơi thử như người thật bằng phím/chuột gửi qua hàng đợi input (đi qua focus giao diện và _unhandled_input):
-## menu -> Chơi mới -> cửa hàng (mua súng) -> NV1 -> tạm dừng/cài đặt/đổi ngôn ngữ -> truy nã -> chết -> bệnh viện
+## menu -> Chơi mới -> cửa hàng (mua súng) -> NV1 -> tạm dừng/cài đặt/đổi ngôn ngữ -> truy nã -> chết -> đứng dậy tại chỗ
 ## -> cướp xe -> bán ở gara -> về menu -> Chơi tiếp -> pha bấm loạn ngẫu nhiên. Bắt mọi lỗi engine/script.
 ## Chạy (nên có cửa sổ): godot --path game -s res://tests/playtest.gd [-- --monkey=<giây> --seed=<số>]
 
@@ -30,7 +30,7 @@ func _run() -> void:
 	await _step("vào cửa hàng, mua súng săn", _shop.bind(city))
 	await _step("NV1 bằng phím thật", _mission1.bind(city))
 	await _step("tạm dừng -> cài đặt -> đổi ngôn ngữ -> tiếp tục", _pause_settings.bind(city))
-	await _step("bắn bừa -> truy nã -> chết -> bệnh viện", _wanted_death.bind(city))
+	await _step("bắn bừa -> truy nã -> chết -> đứng dậy tại chỗ", _wanted_death.bind(city))
 	await _step("cướp xe -> bán ở gara", _carjack_sell.bind(city))
 	await _step("về menu -> Chơi tiếp", _menu_continue.bind(city))
 	if monkey_seconds > 0.0:
@@ -77,12 +77,26 @@ func steer_walk(p: Node, goal: Vector2) -> void:
 	var city: Node = current_scene
 	var route: PackedVector2Array = city.path(p.global_position, goal)
 	var next := route[1] if route.size() > 1 else goal
-	var d: Vector2 = (next - p.global_position).normalized()
+	press_dir((next - p.global_position).normalized())
+
+
+## Giữ các phím di chuyển theo hướng `d` (đi bộ, và lái xe ở kiểu lái mặc định).
+func press_dir(d: Vector2) -> void:
 	for pair in [[&"move_left", -d.x], [&"move_right", d.x], [&"move_up", -d.y], [&"move_down", d.y]]:
 		if pair[1] > 0.2:
 			Input.action_press(pair[0], pair[1])
 		else:
 			Input.action_release(pair[0])
+
+
+## Ô `ch` gần người chơi nhất (bản đồ có nhiều cửa hàng/bệnh viện).
+func nearest(city: Node, ch: String) -> Vector2:
+	var best := Vector2.INF
+	for cell in city.data.find_all(ch):
+		var pos: Vector2 = city.data.cell_center(cell)
+		if pos.distance_to(city.player.global_position) < best.distance_to(city.player.global_position):
+			best = pos
+	return best
 
 
 func stop_moving() -> void:
@@ -121,7 +135,7 @@ func _menu_new_game() -> void:
 
 
 func _shop(city: Node) -> void:
-	var door: Vector2 = city.missions.cell_pos_of("S")
+	var door: Vector2 = nearest(city, "S")
 	await walk_to(door + Vector2(0, TILE), 20.0)
 	await walk_to(door, 20.0)
 	expect(await until(func() -> bool: return city.overlays.current != null, 120), "đi vào cửa không mở cửa hàng")
@@ -148,7 +162,7 @@ func _mission1(city: Node) -> void:
 	await walk_to(bike.global_position, 50.0)
 	await key(KEY_E)
 	expect(city.player.vehicle == bike, "phím E không lên được xe máy")
-	# Lái tới điểm giao (lái tự động bằng các action ga/lái như người chơi bấm).
+	# Lái tới điểm giao: bấm phím hướng về điểm kế tiếp trên đường, như người chơi.
 	var goal: Vector2 = city.missions.cell_pos_of("d")
 	for i in 3600:
 		if city.missions.current == null or paused or city.player.vehicle == null:
@@ -156,10 +170,7 @@ func _mission1(city: Node) -> void:
 		var v: Node = city.player.vehicle
 		var route: PackedVector2Array = city.path(v.global_position, goal, true)
 		var target := route[mini(2, route.size() - 1)] if route.size() > 1 else goal
-		var diff: float = angle_difference(v.rotation, (target - v.global_position).angle())
-		Input.action_press(&"steer_right", clampf(diff * 2.5, 0.0, 1.0))
-		Input.action_press(&"steer_left", clampf(-diff * 2.5, 0.0, 1.0))
-		Input.action_press(&"accelerate", 0.4 if absf(diff) > 0.7 else 0.85)
+		press_dir((target - v.global_position).normalized())
 		await physics(1)
 	stop_moving()
 	for i in 12:
@@ -210,9 +221,10 @@ func _wanted_death(city: Node) -> void:
 	game.armor = 0.0
 	p.take_hit(500.0, Vector2.RIGHT, null)
 	expect(await until(func() -> bool: return city.overlays.current != null, 200), "chết không hiện màn chết")
+	var died_at: Vector2 = p.global_position
 	await key(KEY_ENTER)
 	await physics(20)
-	expect(p.alive and p.global_position.distance_to(city.missions.cell_pos_of("H")) < 10.0, "Enter ở màn chết không về bệnh viện")
+	expect(p.alive and p.global_position.distance_to(died_at) < 40.0, "Enter ở màn chết không hồi sinh tại chỗ")
 
 
 func _carjack_sell(city: Node) -> void:

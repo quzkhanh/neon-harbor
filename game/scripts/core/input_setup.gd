@@ -26,6 +26,7 @@ static func register() -> void:
 	_add(&"weapon_next", [_mouse(MOUSE_BUTTON_WHEEL_DOWN), _key(KEY_Q), _joy(JOY_BUTTON_RIGHT_SHOULDER)])
 	_add(&"weapon_prev", [_mouse(MOUSE_BUTTON_WHEEL_UP), _joy(JOY_BUTTON_LEFT_SHOULDER)])
 	_add(&"reload", [_key(KEY_R), _joy(JOY_BUTTON_X)])
+	_add(&"map", [_key(KEY_M), _key(KEY_TAB), _joy(JOY_BUTTON_BACK)])
 	_add(&"pause", [_key(KEY_ESCAPE), _key(KEY_P), _joy(JOY_BUTTON_START)])
 	for i in WEAPON_SLOTS:
 		_add(StringName("weapon_%d" % (i + 1)), [_key(KEY_1 + i)])

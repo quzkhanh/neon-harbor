@@ -195,6 +195,13 @@ def hurt():
     return np.tanh(1.4 * (0.8 * thump(t, 200, 70, 0.06) + filt(noise(t), 60, 600) * dec(t, 0.05)))
 
 
+def kill():
+    """Hạ gục: tiếng ngã nặng + hai tiếng "ting" xác nhận."""
+    t = T(0.34)
+    body = np.tanh(1.6 * (thump(t, 140, 55, 0.09) + 0.7 * filt(noise(t), 60, 500) * dec(t, 0.06)))
+    return body + 0.35 * (coin(t, 0.0, 1568, 0.05) + 0.8 * coin(t, 0.06, 2093, 0.08))
+
+
 # --- Xe ---
 
 def engine():
@@ -297,7 +304,7 @@ SOUNDS = {
     "skid": (skid, -10, True), "horn": (horn, -12, False), "crash": (crash, -4, False),
     "door": (door, -3, False), "cash": (cash, -10, False), "pickup": (pickup, -14, False),
     "mission_complete": (mission_complete, -9, False), "mission_fail": (mission_fail, -13, False),
-    "star": (star, -15, False), "hurt": (hurt, -7, False),
+    "star": (star, -15, False), "hurt": (hurt, -7, False), "kill": (kill, -6, False),
 }
 
 

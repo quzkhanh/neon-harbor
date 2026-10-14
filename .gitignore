@@ -20,3 +20,6 @@ game/i18n/*.translation
 
 # Bộ asset Kenney gốc: game chỉ dùng phần đã chép vào game/assets/vendor/ (tools/assets/copy_vendor.sh)
 /vendor/
+
+# Âm thanh tự sinh là asset của game (gitignore toàn cục của máy có *.wav)
+!game/assets/audio/sfx/*.wav

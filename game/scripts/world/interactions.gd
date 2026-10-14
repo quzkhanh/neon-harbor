@@ -1,17 +1,20 @@
 class_name Interactions
 extends Node
-## Tìm hành động khả dụng quanh người chơi (lên/xuống xe, bán xe ở gara), hiện gợi ý trên HUD,
-## thực hiện khi bấm `interact`. Đi vào cửa hàng thì tự mở giao diện cửa hàng.
+## Tìm hành động khả dụng quanh người chơi (lên/xuống xe, bán xe ở gara, sơn xe để xoá truy nã),
+## hiện gợi ý trên HUD, thực hiện khi bấm `interact`. Đi vào cửa hàng thì tự mở giao diện cửa hàng.
 
 const GARAGE_RADIUS := 120.0
 const DOOR_RADIUS := 34.0
+const SIGNS := [["S", "SIGN_SHOP", Palette.CYAN], ["H", "SIGN_HOSPITAL", Palette.HEALTH],
+	["G", "SIGN_GARAGE", Palette.GOLD], ["R", "SIGN_RESPRAY", Palette.ACCENT]]
 
 var city: City
 var prompt := ""
 var prompt_params := {}
 var _action := Callable()
 var _shop_armed := true
-var _shop_pos: Vector2
+var _shops: Array[Vector2] = []
+var _resprays: Array[Vector2] = []
 var _garage_pos: Vector2
 
 
@@ -21,11 +24,23 @@ func _init(c: City) -> void:
 
 
 func _ready() -> void:
-	_shop_pos = MapData.cell_center(city.data.find("S"))
+	_shops = _spots("S")
+	_resprays = _spots("R")
 	_garage_pos = MapData.cell_center(city.data.find("G"))
-	for sign_def in [["S", "SIGN_SHOP", Palette.CYAN], ["H", "SIGN_HOSPITAL", Palette.HEALTH], ["G", "SIGN_GARAGE", Palette.GOLD]]:
-		var pos := MapData.cell_center(city.data.find(sign_def[0]))
-		SignPost.make(city.effects, pos, sign_def[2], sign_def[1])
+	for sign_def in SIGNS:
+		for pos in _spots(sign_def[0]):
+			SignPost.make(city.effects, pos, sign_def[2], sign_def[1])
+
+
+func _spots(ch: String) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for cell in city.data.find_all(ch):
+		out.append(MapData.cell_center(cell))
+	return out
+
+
+func _near(pos: Vector2, spots: Array[Vector2], radius: float) -> bool:
+	return spots.any(func(s: Vector2) -> bool: return pos.distance_to(s) < radius)
 
 
 func _process(_delta: float) -> void:
@@ -38,10 +53,12 @@ func _process(_delta: float) -> void:
 		var price := sell_price(v)
 		if price > 0 and v.global_position.distance_to(_garage_pos) < GARAGE_RADIUS:
 			_set_prompt("HINT_SELL", _sell.bind(v), {"price": I18n.money(price)})
+		elif Game.stars > 0 and _near(v.global_position, _resprays, GARAGE_RADIUS):
+			_set_prompt("HINT_RESPRAY", _respray.bind(v), {"price": I18n.money(Tuning.RESPRAY_PRICE)})
 		else:
 			_set_prompt("HINT_EXIT", p.exit_vehicle)
 		return
-	var near_shop := p.global_position.distance_to(_shop_pos) < DOOR_RADIUS
+	var near_shop := _near(p.global_position, _shops, DOOR_RADIUS)
 	if near_shop and _shop_armed:
 		_shop_armed = false
 		city.overlays.show_shop()
@@ -103,3 +120,13 @@ func _sell(v: Vehicle) -> void:
 	Sfx.play("cash")
 	Game.notice.emit(I18n.fmt("NOTICE_SOLD", {"price": I18n.money(price)}))
 	v.queue_free()
+
+
+## Tiệm sơn xe: trả tiền, xe đổi màu, cảnh sát mất dấu (xoá truy nã).
+func _respray(v: Vehicle) -> void:
+	if not Game.spend(Tuning.RESPRAY_PRICE):
+		return
+	v.repaint()
+	Game.clear_wanted()
+	Sfx.play("cash")
+	Game.notice.emit(tr("NOTICE_RESPRAYED"))

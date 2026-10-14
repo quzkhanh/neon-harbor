@@ -1,10 +1,13 @@
 extends "res://tests/harness.gd"
 ## Hoàn thành lần lượt 3 nhiệm vụ qua API kiểm thử (dịch chuyển, hạ mục tiêu).
 ## Assert tiền tăng đúng, súng mở bán đúng, lưu rồi nạp lại save.json giữ nguyên state,
-## chết thì về bệnh viện và mất 10% tiền.
+## chết: về bệnh viện gần nhất mất 10% tiền; làm lại nhiệm vụ; hồi sinh tại chỗ mất 20% và giữ sao.
 
 const UNLOCKS := {1: ["smg"], 2: ["rifle", "flamethrower"], 3: ["sniper", "bazooka"]}
 const MAX_WAIT := 300
+const REVIVE_HOSPITAL := 0  # khớp DeathScreen.Revive (test không được tham chiếu class_name của game)
+const REVIVE_HERE := 1
+const REVIVE_RETRY := 3
 
 
 func _run() -> void:
@@ -83,15 +86,42 @@ func _check_death(city: Node) -> void:
 	game.add_money(1000 - game.money)
 	game.set_stars(2)
 	var p: Node = city.player
+	var died_at: Vector2 = p.global_position
 	p.take_hit(999.0, Vector2.RIGHT, null)
 	await _wait(func() -> bool: return city.overlays.current != null, "chết: không hiện màn chết")
-	city.overlays.current.close(false)
+	city.overlays.current.close(REVIVE_HOSPITAL)
 	await frames(5)
-	var hospital: Vector2 = city.missions.cell_pos_of("H")
+	var hospital: Vector2 = city.nearest_hospital(died_at)
 	expect(p.alive, "chết: không hồi sinh")
 	expect(p.global_position.distance_to(hospital) < 10.0, "chết: không về bệnh viện (%s)" % p.global_position)
 	expect(game.money == 900, "chết: tiền %d, mong đợi 900 (mất 10%%)" % game.money)
 	expect(game.stars == 0, "chết: vẫn còn %d sao" % game.stars)
+
+	# Chết giữa nhiệm vụ -> "Làm lại nhiệm vụ": về điểm nhận nhiệm vụ, nhiệm vụ chạy lại ngay (không hội thoại).
+	game.missions_done = []
+	city.missions.start(1, false)
+	await frames(3)
+	p.take_hit(999.0, Vector2.RIGHT, null)
+	await _wait(func() -> bool: return city.overlays.current != null, "chết giữa NV1: không hiện màn chết")
+	expect(city.missions.retry_mission == 1, "chết giữa NV1: màn chết không cho làm lại")
+	city.overlays.current.close(REVIVE_RETRY)
+	await frames(5)
+	expect(city.missions.current != null and city.missions.current_n == 1, "làm lại: NV1 không chạy lại")
+	expect(p.global_position.distance_to(city.missions.giver_pos(1)) < 10.0, "làm lại: không về điểm nhận NV1")
+
+	# Hồi sinh tại chỗ: mất 20% tiền, giữ sao truy nã, không đổi vị trí.
+	city.missions.current.failed.emit("FAIL_DIED")
+	game.money = 1000
+	game.set_stars(2)
+	var here: Vector2 = p.global_position
+	p.take_hit(999.0, Vector2.RIGHT, null)
+	await _wait(func() -> bool: return city.overlays.current != null, "chết lần 3: không hiện màn chết")
+	city.overlays.current.close(REVIVE_HERE)
+	await frames(5)
+	expect(p.alive and p.global_position.distance_to(here) < 10.0, "hồi sinh tại chỗ: bị dời đi")
+	expect(game.money == 800 and game.stars == 2, "hồi sinh tại chỗ: tiền %d (mong 800), sao %d (mong 2)" % [game.money, game.stars])
+	p.take_hit(999.0, Vector2.RIGHT, null)
+	expect(p.alive, "hồi sinh tại chỗ: không có thời gian bất tử")
 
 
 func _wait(cond: Callable, message: String) -> void:

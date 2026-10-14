@@ -28,7 +28,13 @@ const PED_HEALTH := 40.0
 const PED_FLEE_TIME := 6.0
 const HEAR_GUNSHOT_RADIUS := 520.0
 const KNOCKDOWN_TIME := 1.6
-const CORPSE_TIME := 8.0
+const CORPSE_TIME := 25.0
+const CORPSE_FADE := 1.5
+const CORPSE_SLIDE := 18.0  # xác trượt theo hướng trúng đòn
+const BLOOD_GROW_TIME := 2.0
+const BLOOD_POOL_SCALE := 1.2
+const HEALTH_BAR_TIME := 2.5  # thanh máu trên đầu NPC hiện bao lâu sau khi trúng đòn
+const KILL_MARK_TIME := 0.7
 const COP_HEALTH := 70.0
 const COP_SPEED := 170.0
 const GANG_HEALTH := 65.0
@@ -101,9 +107,12 @@ const COP_CAR_STOP_DIST := 260.0
 # Tiền và chết
 const START_MONEY := 300
 const DEATH_FEE := 0.10
+const REVIVE_HERE_FEE := 0.20  # hồi sinh tại chỗ: đắt hơn, giữ nguyên sao truy nã
+const REVIVE_GRACE := 2.5  # giây bất tử sau khi hồi sinh tại chỗ
 const CAR_SELL_PRICE := {"moto": 250, "car": 500, "police": 800, "sports": 900}
 const ARMOR_PRICE := 400
 const MEDKIT_PRICE := 150
+const RESPRAY_PRICE := 250
 const DEATH_SCREEN_DELAY := 1.2
 const AUTOSAVE_INTERVAL := 30.0
 
@@ -152,3 +161,13 @@ const DRIFT_MIN_LATERAL := 110.0
 const SKID_EVERY := 0.03
 const SKID_LIFE := 6.0
 const STUCK_TIME := 1.2
+
+# Lái theo hướng phím (mặc định): xe tự xoay về hướng bấm trên màn hình
+const STEER_GAIN := 2.5  # độ lái đầy đủ khi lệch ~0,4 rad
+const CORNER_ANGLE := 0.7  # rad: lệch hơn mức này thì coi là vào cua
+const CORNER_SPEED := 230.0  # tự phanh xuống tốc độ này khi vào cua
+const TURN_BACK_ANGLE := 2.27  # rad (~130°): bấm ngược hướng xe thì phanh rồi lùi vòng quay đầu
+const TURN_BACK_SPEED := 60.0
+const ASSIST_STEER_FULL_SPEED := 80.0  # xe xoay được ngay từ tốc độ thấp
+const ASSIST_TURN_SCALE := 1.2
+const ASSIST_DRAG := 420.0  # nhả phím thì xe dừng nhanh như người đi bộ

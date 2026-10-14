@@ -16,9 +16,14 @@ func _init(c: City) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("pause") and current == null and not Ads.showing:
+	if current != null or Ads.showing:
+		return
+	if event.is_action_pressed("pause"):
 		get_viewport().set_input_as_handled()
 		show_pause()
+	elif event.is_action_pressed("map") and city.player.alive:
+		get_viewport().set_input_as_handled()
+		await open(MapScreen.new(city))
 
 
 ## Mở lớp phủ, chờ đóng, trả về kết quả.
@@ -59,5 +64,4 @@ func show_mission_complete(n: int, reward: int, unlocked: Array) -> void:
 
 
 func show_death() -> void:
-	var revive: Variant = await open(DeathScreen.new())
-	city.respawn(revive != true)
+	city.respawn(await open(DeathScreen.new(city.missions.retry_mission > 0)))

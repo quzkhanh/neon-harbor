@@ -19,8 +19,8 @@ func _init(c: City) -> void:
 
 
 func _ready() -> void:
-	for cell in city.data.find_all(","):
-		_walk_cells.append(cell)
+	for ch in ",:":
+		_walk_cells.append_array(city.data.find_all(ch))
 	for ch in MapData.LANES:
 		_lane_cells.append_array(city.data.find_all(ch))
 	_fill(true)

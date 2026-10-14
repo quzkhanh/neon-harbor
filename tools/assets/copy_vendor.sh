@@ -15,7 +15,7 @@ for c in red_1 red_2 red_3 red_5 blue_1 blue_2 blue_3 green_1 green_2 green_3 ye
   cp "$RACE/Cars/car_$c.png" "$OUT/cars/"
 done
 cp "$RACE"/Motorcycles/*.png "$OUT/cars/"
-for o in skidmark_short_1 cone_straight barrel_red tires_white; do cp "$RACE/Objects/$o.png" "$OUT/objects/"; done
+for o in skidmark_short_1 cone_straight barrel_red tires_white tent_red tent_blue; do cp "$RACE/Objects/$o.png" "$OUT/objects/"; done
 cp "$UI/PNG/Yellow/Default/star.png" "$OUT/ui/star.png"
 cp "$UI/PNG/Grey/Default/star_outline.png" "$OUT/ui/star_outline.png"
 cp "$UI/PNG/Grey/Default/arrow_basic_w_small.png" "$UI/PNG/Grey/Default/arrow_basic_e_small.png" "$OUT/ui/"

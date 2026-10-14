@@ -35,30 +35,47 @@ func _run() -> void:
 	Input.action_release(&"aim_left")
 	expect(game.ammo().mag != mag_before or player.gun.reloading > 0.0, "bắn không tốn đạn")
 
-	var car: Node = city.spawn_vehicle("car", Vector2i(10, 20), 0.0)
+	var car: Node = city.spawn_vehicle("car", Vector2i(10, 22), 0.0)
 	player.global_position = car.global_position + Vector2(0, 60)
 	await physics(5)
 	await tap(&"interact")
 	expect(player.vehicle == car, "không lên được xe")
+	# Lái theo hướng phím (mặc định): sang phải rồi rẽ xuống, bấm ngược hướng để phanh.
 	var start: Vector2 = car.global_position
-	Input.action_press(&"accelerate")
-	Input.action_press(&"steer_right")
-	await physics(DRIVE / 4)
-	Input.action_release(&"steer_right")
-	await physics(DRIVE - DRIVE / 4)
-	Input.action_release(&"accelerate")
+	Input.action_press(&"move_right")
+	await physics(DRIVE / 2)
+	Input.action_release(&"move_right")
+	Input.action_press(&"move_down")
+	await physics(DRIVE / 2)
+	Input.action_release(&"move_down")
 	var driven: float = car.global_position.distance_to(start)
 	expect(driven > 200.0, "xe không chạy (đi %d px)" % driven)
-	Input.action_press(&"brake")
+	expect(absf(angle_difference(car.rotation, PI * 0.5)) < 0.5, "bấm xuống mà xe không quay xuống (góc %.2f)" % car.rotation)
+	Input.action_press(&"move_up")
 	await physics(BRAKE)
-	Input.action_release(&"brake")
+	Input.action_release(&"move_up")
+	expect(car.velocity.dot(Vector2.DOWN) < 60.0, "bấm ngược hướng mà xe không phanh")
+	# Kiểu cổ điển: ga + xoay thân xe (đặt lại xe trên làn trước).
+	game.settings.steering = "classic"
+	car.global_position = city.data.cell_center(Vector2i(10, 22))
+	car.rotation = 0.0
+	car.velocity = Vector2.ZERO
+	start = car.global_position
+	Input.action_press(&"accelerate")
+	await physics(DRIVE / 2)
+	Input.action_release(&"accelerate")
+	expect(car.global_position.distance_to(start) > 100.0, "kiểu lái cổ điển: xe không chạy")
+	game.settings.steering = "screen"
+	Input.action_press(&"handbrake")
+	await physics(BRAKE)
+	Input.action_release(&"handbrake")
 	await tap(&"interact")
 	expect(player.vehicle == null, "không xuống được xe")
 	await physics(SETTLE)
 	expect(world.has_point(player.global_position), "người chơi ra ngoài bản đồ: %s" % player.global_position)
 
 	# Hồi quy: xe bị một NPC bắn, NPC đó bị giải phóng trước khi xe nổ -> không được lỗi script.
-	var wreck: Node = city.spawn_vehicle("car", Vector2i(10, 20), 0.0)
+	var wreck: Node = city.spawn_vehicle("car", Vector2i(10, 22), 0.0)
 	var shooter: Node = city.spawn_npc(load("res://scripts/actors/cop.gd"), wreck.global_position + Vector2(0, 300))
 	wreck.take_hit(500.0, Vector2.RIGHT, shooter)
 	shooter.queue_free()

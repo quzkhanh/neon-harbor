@@ -16,6 +16,7 @@ var driver: Node
 var autopilot: RefCounted
 var has_npc_driver := false
 var throttle := 0.0
+var assist := false  # người chơi lái kiểu theo hướng phím (DriveInput)
 var steer := 0.0
 var handbrake := false
 var burning := false
@@ -32,6 +33,7 @@ var _burn_left := 0.0
 var _skid_timer := 0.0
 var _flash := 0.0
 var _crash_cooldown := 0.0
+var _input_reader := DriveInput.new()
 
 
 func setup(vehicle_kind: String, sprite := "") -> Vehicle:
@@ -114,6 +116,15 @@ func set_driver(new_driver: Node) -> void:
 		_skid_sound = null
 		throttle = 0.0
 		steer = 0.0
+		assist = false
+
+
+## Đổi sang màu khác trong các sprite của loại xe này (tiệm sơn xe).
+func repaint() -> void:
+	var options: Array = spec.sprites.filter(func(s: String) -> bool: return s != sprite_name)
+	if options.size() > 0:
+		sprite_name = options[randi() % options.size()]
+		body.texture = load(CAR_DIR % sprite_name)
 
 
 func set_siren(on: bool) -> void:
@@ -136,9 +147,7 @@ func _physics_process(delta: float) -> void:
 	elif autopilot:
 		kinematic = autopilot.update(self, delta)
 	elif is_player_driven() and driver.controls_enabled:
-		throttle = Input.get_action_strength("accelerate") - Input.get_action_strength("brake")
-		steer = Input.get_action_strength("steer_right") - Input.get_action_strength("steer_left")
-		handbrake = Input.is_action_pressed("handbrake")
+		_input_reader.read(self)
 	else:
 		throttle = 0.0
 		steer = 0.0
@@ -154,8 +163,10 @@ func _physics_process(delta: float) -> void:
 func _drive(delta: float) -> void:
 	var speed := forward_speed()
 	var max_speed := float(spec.max_speed)
-	var steer_factor := clampf(absf(speed) / Tuning.STEER_FULL_SPEED, 0.0, 1.0) * (1.0 - 0.35 * clampf(absf(speed) / max_speed, 0.0, 1.0))
-	rotation += steer * float(spec.turn) * steer_factor * signf(speed) * delta
+	var full_speed := Tuning.ASSIST_STEER_FULL_SPEED if assist else Tuning.STEER_FULL_SPEED
+	var steer_factor := clampf(absf(speed) / full_speed, 0.0, 1.0) * (1.0 - 0.35 * clampf(absf(speed) / max_speed, 0.0, 1.0))
+	var turn := float(spec.turn) * (Tuning.ASSIST_TURN_SCALE if assist else 1.0)
+	rotation += steer * turn * steer_factor * signf(speed) * delta
 	var fwd := forward()
 	var side := fwd.rotated(PI * 0.5)
 	speed = velocity.dot(fwd)
@@ -168,7 +179,7 @@ func _drive(delta: float) -> void:
 		else:
 			speed = maxf(speed - float(spec.accel) * 0.6 * delta, -float(spec.reverse))
 	else:
-		speed = move_toward(speed, 0.0, Tuning.VEHICLE_DRAG * delta)
+		speed = move_toward(speed, 0.0, (Tuning.ASSIST_DRAG if assist else Tuning.VEHICLE_DRAG) * delta)
 	var grip := float(spec.grip)
 	if handbrake:
 		grip = Tuning.HANDBRAKE_GRIP
@@ -208,7 +219,12 @@ func _leave_skid(side: Vector2) -> void:
 
 
 ## Chỉ cú đâm mới gây sát thương (có thời gian hồi), trượt dọc tường thì không.
+## Bỏ phần vận tốc hướng vào vật cản: move_and_slide giữ nguyên vận tốc khi tì vào xe khác,
+## nên xe đứng yên vẫn "đâm" ở tốc độ tối đa sau mỗi lần hồi và tự nổ.
 func _check_crashes(before: Vector2) -> void:
+	for i in get_slide_collision_count():
+		var n := get_slide_collision(i).get_normal()
+		velocity -= n * minf(velocity.dot(n), 0.0)
 	if _crash_cooldown > 0.0:
 		return
 	for i in get_slide_collision_count():

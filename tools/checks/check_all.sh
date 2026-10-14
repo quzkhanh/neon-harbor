@@ -57,7 +57,7 @@ cp -r game "$TMP/nokey" && sed -i '/^SHOP_TITLE,/d' "$TMP/nokey/i18n/strings.csv
 expect_fail "xoá khoá SHOP_TITLE khỏi strings.csv" python3 tools/checks/check_i18n.py "$TMP/nokey"
 cp -r game "$TMP/broken" && sed -i 's/^func _check_crashes(before: Vector2) -> void:/&\n\tvar oops: int = "không phải số"/' "$TMP/broken/scripts/actors/vehicle.gd"
 expect_fail "chèn lỗi script vào vehicle.gd" run_test SMOKE smoke.gd "$TMP/broken"
-cp game/maps/district1.txt "$TMP/map.txt" && sed -i '4s/</>/12' "$TMP/map.txt"
+cp game/maps/city.txt "$TMP/map.txt" && sed -i '4s/</>/12' "$TMP/map.txt"
 expect_fail "đảo hướng một ô làn đường" python3 tools/checks/validate_map.py "$TMP/map.txt"
 
 echo

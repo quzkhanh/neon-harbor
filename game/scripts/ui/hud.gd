@@ -39,6 +39,8 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for side in ["left", "right", "top", "bottom"]:
 		root.add_theme_constant_override("margin_" + side, MARGIN)
+	add_child(ObjectiveArrow.new(city))
+	add_child(DistrictBanner.new(city))
 	add_child(root)
 	_build_vitals(root)
 	var top_right := _build_stars(root)

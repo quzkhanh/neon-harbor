@@ -9,9 +9,13 @@ const SETTLE := 45
 const PERF_WARMUP := 5.0
 const PERF_SECONDS := 20
 const PERF_HEALTH := 1000000.0
+const COMBAT_CELL := Vector2i(5, -5)  # tính từ điểm xuất phát P (khu cảng)
+const DRIVE_CELL := Vector2i(-15, -11)
+const CORPSE_CELL := Vector2i(6, -9)
 const SCENARIOS := [
 	"menu", "settings", "city_walk", "combat", "driving", "wanted3", "shop", "dialog",
-	"mission_complete", "death", "hospital", "pause", "touch", "ad_debug",
+	"mission_complete", "death", "hospital", "pause", "touch", "ad_debug", "corpses", "map",
+	"downtown", "market", "uptown", "marina",
 ]
 
 var _name := ""
@@ -57,7 +61,7 @@ func _run() -> void:
 		await _menu()
 	else:
 		await _city()
-	if not _name in ["combat", "driving"]:
+	if not _name in ["combat", "driving", "corpses"]:
 		await _frames(SETTLE)
 	_save()
 
@@ -101,10 +105,20 @@ func _city() -> void:
 				await _frames(1)
 			if _name == "hospital":
 				await _frames(10)
-				city.overlays.current.close(false)
+				city.overlays.current.close(DeathScreen.Revive.HOSPITAL)
 				await _frames(30)
 		"pause":
 			city.overlays.show_pause()
+		"corpses":
+			await _corpses(city)
+		"map":
+			p.global_position = city.missions.giver_pos(1)
+			await _frames(5)
+			city.overlays.open(MapScreen.new(city))
+		"downtown", "market", "uptown", "marina":
+			p.global_position = _district_spot(city, "DISTRICT_" + _name.to_upper())
+			_camera_snap(city)
+			await _hold([&"move_right"], 50)
 		"ad_debug":
 			Ads.use_provider("debug")
 			Ads.show_rewarded("double_reward")
@@ -133,7 +147,7 @@ func _combat(city: City) -> void:
 	Game.owned["rifle"] = {"mag": 30, "reserve": 90}
 	Game.select_weapon("rifle")
 	var p := city.player
-	p.global_position = MapData.cell_center(Vector2i(30, 26)) + Vector2(0, 280)
+	p.global_position = MapData.cell_center(city.data.find("P") + COMBAT_CELL) + Vector2(0, 280)
 	for offset in [Vector2(260, -40), Vector2(330, 60), Vector2(300, 150)]:
 		var g := city.spawn_npc(Gangster, p.global_position + offset)
 		g.alert()
@@ -148,13 +162,48 @@ func _combat(city: City) -> void:
 
 
 func _drive(city: City) -> void:
-	var cell := Vector2i(10, 20)
-	var v := city.spawn_vehicle("car", cell, 0.0, "car_red_1")
+	var v := city.spawn_vehicle("car", city.data.find("P") + DRIVE_CELL, 0.0, "car_red_1")
 	city.player.global_position = v.global_position + Vector2(0, 50)
 	await _frames(5)
 	city.player.enter_vehicle(v)
-	await _hold([&"accelerate"], 70)
-	await _hold([&"accelerate", &"steer_right", &"handbrake"], 16, false)
+	await _hold([&"move_right"], 70)
+	await _hold([&"move_right", &"move_down", &"handbrake"], 16, false)
+
+
+## Xác người: hai người vừa bị hạ (vũng máu, dấu X), một tên bị thương (thanh máu), một người bị xe tông ngã.
+## Ô vỉa hè gần tâm khu `key` nhất.
+func _district_spot(city: City, key: String) -> Vector2:
+	for d in DataDB.districts():
+		if d.key == key:
+			var r: Array = d.rect
+			var center := Vector2i(int(r[0] + r[2] / 2), int(r[1] + r[3] / 2))
+			for radius in 30:
+				for dy in range(-radius, radius + 1):
+					for dx in range(-radius, radius + 1):
+						if city.data.at(center + Vector2i(dx, dy)) == ",":
+							return MapData.cell_center(center + Vector2i(dx, dy))
+	return city.player.global_position
+
+
+func _camera_snap(city: City) -> void:
+	city.camera.global_position = city.player.global_position
+
+
+func _corpses(city: City) -> void:
+	var p := city.player
+	p.global_position = MapData.cell_center(city.data.find("P") + CORPSE_CELL)
+	p.face(PI)
+	var victims: Array[Npc] = []
+	for offset in [Vector2(-220, -70), Vector2(-260, 60), Vector2(-150, 140)]:
+		victims.append(city.spawn_npc(Pedestrian, p.global_position + offset))
+	var gang := city.spawn_npc(Gangster, p.global_position + Vector2(-340, -10))
+	await _frames(5)
+	victims[0].take_hit(500.0, Vector2.LEFT, p)
+	await _frames(90)
+	gang.take_hit(30.0, Vector2.LEFT, p)
+	victims[2].knock_down(Vector2(-80, 0), 1.0, null)
+	victims[1].take_hit(500.0, Vector2.LEFT, p)
+	await _frames(12)
 
 
 func _hold(actions: Array, frames: int, release := true) -> void:

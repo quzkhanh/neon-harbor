@@ -1,35 +1,50 @@
 class_name DeathScreen
 extends Modal
-## Màn chết: về bệnh viện (mất 10% tiền, mất sao) hoặc hồi sinh tại chỗ bằng quảng cáo revive_here.
-## Kết quả: true nếu hồi sinh tại chỗ.
+## Màn chết. Kết quả (Revive): hồi sinh tại chỗ (trả phí hoặc xem quảng cáo), thử lại nhiệm vụ
+## vừa thất bại, hoặc về bệnh viện gần nhất (mất 10% tiền, mất sao).
+
+enum Revive { HOSPITAL, HERE, AD, RETRY }
+
+var _retry: bool
 
 
-func _init() -> void:
+func _init(can_retry: bool) -> void:
 	super()
 	cancellable = false
+	_retry = can_retry
 
 
 func _build(content: VBoxContainer) -> void:
-	content.custom_minimum_size.x = 460
+	content.custom_minimum_size.x = 480
 	var title := Ui.label("DEATH_TITLE", "TitleLabel")
 	title.add_theme_color_override("font_color", Palette.HEALTH)
 	content.add_child(title)
-	var fee := int(Game.money * Tuning.DEATH_FEE)
-	content.add_child(Ui.live_label("DEATH_FEE", func() -> Dictionary: return {"fee": I18n.money(fee)}, "SubLabel"))
-	var revive := Ui.button("AD_REVIVE_HERE", "AccentButton")
-	revive.add_to_group("ad_button")
-	revive.visible = Ads.rewarded_available("revive_here")
-	content.add_child(revive)
-	var hospital := Ui.button("DEATH_HOSPITAL")
-	content.add_child(hospital)
-	revive.pressed.connect(_revive.bind(revive))
-	hospital.pressed.connect(close.bind(false))
-	Ui.focus_chain.call_deferred([revive, hospital])
+	var ad := Ui.button("AD_REVIVE_HERE", "AccentButton")
+	ad.add_to_group("ad_button")
+	ad.visible = Ads.rewarded_available("revive_here")
+	ad.pressed.connect(_revive_ad.bind(ad))
+	var here := _fee_button("DEATH_REVIVE_HERE", Tuning.REVIVE_HERE_FEE, Revive.HERE, "AccentButton")
+	var retry := _fee_button("DEATH_RETRY", Tuning.DEATH_FEE, Revive.RETRY)
+	retry.visible = _retry
+	var hospital := _fee_button("DEATH_HOSPITAL", Tuning.DEATH_FEE, Revive.HOSPITAL)
+	for b in [ad, here, retry, hospital]:
+		content.add_child(b)
+	content.add_child(Ui.label("DEATH_WANTED_NOTE", "SmallLabel"))
+	Ui.focus_chain.call_deferred([ad, here, retry, hospital])
 
 
-func _revive(button: Button) -> void:
+## Nút có phí kèm theo; màn chết không đổi ngôn ngữ khi đang mở nên dịch một lần là đủ.
+func _fee_button(key: String, rate: float, result: Revive, variation := "") -> Button:
+	var b := Ui.button("", variation)
+	b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	b.text = I18n.fmt(key, {"fee": I18n.money(int(Game.money * rate))})
+	b.pressed.connect(close.bind(result))
+	return b
+
+
+func _revive_ad(button: Button) -> void:
 	button.disabled = true
 	if await Ads.show_rewarded("revive_here"):
-		close(true)
+		close(Revive.AD)
 	else:
 		button.disabled = false

@@ -8,6 +8,7 @@ var aim_angle := 0.0
 var controls_enabled := true
 var _walk_velocity := Vector2.ZERO
 var _mouse_active_ms := -100000
+var _grace := 0.0
 
 
 func _ready() -> void:
@@ -51,6 +52,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func _physics_process(delta: float) -> void:
 	if not alive:
 		return
+	if _grace > 0.0:
+		_grace -= delta
+		body.modulate.a = 1.0 if _grace <= 0.0 else 0.45 + 0.4 * absf(sin(_grace * 14.0))
 	if vehicle:
 		global_position = vehicle.global_position
 		return
@@ -103,7 +107,8 @@ func exit_vehicle() -> void:
 	v.set_driver(null)
 
 
-func respawn(pos: Vector2) -> void:
+func respawn(pos: Vector2, grace := 0.0) -> void:
+	_grace = grace
 	if vehicle:
 		exit_vehicle()
 	global_position = pos
@@ -118,6 +123,8 @@ func respawn(pos: Vector2) -> void:
 
 
 func _apply_damage(amount: float, dir: Vector2, source: Node) -> void:
+	if _grace > 0.0:
+		return
 	if amount > 2.0:
 		Sfx.play("hurt", -4.0)
 		Fx.shake(amount * 0.15)

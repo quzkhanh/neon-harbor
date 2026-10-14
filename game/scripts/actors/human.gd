@@ -97,6 +97,7 @@ func take_hit(amount: float, dir: Vector2, source: Variant, knockback := 0.0) ->
 	source = Combat.source_or_null(source)
 	_flash = 1.0
 	knock_velocity += dir.normalized() * knockback
+	Fx.blood_spray(global_position, dir)
 	_apply_damage(amount, dir, source)
 
 
@@ -129,13 +130,18 @@ func _on_damaged(_amount: float, _source: Node) -> void:
 	pass
 
 
+## Xác: tối màu, ngã nghiêng và trượt theo hướng trúng đòn, vũng máu loang dần
+## (người bị xe tông ngã thì không có máu và tự đứng dậy).
 func _die(dir: Vector2, _source: Node) -> void:
 	collision_layer = 0
 	collision_mask = 0
 	z_index = -1
 	set_pose("stand")
-	body.modulate = Color(0.7, 0.7, 0.75)
+	body.modulate = Palette.CORPSE
 	body.scale = Vector2.ONE
-	var tween := create_tween()
+	var slide := dir.normalized() * Tuning.CORPSE_SLIDE
+	Fx.blood_pool(global_position + slide)
+	var tween := create_tween().set_parallel()
 	tween.tween_property(body, "rotation", facing + PI * 0.5 * signf(dir.x + 0.01), 0.25)
+	tween.tween_property(body, "position", slide, 0.25).set_ease(Tween.EASE_OUT)
 	died.emit(self)

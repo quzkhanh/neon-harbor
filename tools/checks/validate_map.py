@@ -1,29 +1,30 @@
 #!/usr/bin/env python3
 """Kiểm tra bản đồ ASCII của Neon Harbor.
 
-Dùng: python3 tools/checks/validate_map.py [đường_dẫn_map]   (mặc định game/maps/district1.txt)
+Dùng: python3 tools/checks/validate_map.py [đường_dẫn_map]   (mặc định game/maps/city.txt)
 Exit code khác 0 nếu có lỗi:
-  - định dạng: các dòng dài bằng nhau, ký tự hợp lệ, đúng 1 P/S/H/G/r/d/k, đủ 1/2/3 (mỗi số đúng 1);
+  - định dạng: các dòng dài bằng nhau, ký tự hợp lệ, đúng 1 P/G/r/d/k/m, có ít nhất 1 S/H/R, đủ 1/2/3 (mỗi số đúng 1);
   - mọi điểm quan trọng đi bộ tới được từ P (BFS qua ô không đặc);
   - lưới làn đường liên thông có hướng (xe tự lái không kẹt ngõ cụt) — cùng quy tắc với scripts/world/lanes.gd;
-  - cửa hàng, bệnh viện, gara nằm cạnh vỉa hè.
+  - cửa hàng, bệnh viện, gara, tiệm sơn xe nằm cạnh vỉa hè.
 """
 import sys
 from collections import deque
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_MAP = ROOT / "game/maps/district1.txt"
+DEFAULT_MAP = ROOT / "game/maps/city.txt"
 
 SOLID = set("#Tx~")
 LANES = {"<": (-1, 0), ">": (1, 0), "^": (0, -1), "v": (0, 1)}
 ROAD = set(LANES) | {"+", "="}
-FLOORS = set(",\".~_-") | ROAD
-SPECIAL_ONE = "PSHGrdk"
+FLOORS = set(",\".~_-:") | ROAD
+SPECIAL_ONE = "PGrdkm"
+SPECIAL_SOME = "SHR"
 MISSIONS = "123"
-SPECIAL_MANY = "cm"
-VALID = FLOORS | SOLID | set(SPECIAL_ONE) | set(MISSIONS) | set(SPECIAL_MANY)
-NEEDS_SIDEWALK = "SHG"
+SPECIAL_MANY = "cbM"
+VALID = FLOORS | SOLID | set(SPECIAL_ONE + SPECIAL_SOME + MISSIONS + SPECIAL_MANY)
+NEEDS_SIDEWALK = "SHGR"
 DIRS = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 
 
@@ -54,6 +55,9 @@ def check_format(g, errors):
         n = len(g.cells(c))
         if n != 1:
             errors.append(f"cần đúng 1 ô {c!r}, đang có {n}")
+    for c in SPECIAL_SOME:
+        if not g.cells(c):
+            errors.append(f"cần ít nhất 1 ô {c!r}")
 
 
 def check_walk(g, errors):
@@ -69,7 +73,7 @@ def check_walk(g, errors):
             if n not in seen and g.at(*n) not in SOLID and 0 <= n[0] < g.w and 0 <= n[1] < g.h:
                 seen.add(n)
                 queue.append(n)
-    for c in SPECIAL_ONE + MISSIONS + SPECIAL_MANY:
+    for c in SPECIAL_ONE + SPECIAL_SOME + MISSIONS + SPECIAL_MANY:
         for cell in g.cells(c):
             if cell not in seen:
                 errors.append(f"ô {c!r} tại {cell} không đi bộ tới được từ P")

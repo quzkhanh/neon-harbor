@@ -28,7 +28,7 @@ var objective := ""
 var objective_params := {}
 var heat := 0.0
 var stars := 0
-var settings := {"lang": "", "music": 0.7, "sfx": 0.8}
+var settings := {"lang": "", "music": 0.7, "sfx": 0.8, "steering": "screen"}
 var missions: Array = []
 
 var _fade: ColorRect
@@ -173,10 +173,16 @@ func add_armor(amount: float) -> void:
 	vitals_changed.emit()
 
 
+## Trả phí hồi sinh theo tỉ lệ số tiền đang có. Trả về số tiền đã trả.
+func pay_fee(rate: float) -> int:
+	var fee := int(money * rate)
+	add_money(-fee)
+	return fee
+
+
 ## Hồi sinh ở bệnh viện: mất 10% tiền, mất hết sao, giữ súng. Trả về số tiền viện phí.
 func hospital_respawn() -> int:
-	var fee := int(money * Tuning.DEATH_FEE)
-	add_money(-fee)
+	var fee := pay_fee(Tuning.DEATH_FEE)
 	clear_wanted()
 	revive()
 	return fee

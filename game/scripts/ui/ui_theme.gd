@@ -99,6 +99,7 @@ static func _labels(t: Theme) -> void:
 	_label_variant(t, "HudLabel", "Bold", 22, Palette.TEXT, 6)
 	_label_variant(t, "HintLabel", "SemiBold", 20, Palette.TEXT, 6)
 	_label_variant(t, "WorldLabel", "ExtraBold", 22, Palette.TEXT, 8)
+	_label_variant(t, "BannerLabel", "ExtraBold", 44, Palette.TEXT, 10)
 
 
 static func _label_variant(t: Theme, name: String, weight: String, size: int, color: Color, outline: int) -> void:

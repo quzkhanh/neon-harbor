@@ -3,7 +3,7 @@
 Tạo ra trong game/assets/sprites/:
   weapons/icon_<id>.png  biểu tượng vũ khí nhìn ngang 192x96 (shop, HUD), cùng một tỉ lệ điểm ảnh
   ui/icon_*.png          ổ khoá, máu, giáp, tiền
-  fx/*.png               chớp nòng, vỏ đạn, quầng sáng, khói, tia lửa, rocket, lựu đạn, vết cháy, lửa
+  fx/*.png               chớp nòng, vỏ đạn, quầng sáng, khói, tia lửa, rocket, lựu đạn, vết cháy, lửa, vũng máu
   items/*.png            vật phẩm nhặt được nhìn từ trên xuống
 
 Chạy từ gốc repo:  python3 tools/assets/make_sprites.py
@@ -508,6 +508,19 @@ def flame():
     return from_arrays(rgb, alpha)
 
 
+def blood():
+    r, theta = radial(96)
+    rng = np.random.default_rng(11)
+    edge = 0.55 + sum(rng.uniform(0.02, 0.06) * np.sin(k * theta + rng.uniform(0, 2 * pi)) for k in range(2, 7))
+    pool = np.clip((edge - r) / 0.05, 0, 1)
+    drops = blobs(96, [(0.5 + 0.4 * cos(a), 0.5 + 0.4 * sin(a), rr) for a, rr in
+                       [(0.4, 0.035), (1.9, 0.028), (2.6, 0.04), (4.1, 0.03), (5.3, 0.025)]], 0.004)
+    alpha = np.maximum(pool, drops)
+    shade = np.clip(1 - r / 0.6, 0, 1)[:, :, None]
+    rgb = np.array([150, 18, 24]) + np.array([50, 8, 8]) * shade
+    return from_arrays(rgb, alpha * 0.9)
+
+
 # ---------- D. Vật phẩm (nhìn từ trên) ----------
 
 def cash():
@@ -593,6 +606,7 @@ SPRITES = {
     "fx/grenade.png": grenade,
     "fx/scorch.png": scorch,
     "fx/flame.png": flame,
+    "fx/blood.png": blood,
     "items/cash.png": cash,
     "items/briefcase.png": briefcase,
     "items/medkit.png": medkit,

@@ -116,6 +116,37 @@ static func impact(pos: Vector2) -> void:
 		burst(pos, "spark", 5, 160.0, 0.25, Color(1, 0.85, 0.5))
 
 
+## Tia máu nhỏ khi người trúng đạn.
+static func blood_spray(pos: Vector2, dir: Vector2) -> void:
+	if root == null:
+		return
+	var p := burst(pos, "spark", 5, 140.0, 0.3, Palette.BLOOD, false)
+	p.direction = dir.normalized()
+	p.spread = 35.0
+
+
+## Vũng máu loang dần dưới xác, mờ đi cùng lúc xác được dọn.
+static func blood_pool(pos: Vector2) -> void:
+	if root == null:
+		return
+	var s := _sprite("blood", pos, -3)
+	s.rotation = randf() * TAU
+	s.scale = Vector2.ONE * 0.3
+	var t := s.create_tween()
+	t.tween_property(s, "scale", Vector2.ONE * Tuning.BLOOD_POOL_SCALE, Tuning.BLOOD_GROW_TIME).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	t.tween_interval(Tuning.CORPSE_TIME - Tuning.BLOOD_GROW_TIME)
+	t.tween_property(s, "modulate:a", 0.0, Tuning.CORPSE_FADE)
+	t.tween_callback(s.queue_free)
+
+
+## Dấu X đỏ xác nhận người chơi đã hạ gục mục tiêu.
+static func kill_mark(pos: Vector2) -> void:
+	if root:
+		var m := KillMark.new()
+		m.global_position = pos
+		root.add_child(m)
+
+
 static func explosion(pos: Vector2, radius: float) -> void:
 	if root == null:
 		return

@@ -12,6 +12,7 @@ const SIDEWALK := [7, 8]
 const WATER := [19, 20]
 const DOCK := [42, 44]
 const ASPHALT := 86
+const PLAZA := [13, 14]
 const PARKING := 35  # vạch trắng mép trái: lặp lại thành ô đỗ xe
 const LANE_EDGE := {"<": 57, ">": 30, "v": 29, "^": 28}  # vạch vàng giữa hai làn
 const TREES := [183, 186]

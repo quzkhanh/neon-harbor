@@ -2,7 +2,11 @@ class_name CityMap
 extends Node2D
 ## Dựng các TileMapLayer (nền, đường, toà nhà/va chạm, đồ trên mái) từ MapData.
 
-const MAP_PATH := "res://maps/district1.txt"
+const MAP_PATH := "res://maps/city.txt"
+const TENTS := ["res://assets/vendor/objects/tent_red.png", "res://assets/vendor/objects/tent_blue.png"]
+const TENT_SCALE := 0.62
+const NEON_EVERY := 5
+const NEON_SCALE := Vector2(0.9, 0.14)
 const TREE_HALF := 22.0
 const CRATE_HALF := 26.0
 const ROOF_PROP_EVERY := 7
@@ -37,6 +41,8 @@ func build(map: MapData = null) -> void:
 	_paint_floors()
 	_paint_buildings()
 	_place_lamps()
+	_place_neon()
+	_place_tents()
 
 
 func _layer(layer_name: String, tileset: TileSet, z: int) -> TileMapLayer:
@@ -64,6 +70,8 @@ func _floor_tile(cell: Vector2i, ch: String) -> int:
 	match ch:
 		"\"":
 			return _pick(TilePalette.GRASS, cell)
+		":":
+			return _pick(TilePalette.PLAZA, cell)
 		".":
 			return _pick(TilePalette.DIRT, cell)
 		"~":
@@ -136,10 +144,7 @@ func _signature(cell: Vector2i) -> int:
 
 ## Đèn đường: quầng sáng ấm trên vỉa hè sát đường, cách đều nhau.
 func _place_lamps() -> void:
-	var lamps := Node2D.new()
-	lamps.name = "Lamps"
-	lamps.z_index = 19
-	add_child(lamps)
+	var lamps := _decor_layer("Lamps", 19)
 	var tex := Fx.tex("glow")
 	for y in data.size.y:
 		for x in data.size.x:
@@ -156,6 +161,43 @@ func _place_lamps() -> void:
 					glow.position = MapData.cell_center(cell) + Vector2(d) * Tuning.TILE * 0.3
 					lamps.add_child(glow)
 					break
+
+
+## Dải đèn neon dưới mép mái các mặt tiền nhìn ra phố (nhịp ngẫu nhiên theo ô, màu xoay vòng).
+func _place_neon() -> void:
+	var neon := _decor_layer("Neon", 22)
+	var tex := Fx.tex("glow")
+	for y in data.size.y:
+		for x in data.size.x:
+			var cell := Vector2i(x, y)
+			if data.at(cell) != "#" or not data.is_ped_walkable(cell + Vector2i.DOWN) or _hash(cell) % NEON_EVERY != 0:
+				continue
+			var glow := Sprite2D.new()
+			glow.texture = tex
+			glow.material = Fx.additive()
+			glow.modulate = Palette.NEON[_hash(cell) % Palette.NEON.size()]
+			glow.scale = NEON_SCALE
+			glow.position = MapData.cell_center(cell) + Vector2(0, Tuning.TILE * 0.5)
+			neon.add_child(glow)
+
+
+## Lều sạp chợ: che phía trên đầu người (đi xuyên qua được).
+func _place_tents() -> void:
+	var tents := _decor_layer("Tents", 21)
+	for cell in data.find_all("M"):
+		var s := Sprite2D.new()
+		s.texture = load(TENTS[_hash(cell) % TENTS.size()])
+		s.scale = Vector2.ONE * TENT_SCALE
+		s.position = MapData.cell_center(cell)
+		tents.add_child(s)
+
+
+func _decor_layer(layer_name: String, z: int) -> Node2D:
+	var n := Node2D.new()
+	n.name = layer_name
+	n.z_index = z
+	add_child(n)
+	return n
 
 
 func _put(layer: TileMapLayer, cell: Vector2i, tile: int) -> void:

@@ -23,16 +23,20 @@ const SHADOW := Color(0, 0, 0, 0.45)
 const OUTLINE := Color(0.03, 0.035, 0.07, 0.9)
 const DIM_SCREEN := Color(0.02, 0.025, 0.05, 0.62)
 const NIGHT_TINT := Color(0.6, 0.6, 0.78)
+const NEON := [Color(1.0, 0.24, 0.5, 0.75), Color(0.18, 0.89, 0.9, 0.7), Color(0.65, 0.35, 1.0, 0.75), Color(1.0, 0.82, 0.25, 0.6)]
 const LAMP := Color(1.0, 0.7, 0.35, 0.22)
 const HEADLIGHT := Color(1.0, 0.92, 0.7, 0.16)
 const MARKER := Color("ffd23f")
 const MARKER_MISSION := Color("ff3d7f")
 const TRACER := Color(1.0, 0.92, 0.6, 0.85)
 const HIT_FLASH := Color(1, 1, 1)
+const CORPSE := Color(0.5, 0.48, 0.52)
+const BLOOD := Color(0.55, 0.06, 0.08)
+const KILL_MARK := Color("ff3b4a")
 const MAP_COLORS := {
 	"#": Color("3a3f55"), "T": Color("2f8f5b"), "x": Color("8a6a3f"), "~": Color("1f5f8f"),
 	",": Color("8fa5b0"), "\"": Color("2f9e62"), ".": Color("9a7650"), "_": Color("a77b4a"),
-	"-": Color("4a4d57"), "road": Color("2a2c33"),
+	"-": Color("4a4d57"), ":": Color("b8754a"), "M": Color("d65a3a"), "road": Color("2a2c33"),
 }
 const SIREN_RED := Color(1.0, 0.18, 0.25)
 const SIREN_BLUE := Color(0.2, 0.45, 1.0)

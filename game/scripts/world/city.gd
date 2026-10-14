@@ -48,7 +48,7 @@ func _ready() -> void:
 	camera.setup(data.world_rect(), player)
 	for cell in data.find_all("c"):
 		spawn_vehicle("car", cell, randf() * TAU)
-	for cell in data.find_all("m"):
+	for cell in data.find_all("m") + data.find_all("b"):
 		spawn_vehicle("moto", cell, -PI * 0.5)
 	population = Population.new(self)
 	add_child(population)
@@ -138,16 +138,34 @@ func _on_player_died(_human: Human) -> void:
 	overlays.show_death()
 
 
-## Hồi sinh ở bệnh viện (mất 10% tiền, mất sao) hoặc tại chỗ (quảng cáo revive_here).
-func respawn(at_hospital: bool) -> void:
+## Hồi sinh theo lựa chọn ở màn chết (DeathScreen.Revive).
+func respawn(choice: DeathScreen.Revive) -> void:
 	var pos := player.global_position
-	if at_hospital:
+	var here := choice == DeathScreen.Revive.HERE or choice == DeathScreen.Revive.AD
+	if choice == DeathScreen.Revive.HERE:
+		var fee := Game.pay_fee(Tuning.REVIVE_HERE_FEE)
+		Game.notice.emit(I18n.fmt("NOTICE_REVIVE_FEE", {"fee": I18n.money(fee)}))
+	if here:
+		Game.revive()
+	else:
 		var fee := Game.hospital_respawn()
-		pos = MapData.cell_center(data.find("H"))
 		Game.notice.emit(I18n.fmt("NOTICE_HOSPITAL", {"fee": I18n.money(fee)}))
 		police.clear_all()
-	else:
-		Game.revive()
-	player.respawn(pos)
+		pos = nearest_hospital(pos)
+		if choice == DeathScreen.Revive.RETRY:
+			pos = missions.giver_pos(missions.retry_mission)
+	player.respawn(pos, Tuning.REVIVE_GRACE if here else 0.0)
 	camera.global_position = pos
 	player_respawned.emit()
+	if choice == DeathScreen.Revive.RETRY:
+		missions.start(missions.retry_mission, false)
+	missions.retry_mission = 0
+
+
+func nearest_hospital(from: Vector2) -> Vector2:
+	var best := Vector2.INF
+	for cell in data.find_all("H"):
+		var pos := MapData.cell_center(cell)
+		if from.distance_to(pos) < from.distance_to(best):
+			best = pos
+	return best

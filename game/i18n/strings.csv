@@ -15,6 +15,9 @@ SETTINGS_TITLE,Settings,Cài đặt
 SETTINGS_LANGUAGE,Language,Ngôn ngữ
 SETTINGS_MUSIC,Music volume,Âm lượng nhạc
 SETTINGS_SFX,Effects volume,Âm lượng hiệu ứng
+SETTINGS_STEERING,Driving controls,Điều khiển xe
+STEERING_SCREEN,Arcade: car goes where you press,Arcade: xe chạy theo hướng bấm
+STEERING_CLASSIC,Classic: left/right turns the car,Cổ điển: trái/phải xoay thân xe
 SETTINGS_BACK,Back,Quay lại
 LANG_EN,English,English
 LANG_VI,Tiếng Việt,Tiếng Việt
@@ -26,10 +29,12 @@ AMMO_INFINITE,∞,∞
 HINT_ENTER,[{key}] Get in,[{key}] Lên xe
 HINT_EXIT,[{key}] Get out,[{key}] Xuống xe
 HINT_SELL,[{key}] Sell this car for {price},[{key}] Bán xe này được {price}
+HINT_RESPRAY,[{key}] Respray to lose the cops ({price}),[{key}] Sơn lại xe để cắt đuôi cảnh sát ({price})
 DIALOG_CONTINUE,[{key}] or click to continue,[{key}] hoặc nhấp để tiếp tục
 SIGN_SHOP,GUN SHOP,CỬA HÀNG SÚNG
 SIGN_HOSPITAL,HOSPITAL,BỆNH VIỆN
 SIGN_GARAGE,GARAGE,GARA
+SIGN_RESPRAY,RESPRAY,SƠN XE
 NAME_ROSA,Rosa,Rosa
 NAME_JAY,Jay,Jay
 MISSION_1_TITLE,First Delivery,Chuyến giao đầu tiên
@@ -63,7 +68,9 @@ M3_FAIL_CAR,the target car was destroyed,chiếc xe mục tiêu đã bị phá h
 FAIL_DIED,you went down,bạn đã gục ngã
 NOTICE_MISSION_FAILED,Mission failed: {reason},Nhiệm vụ thất bại: {reason}
 NOTICE_HOSPITAL,Hospital bill: {fee},Viện phí: {fee}
+NOTICE_REVIVE_FEE,Paid {fee} to get back on your feet,Đã trả {fee} để đứng dậy
 NOTICE_SOLD,Car sold for {price},Đã bán xe được {price}
+NOTICE_RESPRAYED,Fresh paint. The cops lost your trail.,Xe đã sơn mới. Cảnh sát mất dấu bạn.
 NOTICE_VEHICLE_FIRE,Your vehicle is on fire. Get out!,Xe đang bốc cháy. Xuống ngay!
 MISSION_COMPLETE,Mission complete,Hoàn thành nhiệm vụ
 REWARD,Reward,Phần thưởng
@@ -73,9 +80,11 @@ AD_DOUBLE_REWARD,Double the reward (watch an ad),Nhân đôi phần thưởng (x
 REWARD_DOUBLED,Reward doubled!,Đã nhân đôi phần thưởng!
 CONTINUE,Continue,Tiếp tục
 DEATH_TITLE,You're down,Bạn đã gục
-DEATH_FEE,Hospital bill if you wake up there: {fee},Viện phí nếu tỉnh dậy ở bệnh viện: {fee}
+DEATH_REVIVE_HERE,Get up right here ({fee}),Đứng dậy ngay tại chỗ ({fee})
+DEATH_RETRY,Retry the mission ({fee}),Làm lại nhiệm vụ ({fee})
 AD_REVIVE_HERE,Get up right here (watch an ad),Đứng dậy ngay tại chỗ (xem quảng cáo)
-DEATH_HOSPITAL,Wake up at the hospital,Tỉnh dậy ở bệnh viện
+DEATH_HOSPITAL,Wake up at the nearest hospital ({fee}),Tỉnh dậy ở bệnh viện gần nhất ({fee})
+DEATH_WANTED_NOTE,Getting up right here keeps your wanted level.,Đứng dậy tại chỗ thì vẫn giữ mức truy nã.
 SHOP_TITLE,Gun Shop,Cửa hàng súng
 SHOP_CLOSE,Close,Đóng
 SHOP_OWNED,Owned,Đã có
@@ -116,3 +125,13 @@ TOUCH_INTERACT,Use,Dùng
 TOUCH_SWAP,Swap,Đổi súng
 TOUCH_RELOAD,Reload,Nạp đạn
 TOUCH_PAUSE,Pause,Dừng
+MAP_CLOSE,[{key}] Close map,[{key}] Đóng bản đồ
+DISTRICT_HILLSIDE,Hillside,Đồi Hillside
+DISTRICT_DOWNTOWN,Downtown,Trung tâm
+DISTRICT_UPTOWN,Uptown Park,Công viên Uptown
+DISTRICT_MARKET,Night Market,Chợ Đêm
+DISTRICT_MIDTOWN,Midtown,Midtown
+DISTRICT_EASTSIDE,Eastside,Khu Đông
+DISTRICT_RAILYARD,Rail Yard,Bãi Đường Ray
+DISTRICT_HARBOR,The Harbor,Bến Cảng
+DISTRICT_MARINA,Marina Beach,Bãi Biển Marina

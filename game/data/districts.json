@@ -1,0 +1,83 @@
+[
+ {
+  "key": "DISTRICT_HILLSIDE",
+  "rect": [
+   0,
+   0,
+   83,
+   58
+  ]
+ },
+ {
+  "key": "DISTRICT_DOWNTOWN",
+  "rect": [
+   83,
+   0,
+   79,
+   58
+  ]
+ },
+ {
+  "key": "DISTRICT_UPTOWN",
+  "rect": [
+   162,
+   0,
+   76,
+   58
+  ]
+ },
+ {
+  "key": "DISTRICT_MARKET",
+  "rect": [
+   0,
+   58,
+   83,
+   72
+  ]
+ },
+ {
+  "key": "DISTRICT_MIDTOWN",
+  "rect": [
+   83,
+   58,
+   79,
+   72
+  ]
+ },
+ {
+  "key": "DISTRICT_EASTSIDE",
+  "rect": [
+   162,
+   58,
+   76,
+   72
+  ]
+ },
+ {
+  "key": "DISTRICT_RAILYARD",
+  "rect": [
+   0,
+   130,
+   83,
+   56
+  ]
+ },
+ {
+  "key": "DISTRICT_HARBOR",
+  "rect": [
+   83,
+   130,
+   79,
+   56
+  ]
+ },
+ {
+  "key": "DISTRICT_MARINA",
+  "rect": [
+   162,
+   130,
+   76,
+   56
+  ]
+ }
+]

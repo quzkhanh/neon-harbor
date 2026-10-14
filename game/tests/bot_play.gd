@@ -1,6 +1,6 @@
 extends "res://tests/harness.gd"
 ## Bot tự chơi bằng vật lý và input thật (chỉ báo cáo, không làm fail check_all):
-##  - NV1: lên xe máy, lái theo đường A* tới điểm giao bằng ga/phanh/lái; đo thời gian so với giới hạn.
+##  - NV1: lên xe máy, lái theo đường A* tới điểm giao, lần lượt bằng 2 kiểu lái; đo thời gian và số lần va chạm.
 ##  - NV2: cầm tiểu liên + giáp như người chơi đã mua, đấu súng với 6 tên Red Fangs; đo máu còn lại.
 ## Chạy: godot --headless --fixed-fps 60 --path game -s res://tests/bot_play.gd
 
@@ -16,10 +16,11 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var city := await open_city()
-	await _bot_mission1(city)
+	for mode in ["screen", "classic"]:
+		game.missions_done = []
+		await _bot_mission1(await open_city(), mode)
 	game.missions_done = [1]
-	city = await open_city()
+	var city := await open_city()
 	await _bot_mission2(city)
 	finish("BOT")
 
@@ -35,19 +36,23 @@ func _start_mission(city: Node, n: int) -> Node:
 	return city.missions.current
 
 
-func _bot_mission1(city: Node) -> void:
+## `mode` "screen": bấm phím hướng về điểm kế tiếp trên đường (như người mới chơi, không tự phanh/lùi);
+## "classic": tự tính ga/phanh/lái theo thân xe và tự lùi khi kẹt.
+func _bot_mission1(city: Node, mode: String) -> void:
+	game.settings.steering = mode
 	var mission := await _start_mission(city, 1)
 	var p: Node = city.player
 	var bike: Node = mission.bike
 	await _walk_to(city, bike.global_position, 70.0)
 	await tap(&"interact")
 	if p.vehicle != mission.bike:
-		print("BOT NV1: không lên được xe máy")
+		print("BOT NV1 (%s): không lên được xe máy" % mode)
 		return
 	var goal: Vector2 = mission.cell_pos("d")
 	var t := 0.0
 	var stuck := 0.0
 	var reverse := 0.0
+	var crashes := 0
 	var path: PackedVector2Array = city.path(p.vehicle.global_position, goal, true)
 	while is_instance_valid(mission) and city.missions.current == mission and not paused and t < MAX_SECONDS:
 		var v: Node = p.vehicle
@@ -56,27 +61,34 @@ func _bot_mission1(city: Node) -> void:
 		while path.size() > 1 and v.global_position.distance_to(path[0]) < TILE * 1.2:
 			path.remove_at(0)
 		var target: Vector2 = path[mini(LOOKAHEAD - 1, path.size() - 1)] if path.size() > 0 else goal
-		var diff: float = angle_difference(v.rotation, (target - v.global_position).angle())
 		var speed: float = v.velocity.length()
-		_hold_action(&"steer_right", clampf(diff * 2.5, 0.0, 1.0))
-		_hold_action(&"steer_left", clampf(-diff * 2.5, 0.0, 1.0))
-		var sharp := absf(diff) > 0.7
-		_hold_action(&"accelerate", 0.0 if reverse > 0.0 else (0.35 if sharp else 1.0))
-		_hold_action(&"brake", 1.0 if reverse > 0.0 or (sharp and speed > 260.0) else 0.0)
-		stuck = stuck + 1.0 / 60.0 if speed < 30.0 else 0.0
-		if stuck > 1.0:
-			reverse = 0.8
-			stuck = 0.0
-			path = city.path(v.global_position, goal, true)
-		reverse -= 1.0 / 60.0
+		if mode == "screen":
+			_set_vec(&"move_left", &"move_right", &"move_up", &"move_down", (target - v.global_position).normalized())
+		else:
+			var diff: float = angle_difference(v.rotation, (target - v.global_position).angle())
+			_hold_action(&"steer_right", clampf(diff * 2.5, 0.0, 1.0))
+			_hold_action(&"steer_left", clampf(-diff * 2.5, 0.0, 1.0))
+			var sharp := absf(diff) > 0.7
+			_hold_action(&"accelerate", 0.0 if reverse > 0.0 else (0.35 if sharp else 1.0))
+			_hold_action(&"brake", 1.0 if reverse > 0.0 or (sharp and speed > 260.0) else 0.0)
+			stuck = stuck + 1.0 / 60.0 if speed < 30.0 else 0.0
+			if stuck > 1.0:
+				reverse = 0.8
+				stuck = 0.0
+				path = city.path(v.global_position, goal, true)
+			reverse -= 1.0 / 60.0
+		var hp_before: float = v.hp
 		await physics(1)
+		if is_instance_valid(v) and v.hp < hp_before:
+			crashes += 1
 		t += 1.0 / 60.0
-	for a in [&"steer_right", &"steer_left", &"accelerate", &"brake"]:
+	for a in [&"steer_right", &"steer_left", &"accelerate", &"brake", &"move_left", &"move_right", &"move_up", &"move_down"]:
 		Input.action_release(a)
 	var hp := int(bike.hp) if is_instance_valid(bike) else -1
 	await close_overlays(city)
-	print("BOT NV1: %s sau %.1f giây lái (giới hạn %d giây), máu xe máy %d" % [
-		"HOÀN THÀNH" if 1 in game.missions_done else "CHƯA XONG", t, LIMIT_M1, hp])
+	print("BOT NV1 (%s): %s sau %.1f giây lái (giới hạn %d giây), %d lần va chạm, máu xe máy %d" % [
+		mode, "HOÀN THÀNH" if 1 in game.missions_done else "CHƯA XONG", t, LIMIT_M1, crashes, hp])
+	game.settings.steering = "screen"
 
 
 func _bot_mission2(city: Node) -> void:
