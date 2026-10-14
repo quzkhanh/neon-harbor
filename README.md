@@ -7,6 +7,8 @@ that runs the docks. Walk, shoot, steal cars, shop for guns, shake off the NHPD,
 This is a vertical slice: one district, three missions, English and Vietnamese, Linux and Web builds.
 Made with Godot 4.7.2 (GDScript, Compatibility renderer).
 
+**Play in the browser:** https://quzkhanh.github.io/neon-harbor-web/ (Web build only; deployed with `tools/deploy_web.sh`).
+
 | | |
 |---|---|
 | ![City](screenshots/city_walk_en.png) | ![Combat](screenshots/combat_en.png) |
