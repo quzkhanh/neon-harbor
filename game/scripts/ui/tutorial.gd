@@ -58,6 +58,7 @@ func _ready() -> void:
 	box.add_child(Ui.label("TUT_TITLE", "SmallLabel"))
 	_label = Ui.live_label("", _params, "HintLabel")
 	box.add_child(_label)
+	box.add_child(Ui.live_label("TUT_HOW_TO_OFF", func() -> Dictionary: return {"key": InputSetup.key_label(&"pause")}, "SmallLabel"))
 	_show(0)
 
 
@@ -67,6 +68,9 @@ func _params() -> Dictionary:
 
 
 func _process(delta: float) -> void:
+	if not wanted():  # tắt trong Cài đặt giữa lúc chơi
+		queue_free()
+		return
 	if city.overlays.current is MapScreen:
 		_map_seen = true
 	if get_tree().paused or not city.player.alive:

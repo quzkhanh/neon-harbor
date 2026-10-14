@@ -22,6 +22,7 @@ SETTINGS_TUTORIAL,Beginner guide,Hướng dẫn người mới
 TUTORIAL_ON,Show,Bật
 TUTORIAL_OFF,Hide,Tắt
 TUT_TITLE,Guide,Hướng dẫn
+TUT_HOW_TO_OFF,Turn the guide off: [{key}] then Settings,Tắt hướng dẫn: [{key}] rồi vào Cài đặt
 TUT_MOVE,Walk with W A S D or the arrow keys,Di chuyển bằng W A S D hoặc phím mũi tên
 TUT_SHOOT,"Aim with the mouse, left click to shoot","Ngắm bằng chuột, bấm chuột trái để bắn"
 TUT_MAP,[{key}] Open the city map,[{key}] Mở bản đồ thành phố

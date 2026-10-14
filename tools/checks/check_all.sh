@@ -16,6 +16,13 @@ run_test() {  # run_test <tên> <script> [thư mục game]
 step "1. Import sạch (xoá game/.godot)"
 rm -rf game/.godot
 out=$(timeout 300 "$GODOT" --headless --path game --import 2>&1); code=$?
+# Godot 4.7.2 thỉnh thoảng abort (134) lúc thoát sau khi import xong, không có dòng ERROR nào (lỗi engine,
+# coredump chỉ có frame của engine). Gặp đúng kiểu đó thì import sạch lại một lần và in cảnh báo.
+if [ $code -eq 134 ] && ! echo "$out" | grep -q "ERROR"; then
+  echo "CẢNH BÁO: Godot abort khi thoát sau import (exit 134, không có ERROR) — import sạch lại lần 2"
+  rm -rf game/.godot
+  out=$(timeout 300 "$GODOT" --headless --path game --import 2>&1); code=$?
+fi
 if [ $code -ne 0 ] || echo "$out" | grep -q "ERROR"; then echo "$out" | grep "ERROR" | head; echo "FAIL (exit $code)"; fail=1; else echo "PASS: không có dòng ERROR"; fi
 
 step "2. validate_map.py"

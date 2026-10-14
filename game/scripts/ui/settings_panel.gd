@@ -37,22 +37,28 @@ func _choices(content: VBoxContainer, title_key: String, setting: String, option
 		b.button_group = group
 		b.button_pressed = current == value
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # chữ dài (bản dịch, pseudo) xuống dòng thay vì đẩy khung tràn màn hình
 		b.pressed.connect(Game.set_setting.bind(setting, value))
 		row.add_child(b)
 		buttons.append(b)
 	return buttons
 
 
+## Nhãn và thanh trượt chung một hàng (khung cài đặt phải vừa màn hình 720px cả khi chữ dài).
 func _slider(content: VBoxContainer, key: String, setting: String) -> HSlider:
-	content.add_child(Ui.label(key, "SubLabel", HORIZONTAL_ALIGNMENT_LEFT))
+	var row := Ui.hbox(16)
+	content.add_child(row)
+	row.add_child(Ui.label(key, "SubLabel", HORIZONTAL_ALIGNMENT_LEFT))
 	var s := HSlider.new()
+	s.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	s.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	s.min_value = 0.0
 	s.max_value = 1.0
 	s.step = 0.05
 	s.value = Game.settings[setting]
 	s.focus_mode = Control.FOCUS_ALL
 	s.value_changed.connect(func(v: float) -> void: Game.set_setting(setting, v))
-	content.add_child(s)
+	row.add_child(s)
 	return s
 
 

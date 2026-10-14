@@ -20,6 +20,20 @@ func _run() -> void:
 	expect(get_first_node_in_group("hud") != null, "thành phố: không có HUD")
 	expect(world.has_point(player.global_position), "người chơi ngoài bản đồ lúc vào")
 
+	# Hướng dẫn người mới: có khi chơi mới; bấm "Tắt" trong Cài đặt giữa lúc chơi thì biến mất ngay.
+	expect(city.get_node_or_null("Tutorial") != null, "chơi mới mà không có hướng dẫn")
+	var settings: Node = load("res://scripts/ui/settings_panel.gd").new()
+	city.add_child(settings)
+	await frames(2)
+	var off: Array = settings.find_children("*", "Button", true, false).filter(func(b: Button) -> bool: return b.text == "TUTORIAL_OFF")
+	expect(off.size() == 1, "Cài đặt không có nút tắt hướng dẫn")
+	if off.size() == 1:
+		off[0].pressed.emit()
+	settings.close()
+	await frames(3)
+	expect(city.get_node_or_null("Tutorial") == null, "tắt hướng dẫn trong Cài đặt mà khung hướng dẫn vẫn hiện")
+	game.settings.tutorial = true
+
 	var walk_start: Vector2 = player.global_position
 	Input.action_press(&"move_left")
 	await physics(WALK)
