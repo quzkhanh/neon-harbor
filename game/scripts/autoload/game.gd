@@ -28,7 +28,7 @@ var objective := ""
 var objective_params := {}
 var heat := 0.0
 var stars := 0
-var settings := {"lang": "", "music": 0.7, "sfx": 0.8, "steering": "screen", "tutorial": true}
+var settings := {"lang": "", "music": 0.7, "sfx": 0.8, "steering": "screen", "tutorial": true, "touch_scale": 1.0}
 var missions: Array = []
 
 var _fade: ColorRect

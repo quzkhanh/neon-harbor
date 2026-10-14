@@ -1,10 +1,12 @@
 class_name SettingsPanel
 extends Modal
-## Cài đặt: ngôn ngữ (đổi ngay, không khởi động lại), kiểu lái xe, hướng dẫn người mới, âm lượng nhạc và hiệu ứng.
+## Cài đặt: ngôn ngữ (đổi ngay, không khởi động lại), kiểu lái xe, hướng dẫn người mới, âm lượng nhạc và hiệu ứng,
+## cỡ nút điều khiển (chỉ trên máy cảm ứng).
 
 const LANG_KEYS := {"en": "LANG_EN", "vi": "LANG_VI"}
 const STEERING_KEYS := {DriveInput.SCREEN: "STEERING_SCREEN", DriveInput.CLASSIC: "STEERING_CLASSIC"}
 const TUTORIAL_KEYS := {true: "TUTORIAL_ON", false: "TUTORIAL_OFF"}
+const TOUCH_SEPARATION := 12  # thêm hàng cỡ nút: thu khoảng cách để khung vẫn vừa 720px cả khi chữ dài
 
 
 func _build(content: VBoxContainer) -> void:
@@ -17,6 +19,11 @@ func _build(content: VBoxContainer) -> void:
 		[_slider(content, "SETTINGS_MUSIC", "music")],
 		[_slider(content, "SETTINGS_SFX", "sfx")],
 	]
+	if TouchControls.wanted():
+		content.add_theme_constant_override("separation", TOUCH_SEPARATION)
+		var size := _slider(content, "SETTINGS_TOUCH_SIZE", "touch_scale", Tuning.TOUCH_SCALE_RANGE.x, Tuning.TOUCH_SCALE_RANGE.y)
+		size.value_changed.connect(func(_v: float) -> void: get_tree().call_group("touch_controls", "rebuild"))
+		rows.append([size])
 	var back := Ui.button("SETTINGS_BACK", "AccentButton")
 	content.add_child(back)
 	back.pressed.connect(close)
@@ -45,15 +52,15 @@ func _choices(content: VBoxContainer, title_key: String, setting: String, option
 
 
 ## Nhãn và thanh trượt chung một hàng (khung cài đặt phải vừa màn hình 720px cả khi chữ dài).
-func _slider(content: VBoxContainer, key: String, setting: String) -> HSlider:
+func _slider(content: VBoxContainer, key: String, setting: String, low := 0.0, high := 1.0) -> HSlider:
 	var row := Ui.hbox(16)
 	content.add_child(row)
 	row.add_child(Ui.label(key, "SubLabel", HORIZONTAL_ALIGNMENT_LEFT))
 	var s := HSlider.new()
 	s.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	s.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	s.min_value = 0.0
-	s.max_value = 1.0
+	s.min_value = low
+	s.max_value = high
 	s.step = 0.05
 	s.value = Game.settings[setting]
 	s.focus_mode = Control.FOCUS_ALL

@@ -30,7 +30,8 @@ func _sync_weapon() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion:
+	# Chạm sinh chuột giả (DEVICE_ID_EMULATION): không tính là ngắm bằng chuột, kẻo Jay quay về phía ngón tay.
+	if event is InputEventMouseMotion and event.device != InputEvent.DEVICE_ID_EMULATION:
 		_mouse_active_ms = Time.get_ticks_msec()
 
 
@@ -78,7 +79,7 @@ func _physics_process(delta: float) -> void:
 func _update_aim(move_input: Vector2) -> void:
 	var stick := Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
 	if stick.length() > 0.3:
-		aim_angle = stick.angle()
+		aim_angle = AimAssist.pick(self, stick.angle(), float(gun.def.range))
 	elif Time.get_ticks_msec() - _mouse_active_ms < Tuning.MOUSE_AIM_IDLE * 1000.0:
 		aim_angle = (get_global_mouse_position() - global_position).angle()
 	elif move_input.length() > 0.3:

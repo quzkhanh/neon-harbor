@@ -6,6 +6,7 @@ const FONT_DIR := "res://assets/fonts/"
 const FALLBACKS := ["NotoSans-Regular.ttf", "NotoSansMath-Symbols.ttf"]
 const BASE_SIZE := 20
 const RADIUS := 12
+const TOUCH_ROUND := 999  # bo góc tối đa: nút vuông thành tròn
 const GRABBER_SIZE := 22
 
 static var _fonts := {}
@@ -83,6 +84,13 @@ static func _buttons(t: Theme) -> void:
 	t.set_type_variation("AccentButton", "Button")
 	t.set_stylebox("normal", "AccentButton", _pad(box(Palette.ACCENT, RADIUS, 2, Palette.ACCENT), 24, 12))
 	t.set_stylebox("hover", "AccentButton", _pad(box(Palette.ACCENT.lightened(0.12), RADIUS, 2, Color.WHITE), 24, 12))
+	# Nút cảm ứng tròn (TouchControls): kích thước vuông nên bo góc lớn thành hình tròn.
+	t.set_type_variation("TouchButton", "Button")
+	t.set_stylebox("normal", "TouchButton", box(Color(Palette.PANEL, 0.75), TOUCH_ROUND, 3, Palette.BORDER))
+	t.set_stylebox("hover", "TouchButton", box(Color(Palette.PANEL, 0.75), TOUCH_ROUND, 3, Palette.BORDER))
+	t.set_stylebox("pressed", "TouchButton", box(Palette.ACCENT_DARK, TOUCH_ROUND, 3, Palette.ACCENT))
+	t.set_stylebox("hover_pressed", "TouchButton", box(Palette.ACCENT_DARK, TOUCH_ROUND, 3, Palette.ACCENT))
+	t.set_font_size("font_size", "TouchButton", 18)
 	t.set_type_variation("FlatButton", "Button")
 	t.set_stylebox("normal", "FlatButton", _pad(box(Color.TRANSPARENT, RADIUS, 2, Color.TRANSPARENT), 14, 8))
 	t.set_stylebox("hover", "FlatButton", _pad(box(Palette.PANEL_HOVER, RADIUS, 2, Palette.BORDER), 14, 8))

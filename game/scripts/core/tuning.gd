@@ -28,6 +28,14 @@ const INTERACT_RADIUS := 90.0
 const LOOK_AHEAD := 150.0
 const LOOK_AHEAD_DRIVING := 0.45  # giây nhìn trước theo vận tốc xe
 const CAMERA_SMOOTH := 6.0
+# Điều khiển cảm ứng (đơn vị khung 1280×720; nhân Game.settings.touch_scale)
+const TOUCH_STICK_RADIUS := 110.0
+const TOUCH_KNOB := 46.0
+const TOUCH_BUTTON := 110.0
+const TOUCH_GAP := 14.0
+const TOUCH_EDGE := 20.0
+const TOUCH_SCALE_RANGE := Vector2(0.9, 1.4)  # thanh trượt "Cỡ nút điều khiển" (0,9: nút vẫn ≥ 56px ở 915×412)
+const AIM_ASSIST_DEG := 20.0  # joystick/analog: hút tâm vào kẻ địch lệch tối đa chừng này độ
 const MOUSE_AIM_IDLE := 2.0  # giây không động chuột thì chuyển sang ngắm bằng tay cầm
 
 # Người (NPC)

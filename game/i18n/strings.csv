@@ -5,6 +5,7 @@ FMT_THOUSANDS,",",.
 MENU_TAGLINE,A port city that never sleeps.,Thành phố cảng không bao giờ ngủ.
 MENU_CONTINUE,Continue,Chơi tiếp
 MENU_NEW_GAME,New Game,Chơi mới
+MENU_FULLSCREEN,Full screen,Toàn màn hình
 MENU_SETTINGS,Settings,Cài đặt
 MENU_QUIT,Quit,Thoát
 MENU_CREDITS,"Art, UI and sounds: Kenney (CC0) · Fonts: Be Vietnam Pro, Noto Sans (OFL)","Hình ảnh, giao diện, âm thanh: Kenney (CC0) · Phông chữ: Be Vietnam Pro, Noto Sans (OFL)"
@@ -15,6 +16,7 @@ SETTINGS_TITLE,Settings,Cài đặt
 SETTINGS_LANGUAGE,Language,Ngôn ngữ
 SETTINGS_MUSIC,Music volume,Âm lượng nhạc
 SETTINGS_SFX,Effects volume,Âm lượng hiệu ứng
+SETTINGS_TOUCH_SIZE,Control size,Cỡ nút điều khiển
 SETTINGS_STEERING,Driving controls,Điều khiển xe
 STEERING_SCREEN,Arcade: car goes where you press,Arcade: xe chạy theo hướng bấm
 STEERING_CLASSIC,Classic: left/right turns the car,Cổ điển: trái/phải xoay thân xe
@@ -24,11 +26,14 @@ TUTORIAL_OFF,Hide,Tắt
 TUT_TITLE,Guide,Hướng dẫn
 TUT_HOW_TO_OFF,Turn the guide off: [{key}] then Settings,Tắt hướng dẫn: [{key}] rồi vào Cài đặt
 TUT_MOVE,Walk with W A S D or the arrow keys,Di chuyển bằng W A S D hoặc phím mũi tên
+TUT_MOVE_TOUCH,Drag the left stick to walk,Kéo joystick bên trái để di chuyển
 TUT_SHOOT,"Aim with the mouse, left click to shoot","Ngắm bằng chuột, bấm chuột trái để bắn"
+TUT_SHOOT_TOUCH,"Drag the right stick to aim, drag further to shoot (it locks onto nearby enemies)","Kéo joystick bên phải để ngắm, kéo xa hơn để bắn (tự hút tâm vào kẻ địch gần)"
 TUT_MAP,[{key}] Open the city map,[{key}] Mở bản đồ thành phố
 TUT_MISSION,Follow the arrow and the line on the minimap to the pink circle to start a mission,Đi theo mũi tên và đường kẻ trên bản đồ nhỏ tới vòng tròn hồng để nhận nhiệm vụ
 TUT_VEHICLE,[{key}] Get on the motorbike,[{key}] Lên xe máy
 TUT_DRIVE,Drive: press the way you want to go and the bike turns there. [{key}] Handbrake,"Lái xe: bấm hướng muốn đi, xe tự rẽ theo. [{key}] Phanh tay"
+TUT_DRIVE_TOUCH,Drive: drag the left stick the way you want to go and the bike turns there,"Lái xe: kéo joystick trái về hướng muốn đi, xe tự rẽ theo"
 TUT_SHOP,"Buy guns and medkits at gun shops (blue gun icon, [{key}] map). Hospitals heal you for free.","Mua súng, hộp máu ở cửa hàng súng (biểu tượng khẩu súng xanh, [{key}] bản đồ). Vào bệnh viện để chữa máu miễn phí."
 SETTINGS_BACK,Back,Quay lại
 LANG_EN,English,English
@@ -128,8 +133,11 @@ ENDING_FREE_ROAM,Keep playing,Chơi tiếp tự do
 TOUCH_INTERACT,Use,Dùng
 TOUCH_SWAP,Swap,Đổi súng
 TOUCH_RELOAD,Reload,Nạp đạn
-TOUCH_PAUSE,Pause,Dừng
+TOUCH_PAUSE,Pause,Tạm dừng
+TOUCH_MAP,Tap the minimap,Chạm bản đồ nhỏ
+ROTATE_DEVICE,Turn your phone sideways to play,Xoay ngang điện thoại để chơi
 MAP_CLOSE,[{key}] Close map,[{key}] Đóng bản đồ
+MAP_CLOSE_TOUCH,Tap anywhere to close the map,Chạm vào bất kỳ đâu để đóng bản đồ
 HINT_MAP_SHOPS,[{key}] City map. The blue gun icon on the map is a gun shop.,[{key}] Bản đồ. Biểu tượng khẩu súng màu xanh trên bản đồ là cửa hàng súng.
 LEGEND_MISSION,Mission,Nhiệm vụ
 LEGEND_SHOP,Gun shop,Cửa hàng súng

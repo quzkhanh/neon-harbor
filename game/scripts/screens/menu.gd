@@ -1,5 +1,6 @@
 extends Node2D
-## Menu chính: tên game, Chơi tiếp / Chơi mới, Cài đặt, Thoát (ẩn trên Web). Điều khiển được bằng phím và tay cầm.
+## Menu chính: tên game, Chơi tiếp / Chơi mới, Toàn màn hình (chỉ Web cảm ứng), Cài đặt, Thoát (ẩn trên Web).
+## Điều khiển được bằng phím và tay cầm.
 
 var _ui: CanvasLayer
 var _buttons: Array = []
@@ -33,18 +34,20 @@ func _ready() -> void:
 	var spacer := Control.new()
 	spacer.custom_minimum_size.y = 24
 	col.add_child(spacer)
-	var keys := ["MENU_CONTINUE", "MENU_NEW_GAME", "MENU_SETTINGS", "MENU_QUIT"]
+	var keys := ["MENU_CONTINUE", "MENU_NEW_GAME", "MENU_FULLSCREEN", "MENU_SETTINGS", "MENU_QUIT"]
 	for key in keys:
 		var b := Ui.button(key, "AccentButton" if key == "MENU_CONTINUE" or (key == "MENU_NEW_GAME" and not Game.has_progress()) else "")
 		b.custom_minimum_size.x = 320
 		col.add_child(b)
 		_buttons.append(b)
 	_buttons[0].visible = Game.has_progress()
-	_buttons[3].visible = not OS.has_feature("web")
+	_buttons[2].visible = OS.has_feature("web") and TouchControls.wanted() and JavaScriptBridge.eval("document.fullscreenEnabled ? 1 : 0") == 1
+	_buttons[4].visible = not OS.has_feature("web")
 	_buttons[0].pressed.connect(Game.continue_game)
 	_buttons[1].pressed.connect(_new_game)
-	_buttons[2].pressed.connect(_settings)
-	_buttons[3].pressed.connect(Game.quit)
+	_buttons[2].pressed.connect(_fullscreen)
+	_buttons[3].pressed.connect(_settings)
+	_buttons[4].pressed.connect(Game.quit)
 	var credits := Ui.label("MENU_CREDITS", "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT)
 	credits.size_flags_vertical = Control.SIZE_SHRINK_END
 	margin.add_child(credits)
@@ -67,6 +70,13 @@ func _shade() -> TextureRect:
 	rect.stretch_mode = TextureRect.STRETCH_SCALE
 	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	return rect
+
+
+## Toàn màn hình ẩn thanh trình duyệt; Android Chrome còn khoá được chiều ngang. Chỉ khoá được khi đã vào toàn màn hình
+## (vào là bất đồng bộ) nên khoá trong sự kiện fullscreenchange. iPhone không có Fullscreen API: nút bị ẩn.
+func _fullscreen() -> void:
+	JavaScriptBridge.eval("document.addEventListener('fullscreenchange', () => { if (document.fullscreenElement && screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {}) }, { once: true })")
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 
 
 func _new_game() -> void:

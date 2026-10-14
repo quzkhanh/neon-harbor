@@ -1,17 +1,17 @@
 class_name TouchControls
 extends CanvasLayer
-## Điều khiển cảm ứng: joystick di chuyển (trái), joystick ngắm/bắn (phải), nút lên xe, đổi súng, nạp đạn, tạm dừng.
+## Điều khiển cảm ứng: joystick nổi di chuyển (nửa trái) và ngắm/bắn (nửa phải), nút tròn Dùng / Đổi súng / Nạp đạn
+## dọc mép phải, nút tạm dừng bên trái nút trên cùng. Cỡ = Tuning × Game.settings.touch_scale; Cài đặt gọi rebuild() khi đổi cỡ.
 ## Chỉ hiện trên thiết bị cảm ứng hoặc khi chạy với `-- --touch`.
 
-const STICK_ZONE := Vector2(300, 300)
-const BUTTON_SIZE := Vector2(110, 64)
-const EDGE := 20.0
-const PAUSE_RIGHT := 180.0  # chừa chỗ cho hàng sao truy nã
+const BUTTONS_TOP := 170.0  # dưới hàng sao và thẻ súng
 const BUTTONS := [["TOUCH_INTERACT", &"interact"], ["TOUCH_SWAP", &"weapon_next"], ["TOUCH_RELOAD", &"reload"]]
+
+static var forced := false  # test bật chế độ cảm ứng khi chạy headless
 
 
 static func wanted() -> bool:
-	return DisplayServer.is_touchscreen_available() or "--touch" in OS.get_cmdline_user_args()
+	return forced or DisplayServer.is_touchscreen_available() or "--touch" in OS.get_cmdline_user_args()
 
 
 func _ready() -> void:
@@ -21,37 +21,59 @@ func _ready() -> void:
 	for e in InputMap.action_get_events(&"fire"):
 		if e is InputEventMouseButton:
 			InputMap.action_erase_event(&"fire", e)
-	var move := VirtualStick.new().setup([&"move_left", &"move_right", &"move_up", &"move_down"])
-	move.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	move.position = Vector2(20, -STICK_ZONE.y - 20)
-	move.size = STICK_ZONE
-	add_child(move)
-	var aim := VirtualStick.new().setup([&"aim_left", &"aim_right", &"aim_up", &"aim_down"], &"fire")
-	aim.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	aim.position = Vector2(-STICK_ZONE.x - 20, -STICK_ZONE.y - 20)
-	aim.size = STICK_ZONE
-	add_child(aim)
-	var col := Ui.vbox(10)
-	col.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	_build()
+
+
+func rebuild() -> void:
+	for c in get_children():
+		c.queue_free()
+	_build()
+
+
+func _build() -> void:
+	var scale: float = Game.settings.touch_scale
+	_stick([&"move_left", &"move_right", &"move_up", &"move_down"], &"", scale, 0.0)
+	var aim := _stick([&"aim_left", &"aim_right", &"aim_up", &"aim_down"], &"fire", scale, 0.5)
+	aim.mirror = true
+	aim.inset = (Tuning.TOUCH_BUTTON + Tuning.TOUCH_GAP) * scale  # chỗ vẽ mờ không đè cột nút
+	var col := Ui.vbox(int(Tuning.TOUCH_GAP * scale))
+	col.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	col.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	col.offset_right = -EDGE
-	col.offset_top = -BUTTON_SIZE.y * 2.0
+	col.offset_right = -Tuning.TOUCH_EDGE
+	col.offset_top = BUTTONS_TOP
 	add_child(col)
 	for def in BUTTONS:
-		var b := Ui.button(def[0])
-		b.custom_minimum_size = BUTTON_SIZE
-		b.focus_mode = Control.FOCUS_NONE
+		var b := _button(def[0], Tuning.TOUCH_BUTTON * scale)
 		b.button_down.connect(_send.bind(def[1], true))
 		b.button_up.connect(_send.bind(def[1], false))
 		col.add_child(b)
-	var pause := Ui.button("TOUCH_PAUSE", "FlatButton")
-	pause.focus_mode = Control.FOCUS_NONE
+		aim.blocked.append(b)
+	var pause := _button("TOUCH_PAUSE", Tuning.TOUCH_BUTTON * scale)
 	pause.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	pause.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	pause.offset_right = -PAUSE_RIGHT
-	pause.offset_top = EDGE
+	pause.offset_right = -Tuning.TOUCH_EDGE - (Tuning.TOUCH_BUTTON + Tuning.TOUCH_GAP) * scale
+	pause.offset_top = BUTTONS_TOP
 	pause.pressed.connect(_send.bind(&"pause", true))
 	add_child(pause)
+	aim.blocked.append(pause)
+
+
+## Joystick chiếm nửa màn hình bắt đầu từ `left` (0 hoặc 0,5).
+func _stick(dirs: Array[StringName], fire: StringName, scale: float, left: float) -> VirtualStick:
+	var s := VirtualStick.new().setup(dirs, fire, scale)
+	s.anchor_left = left
+	s.anchor_right = left + 0.5
+	s.anchor_bottom = 1.0
+	add_child(s)
+	return s
+
+
+func _button(key: String, side: float) -> Button:
+	var b := Ui.button(key, "TouchButton")
+	b.custom_minimum_size = Vector2.ONE * side
+	b.focus_mode = Control.FOCUS_NONE
+	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	return b
 
 
 func _send(action: StringName, pressed: bool) -> void:

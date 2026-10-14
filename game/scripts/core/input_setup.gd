@@ -4,6 +4,10 @@ extends Object
 
 const DEADZONE := 0.25
 const WEAPON_SLOTS := 8
+const TOUCH_LABELS := {  # nút cảm ứng tương ứng với action (ghi trong gợi ý thay cho phím)
+	&"interact": "TOUCH_INTERACT", &"weapon_next": "TOUCH_SWAP", &"reload": "TOUCH_RELOAD",
+	&"pause": "TOUCH_PAUSE", &"map": "TOUCH_MAP",
+}
 
 
 static func register() -> void:
@@ -32,8 +36,10 @@ static func register() -> void:
 		_add(StringName("weapon_%d" % (i + 1)), [_key(KEY_1 + i)])
 
 
-## Tên phím đầu tiên của action để hiện trong gợi ý ("E", "R"...).
+## Tên phím để ghi trong gợi ý ("E", "R"...); trên máy cảm ứng là tên nút cảm ứng (hoặc "" nếu không có nút).
 static func key_label(action: StringName) -> String:
+	if TouchControls.wanted():
+		return TranslationServer.translate(TOUCH_LABELS[action]) if TOUCH_LABELS.has(action) else ""
 	for e in InputMap.action_get_events(action):
 		if e is InputEventKey:
 			return OS.get_keycode_string(e.physical_keycode)

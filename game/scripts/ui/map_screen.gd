@@ -32,7 +32,15 @@ func _build(content: VBoxContainer) -> void:
 		row.add_child(Ui.label(entry[2], "SmallLabel"))
 		legend.add_child(row)
 	content.add_child(legend)
-	content.add_child(Ui.live_label("MAP_CLOSE", func() -> Dictionary: return {"key": InputSetup.key_label(&"map")}, "SmallLabel"))
+	var close_key := "MAP_CLOSE_TOUCH" if TouchControls.wanted() else "MAP_CLOSE"
+	content.add_child(Ui.live_label(close_key, func() -> Dictionary: return {"key": InputSetup.key_label(&"map")}, "SmallLabel"))
+
+
+## Điện thoại không có phím M hay Esc: chạm bất kỳ đâu để đóng (lớp mờ của Modal nuốt chạm nên phải bắt ở _input).
+func _input(event: InputEvent) -> void:
+	if TouchControls.wanted() and event is InputEventScreenTouch and event.pressed:
+		get_viewport().set_input_as_handled()
+		close()
 
 
 func _unhandled_input(event: InputEvent) -> void:

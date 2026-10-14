@@ -33,13 +33,14 @@ static func wanted() -> bool:
 
 func _ready() -> void:
 	# [khoá dịch, tên action để hiện phím (hoặc ""), điều kiện xong]
+	var touch := TouchControls.wanted()
 	_steps = [
-		["TUT_MOVE", &"", func() -> bool: return _moved(WALK_DIST)],
-		["TUT_SHOOT", &"", func() -> bool: return Input.is_action_pressed("fire")],
+		["TUT_MOVE_TOUCH" if touch else "TUT_MOVE", &"", func() -> bool: return _moved(WALK_DIST)],
+		["TUT_SHOOT_TOUCH" if touch else "TUT_SHOOT", &"", func() -> bool: return Input.is_action_pressed("fire")],
 		["TUT_MAP", &"map", func() -> bool: return _map_seen],
 		["TUT_MISSION", &"", func() -> bool: return city.missions.current != null],
 		["TUT_VEHICLE", &"interact", func() -> bool: return city.player.vehicle != null],
-		["TUT_DRIVE", &"handbrake", func() -> bool: return _moved(DRIVE_DIST)],
+		["TUT_DRIVE_TOUCH" if touch else "TUT_DRIVE", &"" if touch else &"handbrake", func() -> bool: return _moved(DRIVE_DIST)],
 		["TUT_SHOP", &"map", func() -> bool: return _timer > LAST_STEP_TIME],
 	]
 	var root := MarginContainer.new()

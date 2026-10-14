@@ -3,6 +3,8 @@
 //   mặc định: vào menu -> Chơi mới (Enter) -> đi (D) -> bắn (chuột trái), chụp ảnh từng bước, fail nếu console có lỗi.
 //   perf: mở <url>?shot=perf, chờ dòng "PERF ..." trong console (thành phố tối đa người/xe + 3 sao).
 //   persist: Chơi mới -> tải lại trang -> đọc IndexedDB tìm save.json, chụp menu (phải có "Chơi tiếp").
+//   mobile: giả lập điện thoại cảm ứng 915×412: menu -> Toàn màn hình -> Chơi mới -> kéo joystick trái bằng chạm,
+//           rồi xoay dọc 412×915 (phải hiện lớp phủ xoay ngang); fail nếu console có lỗi.
 import { spawn } from "node:child_process";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -53,7 +55,7 @@ async function shot(name) {
 }
 
 async function key(code, text, holdMs = 80) {
-  const vk = { Enter: 13, KeyD: 68, KeyW: 87, KeyE: 69 }[code];
+  const vk = { Enter: 13, KeyD: 68, KeyW: 87, KeyE: 69, ArrowDown: 40, ArrowUp: 38 }[code];
   const base = { code, key: text, windowsVirtualKeyCode: vk, nativeVirtualKeyCode: vk };
   await send("Input.dispatchKeyEvent", { type: "keyDown", ...base });
   await sleep(holdMs);
@@ -66,6 +68,28 @@ async function click(x, y) {
   await send("Input.dispatchMouseEvent", { type: "mousePressed", ...base });
   await sleep(60);
   await send("Input.dispatchMouseEvent", { type: "mouseReleased", ...base });
+}
+
+async function phone(width, height) {
+  await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 2, mobile: true,
+    screenOrientation: width > height ? { type: "landscapePrimary", angle: 90 } : { type: "portraitPrimary", angle: 0 } });
+}
+
+async function swipe(x, y, dx, dy, holdMs) {
+  await send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+  for (let i = 1; i <= 5; i++) {
+    await send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x + dx * i / 5, y: y + dy * i / 5 }] });
+    await sleep(30);
+  }
+  await sleep(holdMs);
+  await send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+}
+
+function report() {
+  const errors = consoleLines.filter((l) => /ERROR|exception|\[error\]/i.test(l));
+  console.log(`console: ${consoleLines.length} dòng, ${errors.length} lỗi`);
+  errors.slice(0, 10).forEach((e) => console.log("  " + e));
+  return errors.length === 0 ? 0 : 1;
 }
 
 async function main() {
@@ -96,6 +120,31 @@ async function main() {
     console.log("renderer: " + gl.result.value);
     await shot("web_perf.png");
     return line ? 0 : 1;
+  }
+
+  if (mode === "mobile") {
+    await send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 });
+    await phone(915, 412);
+    await send("Page.navigate", { url });
+    await sleep(BOOT_MS);
+    await shot("web_mobile_menu.png");
+    await key("ArrowDown", "ArrowDown"); // Chơi mới -> Toàn màn hình
+    await key("Enter", "Enter");
+    await sleep(1500);
+    const fs = await send("Runtime.evaluate", { expression: "String(!!document.fullscreenElement) + ' / ' + (screen.orientation ? screen.orientation.type : 'không có')", returnByValue: true });
+    console.log("toàn màn hình / chiều: " + fs.result.value);
+    const fullscreen = String(fs.result.value).startsWith("true");
+    await key("ArrowUp", "ArrowUp"); // về Chơi mới
+    await key("Enter", "Enter");
+    await sleep(5000);
+    await shot("web_mobile_city.png");
+    await swipe(180, 280, 90, 0, 1200); // joystick trái kéo sang phải
+    await shot("web_mobile_walk.png");
+    await phone(412, 915);
+    await sleep(1500);
+    await shot("web_mobile_portrait.png");
+    if (!fullscreen) console.log("FAIL: bấm Toàn màn hình mà không vào toàn màn hình");
+    return report() || (fullscreen ? 0 : 1);
   }
 
   if (mode === "persist") {
@@ -131,10 +180,7 @@ async function main() {
   for (let i = 0; i < 6; i++) await click(1100, 360);
   await sleep(150);
   await shot("web_play.png");
-  const errors = consoleLines.filter((l) => /ERROR|exception|\[error\]/i.test(l));
-  console.log(`console: ${consoleLines.length} dòng, ${errors.length} lỗi`);
-  errors.slice(0, 10).forEach((e) => console.log("  " + e));
-  return errors.length === 0 ? 0 : 1;
+  return report();
 }
 
 let code = 1;

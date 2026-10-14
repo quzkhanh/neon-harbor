@@ -42,18 +42,21 @@ func _ready() -> void:
 	add_child(ObjectiveArrow.new(city))
 	add_child(DistrictBanner.new(city))
 	add_child(root)
-	_build_vitals(root)
+	var left := _build_vitals(root)
 	var top_right := _build_stars(root)
 	_build_objective(root)
 	_build_weapon(top_right if TouchControls.wanted() else root)
 	var mini := PanelContainer.new()
+	mini.name = "MinimapPanel"
 	mini.theme_type_variation = "HudPanel"
 	mini.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	# Có joystick ảo ở hai góc dưới thì dời minimap và thẻ súng lên giữa.
-	var touch := TouchControls.wanted()
-	mini.size_flags_vertical = Control.SIZE_SHRINK_CENTER if touch else Control.SIZE_SHRINK_END
+	# Có joystick ảo ở hai nửa dưới thì minimap lên ngay dưới khối máu, thẻ súng lên dưới hàng sao.
+	mini.size_flags_vertical = Control.SIZE_SHRINK_BEGIN if TouchControls.wanted() else Control.SIZE_SHRINK_END
 	mini.add_child(Minimap.new(city))
-	root.add_child(mini)
+	(left if TouchControls.wanted() else root).add_child(mini)
+	if TouchControls.wanted():
+		mini.add_to_group("touch_block")  # chạm bản đồ nhỏ không mở joystick trái
+		mini.gui_input.connect(_on_minimap_input)  # điện thoại không có phím M: chạm bản đồ nhỏ để mở bản đồ
 	_build_bottom_center(root)
 	Game.vitals_changed.connect(_on_vitals)
 	Game.money_changed.connect(func(_m: int) -> void: _money.text = I18n.money(Game.money))
@@ -63,6 +66,15 @@ func _ready() -> void:
 	Game.notice.connect(show_notice)
 	I18n.language_changed.connect(func(_l: String) -> void: _refresh_all())
 	_refresh_all()
+
+
+func _on_minimap_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		for pressed in [true, false]:
+			var e := InputEventAction.new()
+			e.action = &"map"
+			e.pressed = pressed
+			Input.parse_input_event(e)
 
 
 func _refresh_all() -> void:
@@ -85,8 +97,14 @@ func _corner(parent: Control, h: Control.SizeFlags, v: Control.SizeFlags, variat
 	return box
 
 
-func _build_vitals(root: Control) -> void:
-	var box := _corner(root, Control.SIZE_SHRINK_BEGIN, Control.SIZE_SHRINK_BEGIN)
+## Cột trên trái: máu/giáp/tiền (và minimap khi có điều khiển cảm ứng).
+func _build_vitals(root: Control) -> VBoxContainer:
+	var col := Ui.vbox(10)
+	col.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	col.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(col)
+	var box := _corner(col, Control.SIZE_SHRINK_BEGIN, Control.SIZE_SHRINK_BEGIN)
 	_health = _bar_row(box, "icon_health", "HealthBar", Tuning.MAX_HEALTH)
 	_armor = _bar_row(box, "icon_armor", "ArmorBar", Tuning.MAX_ARMOR)
 	var row := Ui.hbox(8)
@@ -95,6 +113,7 @@ func _build_vitals(root: Control) -> void:
 	_money.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	row.add_child(_money)
 	box.add_child(row)
+	return col
 
 
 func _bar_row(box: Control, icon: String, variation: String, max_value: float) -> ProgressBar:

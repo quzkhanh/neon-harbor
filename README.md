@@ -57,7 +57,11 @@ Made with Godot 4.7.2 (GDScript, Compatibility renderer).
 - Save in `user://save.json` (IndexedDB on the Web): money, guns, loaded rounds, finished missions, settings.
 - English and Vietnamese, switchable at runtime. All on-screen text comes from `game/i18n/strings.csv`.
 - No ads in this version.
-- Touch controls (two virtual sticks + buttons) on touch screens.
+- Phones (Web): floating sticks that appear under your thumb (left half walks, right half aims and shoots, with aim
+  assist on gang members and, when wanted, cops), big round Use / Swap / Reload / Pause buttons, a control-size
+  slider in Settings, tap the minimap to open the city map (tap anywhere to close it), and hints/guide that name the touch buttons. Holding the
+  phone upright pauses the game and asks you to turn it sideways; the menu has a Full screen button (Android Chrome
+  also locks landscape).
 
 ## Controls
 
