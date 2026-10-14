@@ -28,7 +28,7 @@ var objective := ""
 var objective_params := {}
 var heat := 0.0
 var stars := 0
-var settings := {"lang": "", "music": 0.7, "sfx": 0.8, "steering": "screen"}
+var settings := {"lang": "", "music": 0.7, "sfx": 0.8, "steering": "screen", "tutorial": true}
 var missions: Array = []
 
 var _fade: ColorRect
@@ -255,6 +255,15 @@ func buy_weapon(id: String) -> bool:
 	select_weapon(id)
 	save_game()
 	return true
+
+
+## Tặng súng (Rosa trang bị cho nhiệm vụ): chưa có thì cho súng, có rồi thì thêm đạn; cầm luôn khẩu đó.
+func grant_weapon(id: String) -> void:
+	if owned.has(id):
+		give_ammo(id)
+	else:
+		_give_weapon(id)
+	select_weapon(id)
 
 
 func ammo_full(id: String) -> bool:

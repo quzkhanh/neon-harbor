@@ -1,6 +1,6 @@
 class_name Minimap
 extends Control
-## Bản đồ thu nhỏ: điểm nhiệm vụ, cửa hàng, bệnh viện, gara, cảnh sát, đường GPS tới mục tiêu.
+## Bản đồ thu nhỏ: biểu tượng nhiệm vụ, cửa hàng, bệnh viện, gara, tiệm sơn (MapIcon), cảnh sát, đường GPS tới mục tiêu.
 ## `follow`: bám quanh người chơi (góc dưới trái HUD); tắt thì hiện cả thành phố (MapScreen).
 
 const SIZE := Vector2(210, 210)
@@ -77,12 +77,17 @@ func _draw() -> void:
 		draw_polyline(pts, target.color, ROUTE_WIDTH, true)
 	for c in city.police.cops():
 		if c.alive:
-			_dot(c.global_position, Palette.SIREN_BLUE, false)
+			_dot(c.global_position, Palette.SIREN_BLUE)
 	for g in get_tree().get_nodes_in_group("gang"):
 		if g.alive:
-			_dot(g.global_position, Palette.HEALTH, false)
-	for m in get_tree().get_nodes_in_group("markers"):
-		_dot(m.global_position, m.color, true)
+			_dot(g.global_position, Palette.HEALTH)
+	var markers := get_tree().get_nodes_in_group("markers")
+	var nearest := _nearest_by_icon(markers)
+	for m in markers:
+		var pos := to_map(m.global_position)
+		var inside := Rect2(Vector2.ZERO, size).grow(-EDGE).has_point(pos)
+		if inside or m is Marker or nearest[m.icon] == m:
+			MapIcon.draw(self, pos.clamp(Vector2.ONE * EDGE * 1.5, size - Vector2.ONE * EDGE * 1.5), m.icon, m.color)
 	var p := city.player
 	var angle := p.vehicle.rotation if p.vehicle else p.aim_angle
 	var c := to_map(p.global_position)
@@ -91,13 +96,20 @@ func _draw() -> void:
 	draw_polyline(pts + PackedVector2Array([pts[0]]), Palette.OUTLINE, 1.5, true)
 
 
-## Chấm trên bản đồ; điểm quan trọng nằm ngoài khung thì ghim vào mép.
-func _dot(world: Vector2, color: Color, pin: bool) -> void:
+## Biển hiệu gần người chơi nhất của từng loại (chỉ chúng được ghim ở mép khi ngoài khung).
+func _nearest_by_icon(markers: Array[Node]) -> Dictionary:
+	var from := city.player.global_position
+	var best := {}
+	for m in markers:
+		if m is SignPost and (not best.has(m.icon) or from.distance_to(m.global_position) < from.distance_to(best[m.icon].global_position)):
+			best[m.icon] = m
+	return best
+
+
+## Chấm người (cảnh sát, băng đảng); ngoài khung thì không vẽ.
+func _dot(world: Vector2, color: Color) -> void:
 	var pos := to_map(world)
-	var inside := Rect2(Vector2.ZERO, size).grow(-EDGE).has_point(pos)
-	if not inside:
-		if not pin:
-			return
-		pos = pos.clamp(Vector2.ONE * EDGE, size - Vector2.ONE * EDGE)
+	if not Rect2(Vector2.ZERO, size).grow(-EDGE).has_point(pos):
+		return
 	draw_circle(pos, DOT + 2.0, Palette.OUTLINE)
 	draw_circle(pos, DOT, color)

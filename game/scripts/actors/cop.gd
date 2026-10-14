@@ -39,3 +39,9 @@ func _think(delta: float) -> void:
 func hear_gunshot(pos: Vector2, shooter: Node) -> void:
 	if alive and shooter is Player and Game.stars == 0 and can_see(pos, Tuning.COP_SIGHT):
 		Game.add_heat(Tuning.HEAT_GUNFIRE_SEEN)
+
+
+func _die(dir: Vector2, source: Node) -> void:
+	super(dir, source)
+	if randf() < Tuning.COP_HEALTH_DROP:
+		Pickup.spawn_health(city.effects, global_position + Vector2(24, 12), Tuning.DROP_HEALTH)

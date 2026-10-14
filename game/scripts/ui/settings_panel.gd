@@ -1,9 +1,10 @@
 class_name SettingsPanel
 extends Modal
-## Cài đặt: ngôn ngữ (đổi ngay, không khởi động lại), kiểu lái xe, âm lượng nhạc và hiệu ứng.
+## Cài đặt: ngôn ngữ (đổi ngay, không khởi động lại), kiểu lái xe, hướng dẫn người mới, âm lượng nhạc và hiệu ứng.
 
 const LANG_KEYS := {"en": "LANG_EN", "vi": "LANG_VI"}
 const STEERING_KEYS := {DriveInput.SCREEN: "STEERING_SCREEN", DriveInput.CLASSIC: "STEERING_CLASSIC"}
+const TUTORIAL_KEYS := {true: "TUTORIAL_ON", false: "TUTORIAL_OFF"}
 
 
 func _build(content: VBoxContainer) -> void:
@@ -12,6 +13,7 @@ func _build(content: VBoxContainer) -> void:
 	var rows: Array = [
 		_choices(content, "SETTINGS_LANGUAGE", "lang", LANG_KEYS, I18n.language),
 		_choices(content, "SETTINGS_STEERING", "steering", STEERING_KEYS, Game.settings.steering),
+		_choices(content, "SETTINGS_TUTORIAL", "tutorial", TUTORIAL_KEYS, Game.settings.tutorial),
 		[_slider(content, "SETTINGS_MUSIC", "music")],
 		[_slider(content, "SETTINGS_SFX", "sfx")],
 	]
@@ -23,7 +25,7 @@ func _build(content: VBoxContainer) -> void:
 
 
 ## Hàng nút chọn một trong nhiều giá trị (`options`: giá trị -> khoá dịch).
-func _choices(content: VBoxContainer, title_key: String, setting: String, options: Dictionary, current: String) -> Array:
+func _choices(content: VBoxContainer, title_key: String, setting: String, options: Dictionary, current: Variant) -> Array:
 	content.add_child(Ui.label(title_key, "SubLabel", HORIZONTAL_ALIGNMENT_LEFT))
 	var row := Ui.hbox(12)
 	content.add_child(row)

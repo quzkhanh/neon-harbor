@@ -38,9 +38,19 @@ Made with Godot 4.7.2 (GDScript, Compatibility renderer).
   the stars go down, or drive into a respray shop and pay to lose them at once.
 - Gun shop with stat bars, ammo, armor and medkits; locked guns show which mission unlocks them.
 - Mission guidance: a GPS route on the minimap (by road when driving) and an arrow at the screen edge.
-  Full city map on M / Tab.
-- When you go down you choose: get up right there (20% of your cash, wanted level kept, a few seconds of
-  protection), retry the mission you were on, or wake up at the nearest of five hospitals (10%, stars cleared).
+  Full city map on M / Tab with a legend; gun shops, hospitals, respray shops and the garage each have their own
+  icon, and the minimap keeps the nearest one of each pinned to its edge.
+- Forgiving difficulty: health regenerates up to 60 after a few seconds without damage, vehicles you drive take
+  half crash damage, Rosa hands you an SMG and body armor for mission 2, and a failed mission offers an instant
+  retry from its start point.
+- Healing: medkits and armor lying around the city (parks, plazas, the stadium, outside the Red Fangs hideout;
+  they come back a minute after you take them, and you only pick them up when you need them), small medkits
+  dropped by gang members and cops, free full healing when you walk into a hospital door, and medkits in shops.
+- Beginner guide on the first game: walk, shoot, open the map, start the first mission, get on the bike, drive,
+  where to buy guns. Each step clears when you do it; optional steps time out, and doing something later in the
+  list skips ahead. It can be turned back on in Settings.
+- When you go down you choose: retry the mission you were on (free), get up right there (20% of your cash,
+  wanted level kept, a few seconds of protection), or wake up at the nearest of five hospitals (10%, stars cleared).
   You keep your guns. No game over.
 - Save in `user://save.json` (IndexedDB on the Web): money, guns, ammo, finished missions, settings.
 - English and Vietnamese, switchable at runtime. All on-screen text comes from `game/i18n/strings.csv`.
@@ -124,6 +134,7 @@ other districts, with a fixed seed so the output never changes; the script also 
 | `P` | player start | `S` | gun shop door (one or more) |
 | `H` | hospital (one or more) | `G` | garage (sell cars, mission 3 drop-off) |
 | `R` | respray shop (one or more) | `b` | parked motorbike |
+| `h` | medkit spot (respawns) | `a` | armor spot (respawns) |
 | `1 2 3` | mission start points | `r` | Red Fangs hideout (mission 2) |
 | `d` | delivery point (mission 1) | `k` | heist target car (mission 3) |
 | `c` | parked car | `m` | the mission 1 motorbike |

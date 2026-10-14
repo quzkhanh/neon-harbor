@@ -175,6 +175,7 @@ def plaza(c, r, rng):
             c.set(x, y, "T")
     cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
     c.fill(cx, cy, cx + 1, cy + 1, "~")
+    c.set(cx - 1, cy, "h")
 
 
 def parking(c, r, rng):
@@ -222,6 +223,7 @@ def park(c, r, rng):
     c.fill(x0, cy + ry + 2, x1, cy + ry + 2, ",")
     c.fill(cx - rx - 2, y0, cx - rx - 2, y1, ",")
     c.fill(cx + rx + 2, y0, cx + rx + 2, y1, ",")
+    c.set(cx, cy - ry - 2, "h")
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
             if c.at(x, y) == '"' and rng.random() < 0.1:
@@ -233,6 +235,8 @@ def stadium(c, r, rng):
     c.fill(x0, y0, x1, y1, ":")
     c.fill(x0 + 2, y0 + 2, x1 - 2, y1 - 2, '"')
     trees_along(c, x0, y0, x1, y1, 3, rng)
+    c.set(x0 + 1, y0 + 1, "h")
+    c.set(x1 - 1, y1 - 1, "a")
 
 
 def market(c, r, rng):
@@ -270,6 +274,7 @@ def containers(c, r, rng):
         for x in range(x0 + 1, x1 - 1, 4):
             if rng.random() < 0.75:
                 c.fill(x, y, x + 2, y, "x")
+    c.set(x1, y1, "a")
 
 
 def apartments(c, r, rng):

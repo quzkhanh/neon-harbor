@@ -1,7 +1,8 @@
 extends MissionBase
-## NV2 Debt Collection: tới hang ổ Red Fangs, hạ 6 tên, nhặt vali, mang về cho Rosa.
+## NV2 Debt Collection: Rosa đưa tiểu liên + áo giáp; tới hang ổ Red Fangs, hạ 6 tên, nhặt vali, mang về cho Rosa.
 
 const RING := 3
+const GEAR_WEAPON := "smg"
 
 var _left := Tuning.GANG_COUNT
 var _case: Pickup
@@ -9,6 +10,9 @@ var _has_case := false
 
 
 func _ready() -> void:
+	Game.grant_weapon(GEAR_WEAPON)
+	Game.add_armor(Tuning.MAX_ARMOR)
+	Game.notice.emit(tr("NOTICE_ROSA_GEAR"))
 	var hideout := city.data.find("r")
 	var spots := _guard_spots(hideout)
 	for i in Tuning.GANG_COUNT:

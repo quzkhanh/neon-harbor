@@ -235,15 +235,19 @@ func _check_crashes(before: Vector2) -> void:
 		_crash_cooldown = Tuning.CRASH_COOLDOWN
 		velocity += c.get_normal() * impact * Tuning.CRASH_BOUNCE
 		var damage := (impact - Tuning.CRASH_MIN_SPEED) * Tuning.CRASH_DAMAGE_PER_SPEED + 4.0
-		take_hit(damage, c.get_normal(), driver)
+		take_hit(damage * _crash_scale(), c.get_normal(), driver)
 		var other := c.get_collider()
 		if other is Vehicle:
-			other.take_hit(damage, -c.get_normal(), driver if driver else self)
+			other.take_hit(damage * other._crash_scale(), -c.get_normal(), driver if driver else self)
 			other.velocity += before * 0.35
 		Sfx.play_at("crash", c.get_position(), clampf((impact - 300.0) / 40.0, -12.0, 0.0))
 		Fx.impact(c.get_position())
 		if is_player_driven():
 			Fx.shake(impact / 60.0)
+
+
+func _crash_scale() -> float:
+	return Tuning.PLAYER_CRASH_SCALE if is_player_driven() else 1.0
 
 
 func _on_body_touched(other: Node) -> void:

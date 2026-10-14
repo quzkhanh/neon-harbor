@@ -6,6 +6,7 @@ const RADIUS := 34.0
 const WIDTH := 5.0
 
 var color := Palette.MARKER
+var icon := MapIcon.Kind.MISSION
 var _time := 0.0
 var _label: Label
 

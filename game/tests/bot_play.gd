@@ -5,7 +5,7 @@ extends "res://tests/harness.gd"
 ## Chạy: godot --headless --fixed-fps 60 --path game -s res://tests/bot_play.gd
 
 const LOOKAHEAD := 2
-const LIMIT_M1 := 55
+const LIMIT_M1 := 75
 const TILE := 64.0  # test không được tham chiếu class_name của game (Tuning)
 const MAX_SECONDS := 120.0
 

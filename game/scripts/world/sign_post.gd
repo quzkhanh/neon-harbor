@@ -5,11 +5,13 @@ extends Node2D
 const PAD := Vector2(14, 6)
 
 var color := Palette.CYAN
+var icon := MapIcon.Kind.SHOP
 
 
-static func make(parent: Node, pos: Vector2, sign_color: Color, key: String) -> SignPost:
+static func make(parent: Node, pos: Vector2, sign_color: Color, key: String, map_icon: MapIcon.Kind) -> SignPost:
 	var s := SignPost.new()
 	s.color = sign_color
+	s.icon = map_icon
 	s.global_position = pos
 	s.z_index = 22
 	var panel := PanelContainer.new()

@@ -56,6 +56,7 @@ func _ready() -> void:
 	add_child(police)
 	interactions = Interactions.new(self)
 	add_child(interactions)
+	add_child(PickupSpots.new(self))
 	missions = Missions.new(self)
 	add_child(missions)
 	hud = Hud.new(self)
@@ -65,6 +66,11 @@ func _ready() -> void:
 	if TouchControls.wanted():
 		add_child(TouchControls.new())
 	Music.play()
+	if Tutorial.wanted() and Game.missions_done.is_empty():
+		add_child(Tutorial.new(self))
+	elif Game.missions_done.size() < Game.MISSION_COUNT:
+		get_tree().create_timer(Tuning.START_HINT_DELAY).timeout.connect(func() -> void:
+			Game.notice.emit(I18n.fmt("HINT_MAP_SHOPS", {"key": InputSetup.key_label(&"map")})))
 
 
 func _exit_tree() -> void:
@@ -147,13 +153,16 @@ func respawn(choice: DeathScreen.Revive) -> void:
 		Game.notice.emit(I18n.fmt("NOTICE_REVIVE_FEE", {"fee": I18n.money(fee)}))
 	if here:
 		Game.revive()
+	elif choice == DeathScreen.Revive.RETRY:  # làm lại nhiệm vụ: miễn phí, xoá truy nã
+		Game.clear_wanted()
+		Game.revive()
+		police.clear_all()
+		pos = missions.giver_pos(missions.retry_mission)
 	else:
 		var fee := Game.hospital_respawn()
 		Game.notice.emit(I18n.fmt("NOTICE_HOSPITAL", {"fee": I18n.money(fee)}))
 		police.clear_all()
 		pos = nearest_hospital(pos)
-		if choice == DeathScreen.Revive.RETRY:
-			pos = missions.giver_pos(missions.retry_mission)
 	player.respawn(pos, Tuning.REVIVE_GRACE if here else 0.0)
 	camera.global_position = pos
 	player_respawned.emit()

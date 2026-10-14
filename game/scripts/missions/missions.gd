@@ -100,12 +100,23 @@ func _on_completed(n: int) -> void:
 	_refresh_marker()
 
 
+## Thất bại không phải do chết thì hỏi làm lại ngay (về điểm nhận nhiệm vụ, bỏ qua hội thoại);
+## chết thì màn chết lo việc đó.
 func _on_failed(reason_key: String) -> void:
+	var n := current_n
 	_end_current()
 	Game.clear_objective()
 	Sfx.play("mission_fail")
 	Game.notice.emit(I18n.fmt("NOTICE_MISSION_FAILED", {"reason": tr(reason_key)}))
 	_refresh_marker()
+	if reason_key == "FAIL_DIED":
+		return
+	var modal := ConfirmModal.new("MISSION_RETRY_ASK", {"reason": tr(reason_key)}, "MISSION_RETRY_NOW", "MISSION_RETRY_LATER")
+	if await city.overlays.open(modal) == true:
+		if city.player.vehicle:
+			city.player.exit_vehicle()
+		city.player.global_position = giver_pos(n)
+		start(n, false)
 
 
 func _end_current() -> void:

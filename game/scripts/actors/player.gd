@@ -9,6 +9,7 @@ var controls_enabled := true
 var _walk_velocity := Vector2.ZERO
 var _mouse_active_ms := -100000
 var _grace := 0.0
+var _since_hurt := 0.0
 
 
 func _ready() -> void:
@@ -52,6 +53,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func _physics_process(delta: float) -> void:
 	if not alive:
 		return
+	_since_hurt += delta
+	if _since_hurt > Tuning.REGEN_DELAY and Game.health < Tuning.REGEN_CAP:
+		Game.heal(minf(Tuning.REGEN_RATE * delta, Tuning.REGEN_CAP - Game.health))
 	if _grace > 0.0:
 		_grace -= delta
 		body.modulate.a = 1.0 if _grace <= 0.0 else 0.45 + 0.4 * absf(sin(_grace * 14.0))
@@ -125,6 +129,7 @@ func respawn(pos: Vector2, grace := 0.0) -> void:
 func _apply_damage(amount: float, dir: Vector2, source: Node) -> void:
 	if _grace > 0.0:
 		return
+	_since_hurt = 0.0
 	if amount > 2.0:
 		Sfx.play("hurt", -4.0)
 		Fx.shake(amount * 0.15)

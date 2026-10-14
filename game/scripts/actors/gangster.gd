@@ -66,3 +66,5 @@ func _on_attacked(_source: Node) -> void:
 func _die(dir: Vector2, source: Node) -> void:
 	super(dir, source)
 	Pickup.spawn_cash(city.effects, global_position, randi_range(Tuning.MONEY_DROP.x, Tuning.MONEY_DROP.y))
+	if randf() < Tuning.GANG_HEALTH_DROP:
+		Pickup.spawn_health(city.effects, global_position + Vector2(24, 12), Tuning.DROP_HEALTH)

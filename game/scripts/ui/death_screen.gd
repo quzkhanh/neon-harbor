@@ -1,7 +1,7 @@
 class_name DeathScreen
 extends Modal
-## Màn chết. Kết quả (Revive): hồi sinh tại chỗ (trả phí hoặc xem quảng cáo), thử lại nhiệm vụ
-## vừa thất bại, hoặc về bệnh viện gần nhất (mất 10% tiền, mất sao).
+## Màn chết. Kết quả (Revive): làm lại nhiệm vụ vừa thất bại (miễn phí, chỉ khi chết giữa nhiệm vụ),
+## hồi sinh tại chỗ (trả phí hoặc xem quảng cáo), hoặc về bệnh viện gần nhất (mất 10% tiền, mất sao).
 
 enum Revive { HOSPITAL, HERE, AD, RETRY }
 
@@ -24,13 +24,14 @@ func _build(content: VBoxContainer) -> void:
 	ad.visible = Ads.rewarded_available("revive_here")
 	ad.pressed.connect(_revive_ad.bind(ad))
 	var here := _fee_button("DEATH_REVIVE_HERE", Tuning.REVIVE_HERE_FEE, Revive.HERE, "AccentButton")
-	var retry := _fee_button("DEATH_RETRY", Tuning.DEATH_FEE, Revive.RETRY)
+	var retry := Ui.button("DEATH_RETRY", "AccentButton")
 	retry.visible = _retry
+	retry.pressed.connect(close.bind(Revive.RETRY))
 	var hospital := _fee_button("DEATH_HOSPITAL", Tuning.DEATH_FEE, Revive.HOSPITAL)
-	for b in [ad, here, retry, hospital]:
+	for b in [retry, ad, here, hospital]:
 		content.add_child(b)
 	content.add_child(Ui.label("DEATH_WANTED_NOTE", "SmallLabel"))
-	Ui.focus_chain.call_deferred([ad, here, retry, hospital])
+	Ui.focus_chain.call_deferred([retry, ad, here, hospital])
 
 
 ## Nút có phí kèm theo; màn chết không đổi ngôn ngữ khi đang mở nên dịch một lần là đủ.

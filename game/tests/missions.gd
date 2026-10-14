@@ -2,6 +2,7 @@ extends "res://tests/harness.gd"
 ## Hoàn thành lần lượt 3 nhiệm vụ qua API kiểm thử (dịch chuyển, hạ mục tiêu).
 ## Assert tiền tăng đúng, súng mở bán đúng, lưu rồi nạp lại save.json giữ nguyên state,
 ## chết: về bệnh viện gần nhất mất 10% tiền; làm lại nhiệm vụ; hồi sinh tại chỗ mất 20% và giữ sao.
+## NV2 được Rosa trang bị; thất bại không do chết thì hỏi làm lại; máu tự hồi tới mức trần.
 
 const UNLOCKS := {1: ["smg"], 2: ["rifle", "flamethrower"], 3: ["sniper", "bazooka"]}
 const MAX_WAIT := 300
@@ -19,7 +20,35 @@ func _run() -> void:
 	_check_save_roundtrip()
 	city = await open_city()
 	await _check_death(city)
+	await _check_fail_retry(city)
+	await _check_regen(city)
 	finish("MISSIONS")
+
+
+## Thất bại không do chết: hỏi làm lại; đồng ý thì về điểm nhận và nhiệm vụ chạy lại ngay.
+func _check_fail_retry(city: Node) -> void:
+	await close_overlays(city)
+	game.missions_done = []
+	city.missions.start(1, false)
+	await frames(3)
+	city.missions.current.failed.emit("M1_FAIL_LATE")
+	await _wait(func() -> bool: return city.overlays.current != null, "NV1 thất bại: không hỏi làm lại")
+	city.overlays.current.close(true)
+	await frames(5)
+	expect(city.missions.current != null and city.missions.current_n == 1, "NV1 thất bại -> làm lại: nhiệm vụ không chạy lại")
+	expect(city.player.global_position.distance_to(city.missions.giver_pos(1)) < 10.0, "làm lại: không về điểm nhận NV1")
+
+
+## Không trúng đòn một lúc thì máu tự hồi, nhưng chỉ tới REGEN_CAP.
+func _check_regen(city: Node) -> void:
+	game.clear_wanted()
+	city.police.clear_all()
+	await physics(200)  # hết thời gian bất tử của lần hồi sinh tại chỗ trước đó
+	game.armor = 0.0
+	city.player.take_hit(70.0, Vector2.RIGHT, null)
+	var low: float = game.health
+	await physics(60 * 12)
+	expect(game.health > low and game.health <= 60.0 + 0.01, "hồi máu: %.1f -> %.1f (mong tăng, tối đa 60)" % [low, game.health])
 
 
 func _play_mission(city: Node, n: int) -> Node:
@@ -38,6 +67,7 @@ func _play_mission(city: Node, n: int) -> Node:
 			await frames(5)
 			mission.bike.global_position = mission.cell_pos("d")
 		2:
+			expect(game.current == "smg" and game.armor >= 100.0, "NV2: Rosa chưa đưa tiểu liên + áo giáp (%s, giáp %d)" % [game.current, game.armor])
 			for g in get_nodes_in_group("gang"):
 				g.take_hit(999.0, Vector2.RIGHT, p)
 			await frames(5)
@@ -104,10 +134,12 @@ func _check_death(city: Node) -> void:
 	p.take_hit(999.0, Vector2.RIGHT, null)
 	await _wait(func() -> bool: return city.overlays.current != null, "chết giữa NV1: không hiện màn chết")
 	expect(city.missions.retry_mission == 1, "chết giữa NV1: màn chết không cho làm lại")
+	var money_before_retry: int = game.money
 	city.overlays.current.close(REVIVE_RETRY)
 	await frames(5)
 	expect(city.missions.current != null and city.missions.current_n == 1, "làm lại: NV1 không chạy lại")
 	expect(p.global_position.distance_to(city.missions.giver_pos(1)) < 10.0, "làm lại: không về điểm nhận NV1")
+	expect(game.money == money_before_retry, "làm lại sau khi chết phải miễn phí (tiền %d -> %d)" % [money_before_retry, game.money])
 
 	# Hồi sinh tại chỗ: mất 20% tiền, giữ sao truy nã, không đổi vị trí.
 	city.missions.current.failed.emit("FAIL_DIED")

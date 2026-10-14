@@ -18,6 +18,17 @@ SETTINGS_SFX,Effects volume,Âm lượng hiệu ứng
 SETTINGS_STEERING,Driving controls,Điều khiển xe
 STEERING_SCREEN,Arcade: car goes where you press,Arcade: xe chạy theo hướng bấm
 STEERING_CLASSIC,Classic: left/right turns the car,Cổ điển: trái/phải xoay thân xe
+SETTINGS_TUTORIAL,Beginner guide,Hướng dẫn người mới
+TUTORIAL_ON,Show,Bật
+TUTORIAL_OFF,Hide,Tắt
+TUT_TITLE,Guide,Hướng dẫn
+TUT_MOVE,Walk with W A S D or the arrow keys,Di chuyển bằng W A S D hoặc phím mũi tên
+TUT_SHOOT,"Aim with the mouse, left click to shoot","Ngắm bằng chuột, bấm chuột trái để bắn"
+TUT_MAP,[{key}] Open the city map,[{key}] Mở bản đồ thành phố
+TUT_MISSION,Follow the arrow and the line on the minimap to the pink circle to start a mission,Đi theo mũi tên và đường kẻ trên bản đồ nhỏ tới vòng tròn hồng để nhận nhiệm vụ
+TUT_VEHICLE,[{key}] Get on the motorbike,[{key}] Lên xe máy
+TUT_DRIVE,Drive: press the way you want to go and the bike turns there. [{key}] Handbrake,"Lái xe: bấm hướng muốn đi, xe tự rẽ theo. [{key}] Phanh tay"
+TUT_SHOP,"Buy guns and medkits at gun shops (blue gun icon, [{key}] map). Hospitals heal you for free.","Mua súng, hộp máu ở cửa hàng súng (biểu tượng khẩu súng xanh, [{key}] bản đồ). Vào bệnh viện để chữa máu miễn phí."
 SETTINGS_BACK,Back,Quay lại
 LANG_EN,English,English
 LANG_VI,Tiếng Việt,Tiếng Việt
@@ -46,7 +57,7 @@ M1_INTRO_3,"Take the motorbike parked out front. The client hates waiting, so be
 M1_OUTRO_1,Right on time. I like that. Come back when you want real money.,Đúng giờ. Tôi thích thế. Muốn kiếm tiền thật thì quay lại tìm tôi.
 M2_INTRO_1,The Red Fangs took a case of mine and think they can keep it. They're holed up on the east docks.,Bọn Red Fangs lấy mất chiếc vali của tôi và nghĩ chúng giữ được. Chúng đang cố thủ ở bến tàu phía đông.
 M2_INTRO_2,How many of them?,Bao nhiêu tên?
-M2_INTRO_3,"Six. Gear up at the gun shop, take them down and bring my case back.","Sáu tên. Ghé cửa hàng súng trang bị đi, hạ hết chúng rồi mang vali về cho tôi."
+M2_INTRO_3,Six. Take this SMG and the vest. Need more firepower? The gun shops are the blue gun icons on your map.,"Sáu tên. Cầm khẩu tiểu liên với áo giáp này. Cần thêm hoả lực thì ghé cửa hàng súng, là biểu tượng khẩu súng màu xanh trên bản đồ."
 M2_OUTRO_1,"Not a scratch on it. You're full of surprises, Jay.","Không một vết xước. Cậu đúng là đầy bất ngờ đấy, Jay."
 M3_INTRO_1,One last job. A Red Fangs boss keeps his fancy car at the west docks. I want it.,Việc cuối cùng. Một tay trùm Red Fangs để chiếc xe xịn ở bến tàu phía tây. Tôi muốn nó.
 M3_INTRO_2,The NHPD watch that harbor like hawks.,Cảnh sát NHPD canh bến cảng đó kỹ lắm.
@@ -67,10 +78,15 @@ M3_OBJ_BACK,Get back in the target car,Quay lại chiếc xe mục tiêu
 M3_FAIL_CAR,the target car was destroyed,chiếc xe mục tiêu đã bị phá huỷ
 FAIL_DIED,you went down,bạn đã gục ngã
 NOTICE_MISSION_FAILED,Mission failed: {reason},Nhiệm vụ thất bại: {reason}
+MISSION_RETRY_ASK,Mission failed: {reason}. Try again right away?,Nhiệm vụ thất bại: {reason}. Làm lại ngay?
+MISSION_RETRY_NOW,Retry now,Làm lại ngay
+MISSION_RETRY_LATER,Later,Để sau
 NOTICE_HOSPITAL,Hospital bill: {fee},Viện phí: {fee}
+NOTICE_HOSPITAL_HEAL,The hospital patched you up for free,Bệnh viện đã chữa cho bạn miễn phí
 NOTICE_REVIVE_FEE,Paid {fee} to get back on your feet,Đã trả {fee} để đứng dậy
 NOTICE_SOLD,Car sold for {price},Đã bán xe được {price}
 NOTICE_RESPRAYED,Fresh paint. The cops lost your trail.,Xe đã sơn mới. Cảnh sát mất dấu bạn.
+NOTICE_ROSA_GEAR,Rosa handed you an SMG and body armor,Rosa đưa bạn một khẩu tiểu liên và áo giáp
 NOTICE_VEHICLE_FIRE,Your vehicle is on fire. Get out!,Xe đang bốc cháy. Xuống ngay!
 MISSION_COMPLETE,Mission complete,Hoàn thành nhiệm vụ
 REWARD,Reward,Phần thưởng
@@ -81,7 +97,7 @@ REWARD_DOUBLED,Reward doubled!,Đã nhân đôi phần thưởng!
 CONTINUE,Continue,Tiếp tục
 DEATH_TITLE,You're down,Bạn đã gục
 DEATH_REVIVE_HERE,Get up right here ({fee}),Đứng dậy ngay tại chỗ ({fee})
-DEATH_RETRY,Retry the mission ({fee}),Làm lại nhiệm vụ ({fee})
+DEATH_RETRY,Retry the mission (free),Làm lại nhiệm vụ (miễn phí)
 AD_REVIVE_HERE,Get up right here (watch an ad),Đứng dậy ngay tại chỗ (xem quảng cáo)
 DEATH_HOSPITAL,Wake up at the nearest hospital ({fee}),Tỉnh dậy ở bệnh viện gần nhất ({fee})
 DEATH_WANTED_NOTE,Getting up right here keeps your wanted level.,Đứng dậy tại chỗ thì vẫn giữ mức truy nã.
@@ -126,6 +142,12 @@ TOUCH_SWAP,Swap,Đổi súng
 TOUCH_RELOAD,Reload,Nạp đạn
 TOUCH_PAUSE,Pause,Dừng
 MAP_CLOSE,[{key}] Close map,[{key}] Đóng bản đồ
+HINT_MAP_SHOPS,[{key}] City map. The blue gun icon on the map is a gun shop.,[{key}] Bản đồ. Biểu tượng khẩu súng màu xanh trên bản đồ là cửa hàng súng.
+LEGEND_MISSION,Mission,Nhiệm vụ
+LEGEND_SHOP,Gun shop,Cửa hàng súng
+LEGEND_HOSPITAL,Hospital,Bệnh viện
+LEGEND_RESPRAY,Respray (lose the cops),Sơn xe (cắt đuôi cảnh sát)
+LEGEND_GARAGE,Garage (sell cars),Gara (bán xe)
 DISTRICT_HILLSIDE,Hillside,Đồi Hillside
 DISTRICT_DOWNTOWN,Downtown,Trung tâm
 DISTRICT_UPTOWN,Uptown Park,Công viên Uptown

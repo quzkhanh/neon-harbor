@@ -15,7 +15,7 @@ const CORPSE_CELL := Vector2i(6, -9)
 const SCENARIOS := [
 	"menu", "settings", "city_walk", "combat", "driving", "wanted3", "shop", "dialog",
 	"mission_complete", "death", "hospital", "pause", "touch", "ad_debug", "corpses", "map",
-	"downtown", "market", "uptown", "marina",
+	"downtown", "market", "uptown", "marina", "tutorial",
 ]
 
 var _name := ""
@@ -51,6 +51,7 @@ func _run() -> void:
 	Game.save_path = SHOT_SAVE
 	Game.reset_progress()
 	Game.settings.lang = _lang
+	Game.settings.tutorial = _name == "tutorial"
 	Game.apply_settings()
 	TranslationServer.pseudolocalization_enabled = _pseudo
 	AudioServer.set_bus_mute(0, true)
@@ -100,6 +101,8 @@ func _city() -> void:
 			city.overlays.show_mission_complete(1, 500, ["smg"])
 		"death", "hospital":
 			Ads.use_provider("debug")
+			city.missions.start(1, false)
+			await _frames(5)
 			p.take_hit(500.0, Vector2.RIGHT, null)
 			while city.overlays.current == null:
 				await _frames(1)

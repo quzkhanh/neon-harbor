@@ -29,6 +29,7 @@ func _run() -> void:
 	var city: Node = current_scene
 	await _step("vào cửa hàng, mua súng săn", _shop.bind(city))
 	await _step("NV1 bằng phím thật", _mission1.bind(city))
+	await _step("hướng dẫn người mới đi tới bước cuối dù bỏ qua bước bản đồ/bắn", _tutorial_progress.bind(city))
 	await _step("tạm dừng -> cài đặt -> đổi ngôn ngữ -> tiếp tục", _pause_settings.bind(city))
 	await _step("bắn bừa -> truy nã -> chết -> đứng dậy tại chỗ", _wanted_death.bind(city))
 	await _step("cướp xe -> bán ở gara", _carjack_sell.bind(city))
@@ -149,6 +150,12 @@ func _shop(city: Node) -> void:
 	await key(KEY_ESCAPE)
 	expect(await until(func() -> bool: return city.overlays.current == null and not paused, 60), "Esc không đóng cửa hàng")
 	await walk_to(door + Vector2(0, TILE * 2), 20.0)
+
+
+func _tutorial_progress(city: Node) -> void:
+	var tut: Node = city.get_node_or_null("Tutorial")
+	expect(tut == null or tut._index >= 5, "hướng dẫn kẹt ở bước %s" % (tut._index if tut else -1))
+	print("   hướng dẫn: %s" % ("đã xong" if tut == null else "bước %d" % tut._index))
 
 
 func _mission1(city: Node) -> void:

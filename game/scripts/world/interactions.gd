@@ -1,12 +1,13 @@
 class_name Interactions
 extends Node
 ## Tìm hành động khả dụng quanh người chơi (lên/xuống xe, bán xe ở gara, sơn xe để xoá truy nã),
-## hiện gợi ý trên HUD, thực hiện khi bấm `interact`. Đi vào cửa hàng thì tự mở giao diện cửa hàng.
+## hiện gợi ý trên HUD, thực hiện khi bấm `interact`. Đi vào cửa hàng thì tự mở giao diện cửa hàng;
+## đi vào cửa bệnh viện thì được chữa đầy máu miễn phí.
 
 const GARAGE_RADIUS := 120.0
 const DOOR_RADIUS := 34.0
-const SIGNS := [["S", "SIGN_SHOP", Palette.CYAN], ["H", "SIGN_HOSPITAL", Palette.HEALTH],
-	["G", "SIGN_GARAGE", Palette.GOLD], ["R", "SIGN_RESPRAY", Palette.ACCENT]]
+const SIGNS := [["S", "SIGN_SHOP", Palette.CYAN, MapIcon.Kind.SHOP], ["H", "SIGN_HOSPITAL", Palette.HEALTH, MapIcon.Kind.HOSPITAL],
+	["G", "SIGN_GARAGE", Palette.GOLD, MapIcon.Kind.GARAGE], ["R", "SIGN_RESPRAY", Palette.ACCENT, MapIcon.Kind.RESPRAY]]
 
 var city: City
 var prompt := ""
@@ -14,6 +15,7 @@ var prompt_params := {}
 var _action := Callable()
 var _shop_armed := true
 var _shops: Array[Vector2] = []
+var _hospitals: Array[Vector2] = []
 var _resprays: Array[Vector2] = []
 var _garage_pos: Vector2
 
@@ -26,10 +28,11 @@ func _init(c: City) -> void:
 func _ready() -> void:
 	_shops = _spots("S")
 	_resprays = _spots("R")
+	_hospitals = _spots("H")
 	_garage_pos = MapData.cell_center(city.data.find("G"))
 	for sign_def in SIGNS:
 		for pos in _spots(sign_def[0]):
-			SignPost.make(city.effects, pos, sign_def[2], sign_def[1])
+			SignPost.make(city.effects, pos, sign_def[2], sign_def[1], sign_def[3])
 
 
 func _spots(ch: String) -> Array[Vector2]:
@@ -58,6 +61,10 @@ func _process(_delta: float) -> void:
 		else:
 			_set_prompt("HINT_EXIT", p.exit_vehicle)
 		return
+	if Game.health < Tuning.MAX_HEALTH and _near(p.global_position, _hospitals, DOOR_RADIUS):
+		Game.heal(Tuning.MAX_HEALTH)
+		Sfx.play("pickup")
+		Game.notice.emit(tr("NOTICE_HOSPITAL_HEAL"))
 	var near_shop := _near(p.global_position, _shops, DOOR_RADIUS)
 	if near_shop and _shop_armed:
 		_shop_armed = false

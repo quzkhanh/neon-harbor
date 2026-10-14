@@ -5,7 +5,7 @@ extends RefCounted
 const SOLID := "#Tx~"
 const LANES := {"<": Vector2i.LEFT, ">": Vector2i.RIGHT, "^": Vector2i.UP, "v": Vector2i.DOWN}
 const ROAD := "<>^v+="
-const PED_WALK := ",=_-:MPSHGR123d"
+const PED_WALK := ",=_-:MPSHGR123dha"
 const FLOORS := ",\".~_-:<>^v+="
 const DIRS: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]
 
