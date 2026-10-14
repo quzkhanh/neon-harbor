@@ -36,8 +36,7 @@ LANG_VI,Tiếng Việt,Tiếng Việt
 PAUSE_TITLE,Paused,Tạm dừng
 PAUSE_RESUME,Resume,Tiếp tục
 PAUSE_TO_MENU,Main menu,Về menu chính
-HUD_AMMO,{mag} / {reserve},{mag} / {reserve}
-AMMO_INFINITE,∞,∞
+HUD_AMMO,{mag} / ∞,{mag} / ∞
 HINT_ENTER,[{key}] Get in,[{key}] Lên xe
 HINT_EXIT,[{key}] Get out,[{key}] Xuống xe
 HINT_SELL,[{key}] Sell this car for {price},[{key}] Bán xe này được {price}
@@ -110,15 +109,12 @@ SHOP_STAT_RATE,Fire rate,Tốc độ bắn
 SHOP_STAT_ACCURACY,Accuracy,Độ chính xác
 SHOP_STAT_MAG,Magazine,Băng đạn
 SHOP_LOCKED,Locked: complete mission {mission} to unlock,Đang khoá: hoàn thành nhiệm vụ {mission} để mở bán
-SHOP_AMMO_OWNED,Ammo: {mag} / {reserve},Đạn: {mag} / {reserve}
+SHOP_OWNED_INFO,Owned · unlimited ammo,Đã sở hữu · đạn vô hạn
 SHOP_NOT_OWNED,Not owned yet,Chưa sở hữu
 SHOP_BUY,Buy: {price},Mua: {price}
-SHOP_BUY_AMMO,Ammo +{amount}: {price},Đạn +{amount}: {price}
 SHOP_ARMOR,Armor: {price},Giáp: {price}
 SHOP_MEDKIT,Medkit: {price},Hộp máu: {price}
-AD_FREE_AMMO,Free ammo (watch an ad),Đạn miễn phí (xem quảng cáo)
 SHOP_BOUGHT,Purchased!,Đã mua!
-SHOP_FREE_AMMO_DONE,Ammo restocked for every weapon,Đã nạp thêm đạn cho mọi khẩu súng
 SHOP_NOT_ENOUGH,Not enough money,Không đủ tiền
 WEAPON_PISTOL,Pistol,Súng lục
 WEAPON_SMG,SMG,Tiểu liên

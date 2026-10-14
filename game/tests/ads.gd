@@ -1,6 +1,6 @@
 extends "res://tests/harness.gd"
 ## Quảng cáo: với DebugAdProvider, rewarded chỉ thưởng khi xem hết; game tạm dừng và tắt tiếng khi quảng cáo chạy;
-## interstitial đúng giới hạn tần suất; free_ammo 5 phút một lần. NullAdProvider ẩn mọi nút xem quảng cáo.
+## interstitial đúng giới hạn tần suất. NullAdProvider ẩn mọi nút xem quảng cáo.
 
 const MINUTE_MS := 60000
 
@@ -12,7 +12,6 @@ func _run() -> void:
 	await _check_pause_and_mute()
 	await _check_reward_only_when_watched(city)
 	await _check_interstitial_caps()
-	await _check_free_ammo_cap()
 	ads.use_provider("null")
 	await frames(2)
 	await _check_null_hides_buttons(city)
@@ -87,22 +86,11 @@ func _interstitial() -> bool:
 	return result[0] == true
 
 
-func _check_free_ammo_cap() -> void:
-	expect(ads.rewarded_available("free_ammo"), "free_ammo không khả dụng lúc đầu")
-	expect(await _watch("free_ammo", true), "xem free_ammo không thành công")
-	expect(not ads.rewarded_available("free_ammo"), "free_ammo xem lại được ngay")
-	ads.clock_offset_ms += 5 * MINUTE_MS + 1000
-	expect(ads.rewarded_available("free_ammo"), "free_ammo không mở lại sau 5 phút")
-
-
 func _check_null_hides_buttons(city: Node) -> void:
 	expect(not ads.rewarded_available("double_reward"), "NullAdProvider vẫn báo có rewarded")
 	city.overlays.show_mission_complete(1, 500, [])
 	await frames(3)
 	_expect_hidden(city, "màn hoàn thành nhiệm vụ")
-	city.overlays.show_shop()
-	await frames(3)
-	_expect_hidden(city, "cửa hàng")
 	city.overlays.current.close()
 	await frames(2)
 	city.player.take_hit(999.0, Vector2.RIGHT, null)

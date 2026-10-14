@@ -1,6 +1,6 @@
 extends Modal
-## Cửa hàng súng: danh sách có icon, chỉ số dạng thanh để so sánh, giá, mua súng/đạn,
-## giáp, hộp máu, đạn miễn phí qua quảng cáo. Súng chưa mở khoá hiện ổ khoá kèm điều kiện.
+## Cửa hàng súng: danh sách có icon, chỉ số dạng thanh để so sánh, giá, mua súng (đạn vô hạn),
+## giáp, hộp máu. Súng chưa mở khoá hiện ổ khoá kèm điều kiện.
 
 const ICON := "res://assets/sprites/weapons/icon_%s.png"
 const STATS := [["SHOP_STAT_DAMAGE", "damage"], ["SHOP_STAT_RATE", "rate"], ["SHOP_STAT_ACCURACY", "accuracy"], ["SHOP_STAT_MAG", "mag"]]
@@ -12,10 +12,8 @@ var _detail_name: Label
 var _bars := {}
 var _info: LiveLabel
 var _buy: Button
-var _buy_ammo: Button
 var _armor: Button
 var _medkit: Button
-var _free_ammo: Button
 var _status: Label
 
 
@@ -38,8 +36,6 @@ func _build(content: VBoxContainer) -> void:
 	content.add_child(footer)
 	_armor = _footer_button(footer, _buy_armor)
 	_medkit = _footer_button(footer, _buy_medkit)
-	_free_ammo = _footer_button(footer, _watch_free_ammo, "AccentButton")
-	_free_ammo.add_to_group("ad_button")
 	_status = Ui.label("", "SmallLabel")
 	_status.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	content.add_child(_status)
@@ -81,10 +77,7 @@ func _build_detail() -> Control:
 	_info = Ui.live_label("", _info_params, "SubLabel", HORIZONTAL_ALIGNMENT_LEFT)
 	_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	col.add_child(_info)
-	var buttons := Ui.hbox(12)
-	col.add_child(buttons)
-	_buy = _footer_button(buttons, func() -> void: _purchase(Game.buy_weapon(selected)), "AccentButton")
-	_buy_ammo = _footer_button(buttons, func() -> void: _purchase(Game.buy_ammo(selected)))
+	_buy = _footer_button(col, func() -> void: _purchase(Game.buy_weapon(selected)), "AccentButton")
 	return col
 
 
@@ -112,25 +105,17 @@ func _refresh() -> void:
 		_bars[key].value = ShopWidgets.stat_value(w, key)
 	var owned := Game.owned.has(selected)
 	var unlocked := Game.is_unlocked(selected)
-	_info.setup("SHOP_LOCKED" if not unlocked else ("SHOP_AMMO_OWNED" if owned else "SHOP_NOT_OWNED"))
+	_info.setup("SHOP_LOCKED" if not unlocked else ("SHOP_OWNED_INFO" if owned else "SHOP_NOT_OWNED"))
 	_buy.visible = unlocked and not owned
 	_buy.text = I18n.fmt("SHOP_BUY", {"price": I18n.money(int(w.price))})
-	_buy_ammo.visible = owned and int(w.reserve_max) >= 0
-	_buy_ammo.disabled = Game.ammo_full(selected)
-	_buy_ammo.text = I18n.fmt("SHOP_BUY_AMMO", {"amount": int(w.ammo_pack), "price": I18n.money(int(w.ammo_price))})
 	_armor.text = I18n.fmt("SHOP_ARMOR", {"price": I18n.money(Tuning.ARMOR_PRICE)})
 	_armor.disabled = Game.armor >= Tuning.MAX_ARMOR
 	_medkit.text = I18n.fmt("SHOP_MEDKIT", {"price": I18n.money(Tuning.MEDKIT_PRICE)})
 	_medkit.disabled = Game.health >= Tuning.MAX_HEALTH
-	_free_ammo.text = tr("AD_FREE_AMMO")
-	_free_ammo.visible = Ads.rewarded_available("free_ammo")
 
 
 func _info_params() -> Dictionary:
-	var w := DataDB.weapon(selected)
-	var a := Game.ammo(selected)
-	var reserve: String = tr("AMMO_INFINITE") if int(a.reserve) < 0 else str(int(a.reserve))
-	return {"mission": int(w.unlock), "mag": int(a.mag), "reserve": reserve}
+	return {"mission": int(DataDB.weapon(selected).unlock)}
 
 
 func _purchase(ok: bool) -> void:
@@ -152,18 +137,6 @@ func _buy_medkit() -> void:
 		Game.heal(Tuning.MAX_HEALTH)
 		Game.save_game()
 		_purchase(true)
-
-
-func _watch_free_ammo() -> void:
-	_free_ammo.disabled = true
-	if await Ads.show_rewarded("free_ammo"):
-		for id in Game.owned:
-			Game.give_ammo(id)
-		Game.save_game()
-		Sfx.play("pickup")
-		_status.text = tr("SHOP_FREE_AMMO_DONE")
-	_free_ammo.disabled = false
-	_refresh()
 
 
 func _on_notice(text: String) -> void:

@@ -92,7 +92,7 @@ func _bot_mission1(city: Node, mode: String) -> void:
 
 
 func _bot_mission2(city: Node) -> void:
-	game.owned["smg"] = {"mag": 30, "reserve": 150}
+	game.owned["smg"] = {"mag": 30}
 	game.select_weapon("smg")
 	game.add_armor(100.0)
 	var mission := await _start_mission(city, 2)

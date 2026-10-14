@@ -147,7 +147,7 @@ func _perf() -> void:
 
 
 func _combat(city: City) -> void:
-	Game.owned["rifle"] = {"mag": 30, "reserve": 90}
+	Game.owned["rifle"] = {"mag": 30}
 	Game.select_weapon("rifle")
 	var p := city.player
 	p.global_position = MapData.cell_center(city.data.find("P") + COMBAT_CELL) + Vector2(0, 280)

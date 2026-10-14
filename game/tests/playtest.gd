@@ -276,7 +276,7 @@ func _monkey() -> void:
 	game.add_money(20000)
 	game.missions_done = [1, 2, 3]
 	for w in all_weapons():
-		game.owned[w.id] = {"mag": int(w.mag), "reserve": maxi(int(w.reserve_max), 0) if int(w.reserve_max) >= 0 else -1}
+		game.owned[w.id] = {"mag": int(w.mag)}
 	var frames := int(monkey_seconds * 60.0)
 	var i := 0
 	while i < frames:

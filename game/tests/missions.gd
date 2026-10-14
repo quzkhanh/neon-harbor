@@ -3,6 +3,7 @@ extends "res://tests/harness.gd"
 ## Assert tiền tăng đúng, súng mở bán đúng, lưu rồi nạp lại save.json giữ nguyên state,
 ## chết: về bệnh viện gần nhất mất 10% tiền; làm lại nhiệm vụ; hồi sinh tại chỗ mất 20% và giữ sao.
 ## NV2 được Rosa trang bị; thất bại không do chết thì hỏi làm lại; máu tự hồi tới mức trần.
+## Mọi súng đạn vô hạn: bắn hết băng rồi nạp lại đầy, lặp nhiều lần.
 
 const UNLOCKS := {1: ["smg"], 2: ["rifle", "flamethrower"], 3: ["sniper", "bazooka"]}
 const MAX_WAIT := 300
@@ -18,6 +19,7 @@ func _run() -> void:
 	expect(game.missions_done == [1, 2, 3], "missions_done sai: %s" % [game.missions_done])
 	await _wait(func() -> bool: return current_scene != null and current_scene.scene_file_path == game.ENDING_SCENE, "xong NV3 không sang màn kết")
 	_check_save_roundtrip()
+	_check_infinite_ammo()
 	city = await open_city()
 	await _check_death(city)
 	await _check_fail_retry(city)
@@ -97,7 +99,7 @@ func _play_mission(city: Node, n: int) -> Node:
 
 
 func _check_save_roundtrip() -> void:
-	game.owned["smg"] = {"mag": 7, "reserve": 33}
+	game.owned["smg"] = {"mag": 7}
 	game.settings.lang = "vi"
 	game.save_game()
 	var snapshot := [game.money, game.owned.duplicate(true), game.missions_done.duplicate(), game.settings.duplicate()]
@@ -110,6 +112,17 @@ func _check_save_roundtrip() -> void:
 	expect(snapshot[2] == after[2], "lưu/nạp: nhiệm vụ %s != %s" % [snapshot[2], after[2]])
 	expect(snapshot[3] == after[3], "lưu/nạp: cài đặt %s != %s" % [snapshot[3], after[3]])
 	game.set_setting("lang", "en")
+
+
+func _check_infinite_ammo() -> void:
+	for w in JSON.parse_string(FileAccess.get_file_as_string("res://data/weapons.json")):
+		game.grant_weapon(w.id)
+		for cycle in 3:
+			while game.consume_ammo():
+				pass
+			expect(game.can_reload(), "%s: hết băng lần %d mà không nạp được" % [w.id, cycle + 1])
+			game.finish_reload()
+			expect(int(game.ammo().mag) == int(w.mag), "%s: nạp lại không đầy băng" % w.id)
 
 
 func _check_death(city: Node) -> void:

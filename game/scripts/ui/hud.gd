@@ -152,14 +152,8 @@ func _build_weapon(parent: Control) -> void:
 	row.add_child(col)
 	_weapon_name = Ui.label("", "SmallLabel", HORIZONTAL_ALIGNMENT_RIGHT)
 	col.add_child(_weapon_name)
-	_ammo = Ui.live_label("HUD_AMMO", _ammo_params, "HudLabel", HORIZONTAL_ALIGNMENT_RIGHT)
+	_ammo = Ui.live_label("HUD_AMMO", func() -> Dictionary: return {"mag": int(Game.ammo().mag)}, "HudLabel", HORIZONTAL_ALIGNMENT_RIGHT)
 	col.add_child(_ammo)
-
-
-func _ammo_params() -> Dictionary:
-	var a := Game.ammo()
-	var reserve: String = tr("AMMO_INFINITE") if int(a.reserve) < 0 else str(int(a.reserve))
-	return {"mag": int(a.mag), "reserve": reserve}
 
 
 func _build_bottom_center(root: Control) -> void:

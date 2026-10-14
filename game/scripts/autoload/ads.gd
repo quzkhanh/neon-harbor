@@ -9,14 +9,13 @@ const PROVIDERS := {
 	"null": "res://scripts/ads/null_ad_provider.gd",
 	"debug": "res://scripts/ads/debug_ad_provider.gd",
 }
-const PLACEMENTS_REWARDED := ["double_reward", "revive_here", "free_ammo"]
+const PLACEMENTS_REWARDED := ["double_reward", "revive_here"]
 
 var provider: Node
 var showing := false
 var clock_offset_ms := 0  # để test tua thời gian
 var _session_start_ms := 0
 var _last_interstitial_ms := -1
-var _last_free_ammo_ms := -1
 var _was_paused := false
 
 
@@ -43,11 +42,7 @@ func now_ms() -> int:
 
 
 func rewarded_available(placement: String) -> bool:
-	if showing or not provider.supports_rewarded() or not placement in PLACEMENTS_REWARDED:
-		return false
-	if placement == "free_ammo" and _last_free_ammo_ms >= 0:
-		return now_ms() - _last_free_ammo_ms >= Tuning.AD_FREE_AMMO_GAP * 1000.0
-	return true
+	return not showing and provider.supports_rewarded() and placement in PLACEMENTS_REWARDED
 
 
 func interstitial_allowed() -> bool:
@@ -62,8 +57,6 @@ func show_rewarded(placement: String) -> bool:
 		return false
 	_begin(placement)
 	var completed: bool = await provider.show_rewarded(placement)
-	if completed and placement == "free_ammo":
-		_last_free_ammo_ms = now_ms()
 	_end(placement, completed)
 	return completed
 

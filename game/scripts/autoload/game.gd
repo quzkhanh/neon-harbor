@@ -21,7 +21,7 @@ var save_path := SAVE_PATH
 var money := 0
 var health := Tuning.MAX_HEALTH
 var armor := 0.0
-var owned := {}  # id súng -> {"mag": int, "reserve": int}; reserve -1 là vô hạn
+var owned := {}  # id súng -> {"mag": int}; đạn dự trữ luôn vô hạn
 var current := "pistol"
 var missions_done: Array = []
 var objective := ""
@@ -107,7 +107,7 @@ func load_game() -> void:
 		owned = {}
 		for id in d.owned:
 			if not DataDB.weapon(id).is_empty():
-				owned[id] = {"mag": int(d.owned[id].mag), "reserve": int(d.owned[id].reserve)}
+				owned[id] = {"mag": int(d.owned[id].mag)}
 		if not owned.has("pistol"):
 			_give_weapon("pistol")
 		current = d.current if owned.has(d.current) else "pistol"
@@ -200,7 +200,7 @@ func weapon_def(id := "") -> Dictionary:
 
 
 func ammo(id := "") -> Dictionary:
-	return owned.get(current if id == "" else id, {"mag": 0, "reserve": 0})
+	return owned.get(current if id == "" else id, {"mag": 0})
 
 
 func is_unlocked(id: String) -> bool:
@@ -234,17 +234,11 @@ func consume_ammo() -> bool:
 
 
 func can_reload() -> bool:
-	var a := ammo()
-	return a.mag < int(weapon_def().mag) and a.reserve != 0
+	return ammo().mag < int(weapon_def().mag)
 
 
 func finish_reload() -> void:
-	var a: Dictionary = owned[current]
-	var need := int(weapon_def().mag) - int(a.mag)
-	var take := need if a.reserve < 0 else mini(need, a.reserve)
-	a.mag += take
-	if a.reserve >= 0:
-		a.reserve -= take
+	owned[current].mag = int(weapon_def().mag)
 	weapons_changed.emit()
 
 
@@ -257,44 +251,14 @@ func buy_weapon(id: String) -> bool:
 	return true
 
 
-## Tặng súng (Rosa trang bị cho nhiệm vụ): chưa có thì cho súng, có rồi thì thêm đạn; cầm luôn khẩu đó.
+## Tặng súng (Rosa trang bị cho nhiệm vụ): cho súng với băng đầy và cầm luôn khẩu đó.
 func grant_weapon(id: String) -> void:
-	if owned.has(id):
-		give_ammo(id)
-	else:
-		_give_weapon(id)
+	_give_weapon(id)
 	select_weapon(id)
 
 
-func ammo_full(id: String) -> bool:
-	var w := weapon_def(id)
-	var a := ammo(id)
-	return int(w.reserve_max) < 0 or (a.mag >= int(w.mag) and a.reserve >= int(w.reserve_max))
-
-
-func buy_ammo(id: String) -> bool:
-	if not owned.has(id) or ammo_full(id) or not spend(int(weapon_def(id).ammo_price)):
-		return false
-	give_ammo(id)
-	save_game()
-	return true
-
-
-func give_ammo(id: String) -> void:
-	var w := weapon_def(id)
-	var a: Dictionary = owned[id]
-	if int(w.reserve_max) < 0:
-		return
-	var total := mini(int(a.mag) + int(a.reserve) + int(w.ammo_pack), int(w.mag) + int(w.reserve_max))
-	a.mag = mini(total, int(w.mag))
-	a.reserve = total - a.mag
-	weapons_changed.emit()
-
-
 func _give_weapon(id: String) -> void:
-	var w := weapon_def(id)
-	var mag := mini(int(w.start_ammo), int(w.mag))
-	owned[id] = {"mag": mag, "reserve": -1 if int(w.reserve_max) < 0 else int(w.start_ammo) - mag}
+	owned[id] = {"mag": int(weapon_def(id).mag)}
 	weapons_changed.emit()
 
 

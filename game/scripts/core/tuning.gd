@@ -146,7 +146,6 @@ const FADE_TIME := 0.25
 # Quảng cáo
 const AD_INTERSTITIAL_GRACE := 180.0  # không chiếu trong 3 phút đầu phiên
 const AD_INTERSTITIAL_GAP := 180.0
-const AD_FREE_AMMO_GAP := 300.0
 const AD_DEBUG_DURATION := 2.0
 
 # Dáng đi (Kenney không có frame bước: nhún và lắc sprite)
