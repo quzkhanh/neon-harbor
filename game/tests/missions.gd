@@ -9,7 +9,7 @@ const UNLOCKS := {1: ["smg"], 2: ["rifle", "flamethrower"], 3: ["sniper", "bazoo
 const MAX_WAIT := 300
 const REVIVE_HOSPITAL := 0  # khớp DeathScreen.Revive (test không được tham chiếu class_name của game)
 const REVIVE_HERE := 1
-const REVIVE_RETRY := 3
+const REVIVE_RETRY := 2
 
 
 func _run() -> void:

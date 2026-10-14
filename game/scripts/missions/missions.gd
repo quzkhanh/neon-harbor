@@ -94,7 +94,6 @@ func _on_completed(n: int) -> void:
 	var unlocked := Game.complete_mission(n)
 	var reward := int(Game.mission(n).reward)
 	await city.overlays.show_mission_complete(n, reward, unlocked)
-	await Ads.show_interstitial("after_mission")
 	if n == Game.MISSION_COUNT:
 		Game.go(Game.ENDING_SCENE)
 	_refresh_marker()

@@ -56,7 +56,7 @@ Made with Godot 4.7.2 (GDScript, Compatibility renderer).
   You keep your guns. No game over.
 - Save in `user://save.json` (IndexedDB on the Web): money, guns, loaded rounds, finished missions, settings.
 - English and Vietnamese, switchable at runtime. All on-screen text comes from `game/i18n/strings.csv`.
-- Ads are an API only in this stage (`Ads` autoload with a null provider and a debug provider). No real ad SDK.
+- No ads in this version.
 - Touch controls (two virtual sticks + buttons) on touch screens.
 
 ## Controls
@@ -81,7 +81,6 @@ With the Classic driving scheme, W/S (or RT/LT) accelerate and brake and A/D tur
 
 ```bash
 ./play.sh                 # runs the Linux export if built, otherwise the project with Godot
-./play.sh -- --ads=debug  # with the debug ad provider (simulated ad overlay)
 ./play.sh -- --touch      # force the touch controls on
 ./play-web.sh             # serves build/web on http://localhost:8060
 ```
@@ -101,7 +100,7 @@ special HTTP headers. `include_filter` packs the non-resource files read at runt
 ## Checks
 
 ```bash
-tools/checks/check_all.sh   # clean import, map validator, i18n check, font coverage, smoke, missions, ads,
+tools/checks/check_all.sh   # clean import, map validator, i18n check, font coverage, smoke, missions,
                             # human-like playtest with a random-input phase, gameplay bot report, reverse tests
 tools/checks/take_shots.sh  # real screenshots of every screen in English, Vietnamese and pseudolocalization
 NH_HEADED=1 node tools/checks/web_play.mjs http://localhost:8060/index.html reference/shots perf     # Web FPS, full city
@@ -154,8 +153,7 @@ game/
   maps/          city.txt (generated, see Map format)
   scenes/        menu, city, shop, ending
   scripts/
-    autoload/    Game (the only game state), I18n, Ads, Sfx, Music, Shot (scripted screenshots / perf run)
-    ads/         AdProvider, NullAdProvider, DebugAdProvider
+    autoload/    Game (the only game state), I18n, Sfx, Music, Shot (scripted screenshots / perf run)
     actors/      Human, Player, Npc (Pedestrian, Cop, Gangster), Vehicle, Pickup
     combat/      Gun, Combat, Projectile, Fx
     core/        Tuning (all gameplay numbers), InputSetup, DataDB, SaveIO
@@ -163,7 +161,7 @@ game/
     screens/     menu, ending
     ui/          theme, HUD, minimap, shop, dialog, overlays, touch controls
     world/       City, CityMap, MapData, lanes, traffic and police drivers, population, camera
-  tests/         font_coverage, smoke, missions, ads, bot_play
+  tests/         font_coverage, smoke, missions, playtest, bot_play
 tools/
   assets/        scripts that generate the sounds, music, weapon icons and effect sprites, and copy Kenney assets
                  (copy_vendor.sh needs the original Kenney packs in vendor/, which is not in the repository)
@@ -172,7 +170,6 @@ tools/
 ```
 
 All gameplay numbers live in `game/scripts/core/tuning.gd`. Adding a weapon or vehicle is a data change.
-A new ad provider subclasses `AdProvider` and is registered in `Ads.PROVIDERS`; gameplay code only calls `Ads`.
 
 ## Credits
 

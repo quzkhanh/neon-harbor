@@ -20,7 +20,6 @@ class ErrorCatcher extends Logger:
 var catcher := ErrorCatcher.new()
 var failures := PackedStringArray()
 var game: Node
-var ads: Node
 
 
 func _initialize() -> void:
@@ -37,7 +36,6 @@ func _on_watchdog() -> void:
 
 func _start() -> void:
 	game = root.get_node("Game")
-	ads = root.get_node("Ads")
 	game.save_path = TEST_SAVE
 	game.reset_progress()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_SAVE))

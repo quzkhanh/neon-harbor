@@ -147,8 +147,8 @@ func _on_player_died(_human: Human) -> void:
 ## Hồi sinh theo lựa chọn ở màn chết (DeathScreen.Revive).
 func respawn(choice: DeathScreen.Revive) -> void:
 	var pos := player.global_position
-	var here := choice == DeathScreen.Revive.HERE or choice == DeathScreen.Revive.AD
-	if choice == DeathScreen.Revive.HERE:
+	var here := choice == DeathScreen.Revive.HERE
+	if here:
 		var fee := Game.pay_fee(Tuning.REVIVE_HERE_FEE)
 		Game.notice.emit(I18n.fmt("NOTICE_REVIVE_FEE", {"fee": I18n.money(fee)}))
 	if here:

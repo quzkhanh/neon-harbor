@@ -143,10 +143,6 @@ const STAR_HEAT := [40.0, 140.0, 260.0]
 const MAX_HEAT := 400.0
 const FADE_TIME := 0.25
 
-# Quảng cáo
-const AD_INTERSTITIAL_GRACE := 180.0  # không chiếu trong 3 phút đầu phiên
-const AD_INTERSTITIAL_GAP := 180.0
-const AD_DEBUG_DURATION := 2.0
 
 # Nhà nổi khối (BuildingDepth): mái lệch = (vị trí - tâm camera) × hệ số; ở mép màn hình 640px lệch 640 × hệ số
 const BUILDING_RISE_LOW := 0.06

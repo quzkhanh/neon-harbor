@@ -92,13 +92,10 @@ MISSION_COMPLETE,Mission complete,Hoàn thành nhiệm vụ
 REWARD,Reward,Phần thưởng
 REWARD_AMOUNT,+{money},+{money}
 UNLOCKED_WEAPON,Now in the gun shop: {weapon},Đã mở bán ở cửa hàng: {weapon}
-AD_DOUBLE_REWARD,Double the reward (watch an ad),Nhân đôi phần thưởng (xem quảng cáo)
-REWARD_DOUBLED,Reward doubled!,Đã nhân đôi phần thưởng!
 CONTINUE,Continue,Tiếp tục
 DEATH_TITLE,You're down,Bạn đã gục
 DEATH_REVIVE_HERE,Get up right here ({fee}),Đứng dậy ngay tại chỗ ({fee})
 DEATH_RETRY,Retry the mission (free),Làm lại nhiệm vụ (miễn phí)
-AD_REVIVE_HERE,Get up right here (watch an ad),Đứng dậy ngay tại chỗ (xem quảng cáo)
 DEATH_HOSPITAL,Wake up at the nearest hospital ({fee}),Tỉnh dậy ở bệnh viện gần nhất ({fee})
 DEATH_WANTED_NOTE,Getting up right here keeps your wanted level.,Đứng dậy tại chỗ thì vẫn giữ mức truy nã.
 SHOP_TITLE,Gun Shop,Cửa hàng súng
@@ -124,12 +121,6 @@ WEAPON_SNIPER,Sniper Rifle,Súng bắn tỉa
 WEAPON_GRENADE,Grenade,Lựu đạn
 WEAPON_FLAMETHROWER,Flamethrower,Súng phun lửa
 WEAPON_BAZOOKA,Rocket Launcher,Súng phóng tên lửa
-AD_BADGE,AD,QUẢNG CÁO
-AD_REWARDED,Rewarded ad (debug),Quảng cáo có thưởng (giả lập)
-AD_INTERSTITIAL,Interstitial ad (debug),Quảng cáo chen ngang (giả lập)
-AD_PLACEMENT,Placement: {placement},Vị trí: {placement}
-AD_FINISH,Watch to the end,Xem hết
-AD_SKIP,Skip,Bỏ qua
 ENDING_TITLE,The Harbor Is Yours,Bến cảng là của bạn
 ENDING_TEXT,"The Red Fangs are broken and the boss's car sits in Rosa's garage. The streets of Neon Harbor have learned a new name: Jay. The night is still young, and the city is yours to roam.","Red Fangs đã tan rã, chiếc xe của tay trùm nằm trong gara của Rosa. Đường phố Neon Harbor giờ đã biết một cái tên mới: Jay. Đêm còn dài, cả thành phố là của bạn."
 ENDING_MONEY,Cash: {money},Tiền mặt: {money}

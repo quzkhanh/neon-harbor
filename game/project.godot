@@ -15,7 +15,6 @@ I18n="*res://scripts/autoload/i18n.gd"
 Sfx="*res://scripts/autoload/sfx.gd"
 Music="*res://scripts/autoload/music.gd"
 Game="*res://scripts/autoload/game.gd"
-Ads="*res://scripts/autoload/ads.gd"
 Shot="*res://scripts/autoload/shot.gd"
 
 [display]

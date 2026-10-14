@@ -40,8 +40,6 @@ run_test SMOKE smoke.gd || fail=1
 step "6. missions.gd"
 run_test MISSIONS missions.gd || fail=1
 
-step "7. ads.gd"
-run_test ADS ads.gd || fail=1
 
 step "7a. Chơi thử như người (phím/chuột thật qua hàng đợi input + 60 giây bấm loạn)"
 out=$(timeout 900 "$GODOT" --headless --path game -s res://tests/playtest.gd -- --monkey=60 2>&1); code=$?

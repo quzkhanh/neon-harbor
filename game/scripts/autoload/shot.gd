@@ -14,7 +14,7 @@ const DRIVE_CELL := Vector2i(-15, -11)
 const CORPSE_CELL := Vector2i(6, -9)
 const SCENARIOS := [
 	"menu", "settings", "city_walk", "combat", "driving", "wanted3", "shop", "dialog",
-	"mission_complete", "death", "hospital", "pause", "touch", "ad_debug", "corpses", "map",
+	"mission_complete", "death", "hospital", "pause", "touch", "corpses", "map",
 	"downtown", "market", "uptown", "marina", "tutorial",
 ]
 
@@ -96,11 +96,9 @@ func _city() -> void:
 			p.global_position = city.missions.giver_pos(1)
 			await _frames(40)
 		"mission_complete":
-			Ads.use_provider("debug")
 			Game.missions_done.append(1)
 			city.overlays.show_mission_complete(1, 500, ["smg"])
 		"death", "hospital":
-			Ads.use_provider("debug")
 			city.missions.start(1, false)
 			await _frames(5)
 			p.take_hit(500.0, Vector2.RIGHT, null)
@@ -122,10 +120,6 @@ func _city() -> void:
 			p.global_position = _district_spot(city, "DISTRICT_" + _name.to_upper())
 			_camera_snap(city)
 			await _hold([&"move_right"], 50)
-		"ad_debug":
-			Ads.use_provider("debug")
-			Ads.show_rewarded("double_reward")
-			await _frames(30)
 
 
 func _perf() -> void:

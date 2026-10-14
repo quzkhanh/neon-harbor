@@ -6,7 +6,7 @@ cd "$(dirname "$0")/../.."
 GODOT=${GODOT:-$(command -v godot || echo "$HOME/games/tools/godot/godot")}
 OUT="$PWD/reference/shots"
 SHOTS=("$@")
-[ ${#SHOTS[@]} -eq 0 ] && SHOTS=(menu settings city_walk combat driving wanted3 shop dialog mission_complete death hospital pause touch ad_debug corpses map tutorial)
+[ ${#SHOTS[@]} -eq 0 ] && SHOTS=(menu settings city_walk combat driving wanted3 shop dialog mission_complete death hospital pause touch corpses map tutorial)
 mkdir -p "$OUT"
 shoot() {  # shoot <tên> <tham số...>
   local extra=()

@@ -16,7 +16,7 @@ func _init(c: City) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if current != null or Ads.showing:
+	if current != null:
 		return
 	if event.is_action_pressed("pause"):
 		get_viewport().set_input_as_handled()
