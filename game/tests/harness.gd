@@ -3,7 +3,10 @@ extends SceneTree
 ## Script test được biên dịch trước khi autoload tồn tại: chỉ truy cập game qua root.get_node() (duck typing).
 
 const TEST_SAVE := "user://test_save.json"
-var watchdog_sec := 60.0
+var watchdog_sec := 60.0:  # test đặt lại trong _run() thì hẹn lại đồng hồ chờ
+	set(seconds):
+		watchdog_sec = seconds
+		_arm_watchdog()
 
 
 class ErrorCatcher extends Logger:
@@ -19,13 +22,21 @@ class ErrorCatcher extends Logger:
 
 var catcher := ErrorCatcher.new()
 var failures := PackedStringArray()
+var _watchdog: SceneTreeTimer
 var game: Node
 
 
 func _initialize() -> void:
 	OS.add_logger(catcher)
-	create_timer(watchdog_sec, true, false, true).timeout.connect(_on_watchdog)
+	_arm_watchdog()
 	_start.call_deferred()
+
+
+func _arm_watchdog() -> void:
+	if _watchdog:
+		_watchdog.timeout.disconnect(_on_watchdog)
+	_watchdog = create_timer(watchdog_sec, true, false, true)
+	_watchdog.timeout.connect(_on_watchdog)
 
 
 ## Test bị treo (thường do lỗi script làm coroutine dừng giữa chừng): báo FAIL thay vì chờ mãi.

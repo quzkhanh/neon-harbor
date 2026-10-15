@@ -118,7 +118,7 @@ func _enter(next: Phase) -> void:
 
 func _aborted() -> bool:
 	for p in _peds:
-		if p != null and (not is_instance_valid(p) or not p.alive or not p.scripted):
+		if not is_instance_valid(p) or not p.alive or not p.scripted:  # người đã bị free so với null cũng bằng null
 			return true
 	return false
 
