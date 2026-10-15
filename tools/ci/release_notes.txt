@@ -2,9 +2,12 @@ A top-down open-world action game: nine story missions, a five-star wanted syste
 safehouses and businesses, day and night with rain, English and Vietnamese. Play in the browser:
 https://quzkhanh.github.io/neon-harbor-web/
 
-## What's new in 0.10.1
+## What's new in 0.11.0
 
-- Cars now push each other: bump a parked car and it moves, ram a traffic car and it is shoved instead of ignoring you. This also makes it easier to clear a queue behind a road accident.
+- Fame: two new scores, Goodwill (taxi, deliveries, errands, catching criminals) and Notoriety (hurting pedestrians). Goodwill gives shop and hospital discounts, bigger tips and friendlier chatter; Notoriety makes people flee sooner, scares witnesses off the phone and makes shops pay protection money. See both on the Stats screen.
+- Free way out when the cops take you down: "Go to jail" (wait 10 seconds, wanted level cleared). You are released from one of four new police stations.
+- Jay is no longer bald: pick his hairstyle and hair colour in the safehouse wardrobe. Pedestrians now have their own hair, hats and shirt colours, so crowds look varied.
+- Cars shove each other more convincingly, including police and racing cars.
 
 ## Download
 
