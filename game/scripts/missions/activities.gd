@@ -12,6 +12,7 @@ const SCRIPTS := {
 	"taxi": "res://scripts/missions/activity_taxi.gd",
 	"vigilante": "res://scripts/missions/activity_vigilante.gd",
 	"errand": "res://scripts/missions/activity_errand.gd",
+	"phone": "res://scripts/missions/activity_phone.gd",
 }
 const STARTS := [["Q", "SIGN_RACE", Palette.ICON_RACE, MapIcon.Kind.RACE], ["J", "SIGN_JOB", Palette.ICON_JOB, MapIcon.Kind.JOB],
 	["K", "SIGN_SWEEP", Palette.ICON_SWEEP, MapIcon.Kind.SWEEP]]

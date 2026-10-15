@@ -53,7 +53,11 @@ Made with Godot 4.7.2 (GDScript, Compatibility renderer).
   right stick) and they raise their hands; keep aiming and they drop their wallet, which is a crime if anyone sees
   it. Press the interact key next to a pedestrian to talk: greetings, rumours, tips, and now and then a small errand
   (find a dropped package nearby and bring it back for a reward). Emote bubbles show surprise, fear and anger, and
-  Red Fangs throw a taunt before they open fire. Traffic follows the directed lanes in the map, stops for obstacles and honks. After mission 2 the Red Fangs
+  Red Fangs throw a taunt before they open fire.
+- Lucky Live, a self-styled street "influencer" (shaved head, shades, gold chain, phone always recording), streams
+  from a corner near the start under a neon sign. Walk close and he talks to his viewers; talk to him for his
+  pavement philosophy, and now and then a thief snatches his phone: knock the thief down and bring the phone back
+  for a reward (he may "forget his wallet" first). Traffic follows the directed lanes in the map, stops for obstacles and honks. After mission 2 the Red Fangs
   guard their turf (Harbor, Rail Yard, Marina) until the story ends. Population is spawned and despawned off screen.
 - Day and night: a full day lasts 16 minutes; the light changes from night to dawn, day and dusk, and street lamps,
   neon and headlights fade out in daylight. Now and then it rains: darker sky, rain on screen, slippery roads.
@@ -222,11 +226,11 @@ game/
   scenes/        menu, city, shop, ending
   scripts/
     autoload/    Game (the only game state), I18n, Sfx, Music, Shot (scripted screenshots / perf run)
-    actors/      Human, Player, Npc (Pedestrian + PedHoldup/PedTalk, Cop, Swat, Gangster, Boss, Ally), Vehicle (+ Nitro,
+    actors/      Human, Player, Npc (Pedestrian + PedHoldup/PedTalk, Streamer, Cop, Swat, Gangster, Boss, Ally), Vehicle (+ Nitro,
                  Stunt, BoatHull), Pickup, Emote and Speech bubbles
     combat/      Gun, Combat, Melee (+ SwingArc), Projectile, Fx
     core/        Tuning (all gameplay numbers), InputSetup, DataDB, SaveIO
-    missions/    mission runner, the nine missions, side jobs (Activities: race, courier, taxi, vigilante, turf war, errand)
+    missions/    mission runner, the nine missions, side jobs (Activities: race, courier, taxi, vigilante, turf war, errand, phone chase)
     screens/     menu, ending
     ui/          theme, HUD, minimap, shop, dialog, overlays, touch controls
     world/       City, CityMap, MapData, lanes, traffic/chase/race/flee drivers, population, police (roadblocks,

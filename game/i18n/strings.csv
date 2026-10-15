@@ -355,3 +355,27 @@ GANG_TAUNT_1,"Wrong street, tourist.","Lạc đường à, khách du lịch?"
 GANG_TAUNT_2,Red Fangs turf. Pay up or bleed.,Đất Red Fangs. Nộp tiền hay đổ máu?
 GANG_TAUNT_3,Look who walked in. Get 'em!,Xem ai mò tới kìa. Xử nó!
 GANG_TAUNT_4,"You lost, Jay? We'll fix that.",Lạc đường hả Jay? Để bọn tao chỉ.
+SIGN_LUCKY,LUCKY LIVE,LUCKY LIVE
+LEGEND_STREAMER,Lucky Live (streamer),Lucky Live (livestream)
+LUCKY_LIVE_1,"Chat, smash that follow! Big things today!","Anh em ơi bấm theo dõi đi, hôm nay làm ăn lớn!"
+LUCKY_LIVE_2,"I live simple: strong wifi, a thousand viewers.","Anh sống giản dị lắm: wifi khoẻ, nghìn người xem."
+LUCKY_LIVE_3,Life is a battery. Charge it or sit still.,"Đời như cục pin, sạc được thì sạc, không thì ngồi yên."
+LUCKY_LIVE_4,"Thin wallet? Laugh louder, chat.",Ví mỏng thì cười to lên anh em ạ.
+LUCKY_LIVE_5,Don't look at the chain. Look at the heart.,"Đừng nhìn dây chuyền, nhìn vào tấm lòng anh đây."
+LUCKY_LIVE_6,Who said lag? My signal is pure gold.,Ai bảo lag? Sóng nhà anh toàn vàng ròng.
+LUCKY_LIVE_7,Shout-out to the night owls of the harbor!,Gửi lời chào anh em cú đêm ở bến cảng!
+LUCKY_LIVE_8,Every like is a prayer for my lost wallet.,Mỗi like là một lời cầu nguyện cho cái ví của anh.
+LUCKY_CHAT_1,"Jay! Wave at the camera, you're famous now.","Jay! Vẫy tay vào camera đi, nổi tiếng rồi đấy."
+LUCKY_CHAT_2,"Money goes, brotherhood stays... you got this round?","Tiền thì hết, tình anh em thì còn... bữa này em trả nhé?"
+LUCKY_CHAT_3,I don't need fame. Just the whole harbor knowing my face.,"Anh không cần nổi tiếng, chỉ cần cả bến cảng biết mặt."
+LUCKY_CHAT_4,"Okay, okay, no fighting... let me say the last word... you go first.","Thôi, thôi, đừng cãi... để anh nói câu cuối... à em nói trước đi."
+LUCKY_CHAT_5,"Lost? Follow my stream, I review every street.","Lạc đường à? Theo dõi live anh, phố nào anh cũng review."
+LUCKY_JOB_ASK,Hey! That punk grabbed my phone! Get it back!,Ê! Thằng kia giật điện thoại của anh! Lấy lại giúp!
+LUCKY_THANKS,"My phone! Chat, give it up for Jay!","Điện thoại của anh! Anh em ơi, tặng Jay tràng pháo tay!"
+LUCKY_WALLET,Let me pay... where's my wallet? I'll transfer it!,Để anh trả... ơ ví đâu rồi? Thôi anh chuyển khoản!
+LUCKY_PANIC,"End stream! End stream! Stay calm, chat!",Tắt live! Tắt live! Anh em giữ bình tĩnh!
+JOB_PHONE_CHASE,Catch the phone thief,Đuổi theo tên giật điện thoại
+JOB_PHONE_RETURN,Bring the phone back to Lucky,Mang điện thoại về trả Lucky
+NOTICE_PHONE_FOUND,Got the phone. Bring it back to Lucky.,Lấy lại được điện thoại. Mang về trả Lucky.
+FAIL_THIEF_ESCAPED,the thief got away,tên trộm đã chạy thoát
+PED_RUMOR_4,Lucky Live owes half the harbor a lunch.,Lucky Live nợ nửa bến cảng một bữa trưa.

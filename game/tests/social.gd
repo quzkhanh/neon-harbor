@@ -1,7 +1,8 @@
 extends "res://tests/harness.gd"
 ## Tương tác với NPC (đợt 10): bị chĩa súng (ngắm có chủ đích) thì giơ tay rồi đánh rơi ví (người thấy báo cảnh sát), người có súng thì
 ## bắn lại; người máu nóng bị đấm thì đấm trả, người khác sợ hãi bỏ chạy; bắt chuyện (phím tương tác) ra câu thoại;
-## việc vặt tìm đồ đánh rơi (trả đồ được tiền, người nhờ chết là thất bại); Red Fangs chọc ghẹo trước khi bắn.
+## việc vặt tìm đồ đánh rơi (trả đồ được tiền, người nhờ chết là thất bại); Red Fangs chọc ghẹo trước khi bắn;
+## Lucky Live (streamer ở góc phố): lên sóng khi Jay tới gần, bắt chuyện, việc lấy lại điện thoại, chết thì có lại.
 ## Chạy: godot --headless --path game -s res://tests/social.gd
 
 
@@ -17,6 +18,7 @@ func _run() -> void:
 	await _check_talk(city)
 	await _check_errand(city)
 	await _check_taunt(city)
+	await _check_lucky(city)
 	finish("SOCIAL")
 
 
@@ -159,3 +161,50 @@ func _check_taunt(city: Node) -> void:
 	expect(gang.alerted and _bubble(gang, "Speech"), "Red Fangs thấy Jay mà không chọc ghẹo")
 	expect(gang._react > 0.6, "Red Fangs chọc ghẹo mà bắn luôn, không dừng lại")
 	await _clear(city, [gang])
+
+
+func _check_lucky(city: Node) -> void:
+	var p: Node = city.player
+	var spot: Node = city.streamer
+	var lucky: Node = spot.lucky
+	var home: Vector2 = p.global_position
+	expect(is_instance_valid(lucky) and lucky.alive and city.data.is_ped_walkable(spot.CELL), "không có Lucky ở góc phố")
+	p.global_position = lucky.global_position + Vector2(0, 40)
+	await physics(3)
+	expect(city.interactions.prompt == "HINT_TALK", "đứng cạnh Lucky mà không có gợi ý bắt chuyện (%s)" % city.interactions.prompt)
+	lucky._next_line = 0.0
+	await physics(2)
+	expect(_bubble(lucky, "Speech"), "Jay ở gần mà Lucky không nói gì trên sóng")
+	# Việc vặt: quật ngã tên trộm, mang điện thoại về.
+	p.global_position = home
+	city.activities.start("phone")
+	await physics(2)
+	var job: Node = city.activities.current
+	var thief: Node = job.thief if job else null
+	expect(is_instance_valid(thief) and thief.heat_on_hit == 0.0, "không có tên trộm / đánh tên trộm vẫn bị truy nã")
+	await physics(30)
+	expect(is_instance_valid(thief) and thief._flee_time > 0.0, "tên trộm không bỏ chạy")
+	if is_instance_valid(thief):
+		thief.knock_down(Vector2.RIGHT * 100.0, 5.0, p)
+	await physics(2)
+	expect(job._found and game.heat == 0.0, "quật ngã tên trộm mà không lấy lại được điện thoại / bị tính phạm tội")
+	var money: int = game.money
+	p.global_position = lucky.global_position + Vector2(0, 40)
+	await physics(3)
+	expect(city.activities.current == null and game.money > money, "mang điện thoại về trả Lucky mà không được tiền")
+	# Tên trộm chạy thoát: thất bại.
+	city.activities.start("phone")
+	await physics(2)
+	city.activities.current.thief.global_position = p.global_position + Vector2(1500, 0)
+	await physics(2)
+	expect(city.activities.current == null, "tên trộm chạy thoát mà việc chưa thất bại")
+	await _clear(city, [thief])
+	# Lucky chết: khi góc phố khuất màn hình thì có Lucky mới.
+	lucky.take_hit(500.0, Vector2.RIGHT, null)
+	spot._respawn = 0.0
+	p.global_position = home + Vector2(2000, 0)
+	city.camera.global_position = p.global_position
+	await physics(30)
+	expect(is_instance_valid(spot.lucky) and spot.lucky != lucky and spot.lucky.alive, "Lucky chết mà không có lại")
+	p.global_position = home
+	game.clear_wanted()

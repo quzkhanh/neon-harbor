@@ -2,7 +2,7 @@ class_name ShotScenes
 extends RefCounted
 ## Tình huống chụp ảnh của đợt mở rộng (Shot gọi sang để shot.gd không phình ra).
 
-const NAMES := ["nitro", "wanted5", "roadblock", "race", "noon", "dusk", "rain", "wheel", "stats", "safehouse", "wardrobe", "boat", "zombies", "death_home", "melee", "holdup", "talk", "taunt"]
+const NAMES := ["nitro", "wanted5", "roadblock", "race", "noon", "dusk", "rain", "wheel", "stats", "safehouse", "wardrobe", "boat", "zombies", "death_home", "melee", "holdup", "talk", "taunt", "lucky"]
 
 
 static func run(scene_name: String, city: City, shot: Node) -> void:
@@ -65,6 +65,12 @@ static func run(scene_name: String, city: City, shot: Node) -> void:
 			city.player.take_hit(500.0, Vector2.RIGHT, null)
 			while city.overlays.current == null:
 				await shot._frames(1)
+			await shot._frames(10)
+		"lucky":
+			var lucky := city.streamer.lucky
+			city.player.global_position = lucky.global_position + Vector2(70, 30)
+			await shot._frames(30)
+			lucky.say("LUCKY_LIVE_2")
 			await shot._frames(10)
 		"melee", "holdup", "talk", "taunt":
 			await _social(scene_name, city, shot)

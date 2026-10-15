@@ -87,6 +87,8 @@ func _job_prompt() -> bool:
 	if job.is_empty():
 		job = city.properties.prompt()
 	if job.is_empty():
+		job = city.streamer.prompt()
+	if job.is_empty():
 		return false
 	_set_prompt(job[0], job[1], job[2] if job.size() > 2 else {})
 	return true

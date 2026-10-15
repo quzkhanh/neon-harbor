@@ -19,6 +19,7 @@ var police: Police
 var missions: Missions
 var activities: Activities
 var properties: Properties
+var streamer: StreamerSpot
 var interactions: Interactions
 var overlays: Overlays
 var _warm: Array[Texture2D] = []  # sprite xe/người nạp sẵn: lần đầu xe loại mới xuất hiện không bị khựng
@@ -70,6 +71,8 @@ func _ready() -> void:
 	add_child(activities)
 	properties = Properties.new(self)
 	add_child(properties)
+	streamer = StreamerSpot.new(self)
+	add_child(streamer)
 	add_child(Achievements.new(self))
 	add_child(Cheats.new(self))
 	hud = Hud.new(self)
