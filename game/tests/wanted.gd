@@ -49,9 +49,8 @@ func _check_heli(city: Node) -> void:
 
 
 func _check_swat(city: Node) -> void:
-	for c in get_nodes_in_group("cops"):  # giới hạn tổng số cảnh sát: dọn chỗ trước
-		c.queue_free()
-	await frames(2)
+	for c in get_nodes_in_group("cops"):  # giới hạn tổng số cảnh sát: dọn chỗ ngay, kẻo Police sinh thêm lấp chỗ
+		c.free()
 	var van: Node = city.spawn_vehicle("swat", ROAD, 0.0)
 	van.global_position = city.player.global_position + Vector2(200, 0)  # gần camera, kẻo Police dọn lính ở xa
 	var is_swat := func(c: Node) -> bool: return c.skin == "robot1"
@@ -77,9 +76,8 @@ func _check_roadblock(city: Node) -> void:
 	if spot.is_empty():
 		return
 	expect(spot.center.x > v.global_position.x + 600.0 and absf(spot.center.y - v.global_position.y) < 64.0, "rào chắn không nằm phía trước trên cùng con đường: %s" % spot.center)
-	for c in get_nodes_in_group("cops"):  # giới hạn tổng số cảnh sát: dọn chỗ trước
-		c.queue_free()
-	await frames(2)
+	for c in get_nodes_in_group("cops"):  # giới hạn tổng số cảnh sát: dọn chỗ ngay, kẻo Police sinh thêm lấp chỗ
+		c.free()
 	var cops_before: int = get_nodes_in_group("cops").size()
 	city.police.roadblocks._build(spot)
 	await physics(3)

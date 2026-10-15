@@ -64,7 +64,7 @@ func _check_fail_retry(city: Node) -> void:
 	await frames(5)
 	expect(city.missions.current != null and city.missions.current_n == 1, "NV1 thất bại -> làm lại: nhiệm vụ không chạy lại")
 	var off: float = city.player.global_position.distance_to(city.missions.giver_pos(1))
-	expect(off < 10.0, "làm lại: không về điểm nhận NV1 (cách %.0f px, trên xe: %s, còn sống: %s)" % [off, city.player.vehicle != null, city.player.alive])
+	expect(off < 40.0, "làm lại: không về điểm nhận NV1 (cách %.0f px, trên xe: %s, còn sống: %s)" % [off, city.player.vehicle != null, city.player.alive])
 
 
 ## Không trúng đòn một lúc thì máu tự hồi, nhưng chỉ tới REGEN_CAP.

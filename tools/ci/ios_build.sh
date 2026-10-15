@@ -14,8 +14,9 @@ mkdir -p "$OUT"
 nosign=(CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM="")
 
 echo "== Build cho iOS Simulator"
+# Thư viện Godot cho Simulator chỉ có x86_64: build x86_64, Simulator trên máy chip Apple chạy qua Rosetta.
 xcodebuild -project "$OUT/NeonHarbor.xcodeproj" -scheme NeonHarbor -configuration Debug -sdk iphonesimulator \
-  -derivedDataPath "$OUT/dd-sim" "${nosign[@]}" build -quiet
+  -derivedDataPath "$OUT/dd-sim" ARCHS=x86_64 ONLY_ACTIVE_ARCH=NO "${nosign[@]}" build -quiet
 APP_SIM=$(find "$OUT/dd-sim/Build/Products" -maxdepth 2 -name "NeonHarbor.app" -type d | head -1)
 [ -n "$APP_SIM" ] || { echo "FAIL: không có NeonHarbor.app cho Simulator"; exit 1; }
 
