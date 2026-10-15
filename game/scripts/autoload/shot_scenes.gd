@@ -2,7 +2,7 @@ class_name ShotScenes
 extends RefCounted
 ## Tình huống chụp ảnh của đợt mở rộng (Shot gọi sang để shot.gd không phình ra).
 
-const NAMES := ["nitro", "wanted5", "roadblock", "race", "noon", "dusk", "rain", "wheel", "stats", "safehouse", "wardrobe", "boat", "zombies", "death_home"]
+const NAMES := ["nitro", "wanted5", "roadblock", "race", "noon", "dusk", "rain", "wheel", "stats", "safehouse", "wardrobe", "boat", "zombies", "death_home", "melee", "holdup", "talk", "taunt"]
 
 
 static func run(scene_name: String, city: City, shot: Node) -> void:
@@ -66,6 +66,8 @@ static func run(scene_name: String, city: City, shot: Node) -> void:
 			while city.overlays.current == null:
 				await shot._frames(1)
 			await shot._frames(10)
+		"melee", "holdup", "talk", "taunt":
+			await _social(scene_name, city, shot)
 		"noon", "dusk", "rain":
 			Game.clock = {"noon": 12.0, "dusk": 18.6, "rain": 22.0}[scene_name]
 			if scene_name == "rain":
@@ -114,3 +116,39 @@ static func _race(city: City, shot: Node) -> void:
 	city.activities.start("race", city.activities._race_index(q))
 	await shot._frames(200)
 	await shot._hold([&"move_right"], 50, false)
+
+
+## Cận chiến (vệt chém + sao tóe), bị chĩa súng (giơ tay), bắt chuyện, Red Fangs chọc ghẹo.
+static func _social(scene_name: String, city: City, shot: Node) -> void:
+	var p := city.player
+	city.population.set_process(false)
+	for n in city.get_tree().get_nodes_in_group("peds"):
+		n.queue_free()
+	p.aim_angle = 0.0
+	if scene_name == "taunt":
+		city.spawn_npc(Gangster, p.global_position + Vector2(170, -20))
+		await shot._frames(20)
+		return
+	var ped := city.spawn_npc(Pedestrian, p.global_position + Vector2(44 if scene_name == "melee" else 120, 0))
+	ped.add_to_group("peds")
+	ped.armed = false
+	ped.gun = null
+	match scene_name:
+		"melee":
+			Game.grant_weapon("bat")
+			Game.select_weapon("bat")
+			await shot._frames(5)
+			p.gun.cooldown = 0.0
+			p.gun.try_fire(p, p.muzzle_position(), 0.0, [p.get_rid()])
+			await shot._frames(3)
+		"holdup":
+			Game.select_weapon("pistol")
+			Input.action_press(&"aim_right")
+			await shot._frames(40)
+		"talk":
+			Game.select_weapon("fists")
+			ped.global_position = p.global_position + Vector2(36, 0)
+			await shot._frames(3)
+			ped.chat()
+			Speech.say(ped, "PED_TIP_RESPRAY")
+			await shot._frames(10)

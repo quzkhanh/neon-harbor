@@ -11,6 +11,7 @@ const SCRIPTS := {
 	"sweep": "res://scripts/missions/activity_sweep.gd",
 	"taxi": "res://scripts/missions/activity_taxi.gd",
 	"vigilante": "res://scripts/missions/activity_vigilante.gd",
+	"errand": "res://scripts/missions/activity_errand.gd",
 }
 const STARTS := [["Q", "SIGN_RACE", Palette.ICON_RACE, MapIcon.Kind.RACE], ["J", "SIGN_JOB", Palette.ICON_JOB, MapIcon.Kind.JOB],
 	["K", "SIGN_SWEEP", Palette.ICON_SWEEP, MapIcon.Kind.SWEEP]]
@@ -109,7 +110,8 @@ func _race_index(spot: Vector2) -> int:
 	return best
 
 
-func start(job: String, index := 0) -> void:
+## `index`: tuyến đua; `asker`: người nhờ việc vặt.
+func start(job: String, index := 0, asker: Pedestrian = null) -> void:
 	if busy():
 		return
 	kind = job
@@ -117,6 +119,8 @@ func start(job: String, index := 0) -> void:
 	current.city = city
 	if job == "race":
 		current.index = index
+	elif job == "errand":
+		current.asker = asker
 	current.completed.connect(_end.bind(current))
 	current.failed.connect(_on_failed.bind(current))
 	add_child(current)

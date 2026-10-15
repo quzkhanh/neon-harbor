@@ -6,6 +6,7 @@ extends Human
 var vehicle: Vehicle
 var gun := Gun.new({}, true)
 var aim_angle := 0.0
+var aiming := false  # đang ngắm có chủ đích (chuột, analog/joystick phải), không phải hướng ngắm đi theo hướng chạy
 var controls_enabled := true
 var _walk_velocity := Vector2.ZERO
 var _mouse_active_ms := -100000
@@ -100,11 +101,14 @@ func _physics_process(delta: float) -> void:
 
 func _update_aim(move_input: Vector2) -> void:
 	var stick := Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
+	aiming = true
 	if stick.length() > 0.3:
 		aim_angle = AimAssist.pick(self, stick.angle(), float(gun.def.range))
 	elif Time.get_ticks_msec() - _mouse_active_ms < Tuning.MOUSE_AIM_IDLE * 1000.0:
 		aim_angle = (get_global_mouse_position() - global_position).angle()
-	elif move_input.length() > 0.3:
+	else:
+		aiming = false
+	if not aiming and move_input.length() > 0.3:
 		aim_angle = move_input.angle()
 
 

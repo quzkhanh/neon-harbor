@@ -1,9 +1,12 @@
 class_name Gangster
 extends Npc
-## Thành viên Red Fangs: canh hang ổ, thấy người chơi (hoặc bị bắn) thì áp sát và bắn. Chết rơi tiền.
+## Thành viên Red Fangs: canh hang ổ, thấy người chơi thì buông một câu chọc ghẹo rồi áp sát và bắn (bị bắn trước thì
+## bắn luôn). Chết rơi tiền.
 
 const SKINS := ["soldier1", "manOld"]
 const KEEP_DISTANCE := 230.0
+const TAUNTS := ["GANG_TAUNT_1", "GANG_TAUNT_2", "GANG_TAUNT_3", "GANG_TAUNT_4"]
+const TAUNT_PAUSE := 0.7  # buông câu chọc ghẹo xong mới bắn
 
 var guard_pos := Vector2.ZERO
 var alerted := false
@@ -27,6 +30,8 @@ func _think(delta: float) -> void:
 	if not alerted:
 		if p.alive and can_see(target.global_position):
 			alert()
+			Speech.say(self, TAUNTS.pick_random(), {}, Palette.EMOTE_ANGRY)
+			_react += TAUNT_PAUSE
 		move(Vector2.ZERO, delta)
 		return
 	if not p.alive:

@@ -327,3 +327,31 @@ NOTICE_ROSA_CREW,"Rosa sent a rifle, body armor and two of her crew with you","R
 NOTICE_RACE_STOP,Street race: stop on the flag to start.,Đua xe: dừng xe trên cờ để xuất phát.
 DEATH_SAFEHOUSE,"Wake up at your safehouse (free, wanted level cleared)","Về nhà an toàn (miễn phí, xoá truy nã)"
 NOTICE_SAFEHOUSE_WAKE,You woke up at your safehouse. The cops lost your trail.,Bạn tỉnh dậy ở nhà an toàn. Cảnh sát đã mất dấu.
+HINT_TALK,[{key}] Talk,[{key}] Bắt chuyện
+PED_HELLO_1,Hey. Watch where you're walking.,"Này, đi đứng nhìn đường chứ."
+PED_HELLO_2,"Can't talk, I'm late for my shift.","Không rảnh đâu, tôi trễ ca rồi."
+PED_HELLO_3,"This harbor never sleeps, huh?",Cảng này chẳng bao giờ ngủ nhỉ?
+PED_HELLO_4,Nice jacket. Where'd you get it?,Áo đẹp đấy. Mua ở đâu thế?
+PED_RUMOR_1,They say Silas Crane never forgets a face.,Nghe nói Silas Crane chưa quên mặt ai bao giờ.
+PED_RUMOR_2,"Stay out of Red Fangs turf, friend.",Tránh xa địa bàn Red Fangs nhé bạn.
+PED_RUMOR_3,My cousin saw a helicopter chase last night.,Ông anh họ tôi thấy trực thăng rượt xe tối qua.
+PED_TIP_RESPRAY,A fresh paint job makes the cops forget you.,Sơn lại xe là cảnh sát quên mặt bạn ngay.
+PED_TIP_HOSPITAL,Hurt? The hospital patches you up for free.,Bị thương à? Bệnh viện chữa miễn phí đấy.
+PED_TIP_RACE,Street racers meet at the race flags.,Dân đua xe hay tụ ở mấy lá cờ đua.
+PED_TIP_COINS,Kids say neon coins are hidden all over town.,Bọn trẻ bảo xu neon giấu khắp thành phố.
+PED_TIP_BUSINESS,Buy a business and the cash comes to you.,Mua một cơ sở kinh doanh là tiền tự chảy về.
+PED_TIP_TAXI,Hop in a taxi if you want honest money.,Muốn kiếm tiền lương thiện thì lái taxi đi.
+PED_ERRAND_ASK,I dropped my package nearby. Find it?,Tôi đánh rơi gói đồ gần đây. Tìm giúp nhé?
+PED_ERRAND_THANKS,"You found it! Here, take this.",Tìm thấy rồi! Cầm lấy chút quà này.
+JOB_ERRAND_FIND,Find the lost package,Tìm gói đồ bị rơi
+JOB_ERRAND_RETURN,Bring the package back to its owner,Mang gói đồ về trả người nhờ
+NOTICE_ERRAND_FOUND,Found it. Bring it back to the owner.,Tìm thấy rồi. Mang về trả người nhờ.
+FAIL_ERRAND_OWNER,the owner died,người nhờ đã chết
+PED_PLEAD,Take it! Just don't shoot!,Cầm lấy! Đừng bắn tôi!
+PED_FIGHT_1,You want some? Come on!,Muốn ăn đòn hả? Nhào vô!
+PED_FIGHT_2,"Big mistake, buddy!","Sai lầm rồi, anh bạn!"
+PED_FIGHT_3,Hey! I'll knock you flat!,Này! Tao cho mày nằm đất!
+GANG_TAUNT_1,"Wrong street, tourist.","Lạc đường à, khách du lịch?"
+GANG_TAUNT_2,Red Fangs turf. Pay up or bleed.,Đất Red Fangs. Nộp tiền hay đổ máu?
+GANG_TAUNT_3,Look who walked in. Get 'em!,Xem ai mò tới kìa. Xử nó!
+GANG_TAUNT_4,"You lost, Jay? We'll fix that.",Lạc đường hả Jay? Để bọn tao chỉ.

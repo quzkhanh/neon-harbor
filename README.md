@@ -31,10 +31,12 @@ Made with Godot 4.7.2 (GDScript, Compatibility renderer).
   neon strips glow under the eaves and market stalls have canopies you can walk under. Buildings stand out like in
   classic top-down crime games: wall and roof layers scale around the camera centre, so roofs lean away from you and show their walls
   (two building heights), roofs are tinted apart from the road, and buildings, trees and crates cast drop shadows.
-- On foot: 10 weapons defined as data (`game/data/weapons.json`): fists and a baseball bat (melee arc with
-  knockback), pistol, SMG, shotgun, assault rifle, sniper rifle (pierces 3 targets), grenades, flamethrower (sets
+- On foot: 10 weapons defined as data (`game/data/weapons.json`): fists and a baseball bat, pistol, SMG, shotgun, assault rifle, sniper rifle (pierces 3 targets), grenades, flamethrower (sets
   targets on fire), rocket launcher. Hold the swap key for a weapon wheel (time slows down while it is open).
   Pistol and SMG can be fired from a moving vehicle (drive-by).
+  Melee hits read clearly: Jay lunges, a swing trail sweeps across (white for fists, orange with the bat), the
+  game freezes for a split second on impact with sparks and a light shake, and the victim staggers. Three hits in a
+  row make a combo whose last blow is stronger and knocks the target down.
   Muzzle flash, ejected casings, tracers, screen shake, knockback and hit flash. Wounded people show a small health
   bar; a takedown is confirmed with a red X and a sound, and the body stays dark on a spreading pool of blood
   (people knocked down by a car get back up instead).
@@ -46,8 +48,12 @@ Made with Godot 4.7.2 (GDScript, Compatibility renderer).
   backs around if you press the opposite way; **Classic** is accelerate/brake plus turning the car body.
   Handbrake drift and skid marks. Crashes damage vehicles; a wrecked vehicle burns and explodes.
 - A living city: pedestrians walk the sidewalks and flee from gunfire; some carry a pistol and shoot back when
-  attacked, carjacked drivers sometimes fight, and witnesses phone the police a few seconds after they hear you
-  shoot. Traffic follows the directed lanes in the map, stops for obstacles and honks. After mission 2 the Red Fangs
+  attacked, some punch back when you start a fist fight while others cover up and run, carjacked drivers sometimes
+  fight, and witnesses phone the police a few seconds after they hear you shoot. Aim a gun at someone (mouse or
+  right stick) and they raise their hands; keep aiming and they drop their wallet, which is a crime if anyone sees
+  it. Press the interact key next to a pedestrian to talk: greetings, rumours, tips, and now and then a small errand
+  (find a dropped package nearby and bring it back for a reward). Emote bubbles show surprise, fear and anger, and
+  Red Fangs throw a taunt before they open fire. Traffic follows the directed lanes in the map, stops for obstacles and honks. After mission 2 the Red Fangs
   guard their turf (Harbor, Rail Yard, Marina) until the story ends. Population is spawned and despawned off screen.
 - Day and night: a full day lasts 16 minutes; the light changes from night to dawn, day and dusk, and street lamps,
   neon and headlights fade out in daylight. Now and then it rains: darker sky, rain on screen, slippery roads.
@@ -150,7 +156,7 @@ special HTTP headers. `include_filter` packs the non-resource files read at runt
 
 ```bash
 tools/checks/check_all.sh   # clean import, map validator, i18n check, font coverage, smoke, missions (all 9),
-                            # vehicles, wanted, activities, atmosphere, combat, economy, water, touch,
+                            # vehicles, wanted, activities, atmosphere, combat, economy, water, social, touch,
                             # human-like playtest with a random-input phase, gameplay bot reports
                             # (missions 1, 2 and 4–9 played with real physics), reverse tests
 tools/checks/take_shots.sh  # real screenshots of every screen in English, Vietnamese and pseudolocalization
@@ -216,17 +222,17 @@ game/
   scenes/        menu, city, shop, ending
   scripts/
     autoload/    Game (the only game state), I18n, Sfx, Music, Shot (scripted screenshots / perf run)
-    actors/      Human, Player, Npc (Pedestrian, Cop, Swat, Gangster, Boss, Ally), Vehicle (+ Nitro, Stunt,
-                 BoatHull), Pickup
-    combat/      Gun, Combat, Projectile, Fx
+    actors/      Human, Player, Npc (Pedestrian + PedHoldup/PedTalk, Cop, Swat, Gangster, Boss, Ally), Vehicle (+ Nitro,
+                 Stunt, BoatHull), Pickup, Emote and Speech bubbles
+    combat/      Gun, Combat, Melee (+ SwingArc), Projectile, Fx
     core/        Tuning (all gameplay numbers), InputSetup, DataDB, SaveIO
-    missions/    mission runner, the nine missions, side jobs (Activities: race, courier, taxi, vigilante, turf war)
+    missions/    mission runner, the nine missions, side jobs (Activities: race, courier, taxi, vigilante, turf war, errand)
     screens/     menu, ending
     ui/          theme, HUD, minimap, shop, dialog, overlays, touch controls
     world/       City, CityMap, MapData, lanes, traffic/chase/race/flee drivers, population, police (roadblocks,
                  helicopter), day/night, weather, ramps, properties, achievements, cheats, camera
   tests/         font_coverage, smoke, missions, vehicles, wanted, activities, atmosphere, combat, economy,
-                 water, touch, playtest, bot_play, bot_story (real-physics bot through missions 4–9)
+                 water, social, touch, playtest, bot_play, bot_story (real-physics bot through missions 4–9)
 tools/
   assets/        scripts that generate the sounds, music, weapon icons, effect sprites, helicopter, boats, ramps,
                  spike strips and tokens, and copy Kenney assets

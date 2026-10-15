@@ -50,6 +50,18 @@ func _check_melee(city: Node) -> void:
 	expect(front.health < front.max_health, "đấm không trúng người phía trước")
 	expect(behind.health == behind.max_health, "đấm trúng cả người phía sau")
 	expect(p.gun.reloading <= 0.0 and game.owned.fists.mag == 0, "tay không mà tốn đạn / phải nạp")
+	expect(front._stagger > 0.0 and front.knocked <= 0.0, "cú đấm đầu không làm nạn nhân lảo đảo / ngã luôn")
+	expect(p.get_children().any(func(c: Node) -> bool: return c.get_script() and c.get_script().resource_path.ends_with("swing_arc.gd")), "đấm mà không có vệt chém")
+	expect(Engine.time_scale < 1.0, "đấm trúng mà không khựng hình")
+	for i in 2:
+		p.gun.cooldown = 0.0
+		p.gun.try_fire(p, p.muzzle_position(), 0.0, ex)
+	expect(p.gun.combo == 3 and front.knocked > 0.0, "cú thứ 3 liên tiếp không làm ngã (combo %d)" % p.gun.combo)
+	p.gun.cooldown = -1.0
+	p.gun.try_fire(p, p.muzzle_position(), 0.0, ex)
+	expect(p.gun.combo == 1, "nghỉ lâu rồi đánh tiếp mà combo không về cú 1")
+	await create_timer(0.3, true, false, true).timeout
+	expect(Engine.time_scale == 1.0, "hết khựng hình mà thời gian không trở lại bình thường")
 	front.queue_free()
 	behind.queue_free()
 	game.clear_wanted()

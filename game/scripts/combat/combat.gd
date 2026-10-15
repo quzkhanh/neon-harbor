@@ -7,9 +7,6 @@ const HIT_MASK := Tuning.LAYER_WORLD | Tuning.LAYER_ACTORS | Tuning.LAYER_VEHICL
 
 ## Bắn một phát của súng `w` từ `origin` theo góc `angle`. `exclude`: RID không bị trúng (người bắn, xe của họ).
 static func fire(shooter: Node2D, w: Dictionary, origin: Vector2, angle: float, exclude: Array[RID]) -> void:
-	if w.kind == "melee":
-		_melee(shooter, w, angle)
-		return
 	match w.kind:
 		"hitscan":
 			for i in int(w.pellets):
@@ -73,27 +70,6 @@ static func _flame(shooter: Node2D, w: Dictionary, origin: Vector2, angle: float
 		n.take_hit(float(w.damage), to, shooter, float(w.knockback))
 		if n.has_method("ignite"):
 			n.ignite(shooter)
-
-
-## Đòn cận chiến: trúng mọi mục tiêu trong hình quạt trước mặt (không xuyên tường), không gây tiếng súng.
-static func _melee(shooter: Node2D, w: Dictionary, angle: float) -> void:
-	var space := shooter.get_world_2d().direct_space_state
-	var hit := false
-	for n in shooter.get_tree().get_nodes_in_group("damageable"):
-		if n == shooter or (n is Human and not n.alive):
-			continue
-		var to: Vector2 = n.global_position - shooter.global_position
-		var reach: float = float(w.range) + (n.size.y * 0.5 if n is Vehicle else Tuning.HUMAN_RADIUS)
-		if to.length() > reach or absf(angle_difference(angle, to.angle())) > deg_to_rad(float(w.spread)):
-			continue
-		var los := PhysicsRayQueryParameters2D.create(shooter.global_position, n.global_position, Tuning.LAYER_WORLD)
-		if not space.intersect_ray(los).is_empty():
-			continue
-		n.take_hit(float(w.damage), to, shooter, float(w.knockback))
-		hit = true
-	Sfx.play_at("punch" if hit else str(w.sound), shooter.global_position, 0.0, randf_range(0.9, 1.1))
-	if hit:
-		Fx.shake(float(w.shake))
 
 
 ## Nguồn sát thương có thể đã bị giải phóng (người bắn chết/bị dọn trước khi xe nổ, lửa tắt...): coi như null.

@@ -74,7 +74,10 @@ func _process(_delta: float) -> void:
 	if _job_prompt():
 		return
 	var v := nearest_vehicle()
-	if v:
+	var ped := PedTalk.nearest(city)
+	if ped and (v == null or ped.global_position.distance_to(p.global_position) < _edge_distance(v)):
+		_set_prompt("HINT_TALK", PedTalk.talk.bind(ped, city))
+	elif v:
 		_set_prompt("HINT_ENTER", _enter.bind(v))
 
 
@@ -105,12 +108,16 @@ func nearest_vehicle() -> Vehicle:
 	var best: Vehicle = null
 	var best_d := Tuning.INTERACT_RADIUS
 	for v in get_tree().get_nodes_in_group("vehicles"):
-		var d: float = v.global_position.distance_to(city.player.global_position) - v.size.y * 0.5
+		var d := _edge_distance(v)
 		var scripted: bool = v.has_meta("mission") and v.has_npc_driver  # xe nhiệm vụ do NPC lái (đối thủ đua, xe đưa tin...)
 		if not v.wrecked and not v.burning and not scripted and d < best_d:
 			best = v
 			best_d = d
 	return best
+
+
+func _edge_distance(v: Vehicle) -> float:
+	return v.global_position.distance_to(city.player.global_position) - v.size.y * 0.5
 
 
 ## Lên xe; nếu có người lái thì kéo họ ra (cảnh sát thấy thì tính là cướp xe).

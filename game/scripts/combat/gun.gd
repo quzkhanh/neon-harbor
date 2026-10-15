@@ -6,6 +6,7 @@ var def: Dictionary
 var uses_game_ammo := false
 var cooldown := 0.0
 var reloading := 0.0
+var combo := 0  # cú thứ mấy trong chuỗi cận chiến của người chơi
 
 
 func _init(weapon: Dictionary = {}, player := false) -> void:
@@ -33,8 +34,9 @@ func try_fire(shooter: Node2D, origin: Vector2, angle: float, exclude: Array[RID
 	if cooldown > 0.0 or reloading > 0.0:
 		return false
 	if def.kind == "melee":
-		cooldown = 1.0 / float(def.rate)
-		Combat.fire(shooter, def, origin, angle, exclude)
+		combo = combo % Melee.COMBO_HITS + 1 if uses_game_ammo and cooldown > -Melee.COMBO_WINDOW else 1
+		cooldown = 1.0 / float(def.rate) + (Melee.FINISHER_RECOVERY if combo == Melee.COMBO_HITS else 0.0)
+		Melee.swing(shooter, def, angle, combo)
 		return true
 	if uses_game_ammo and not Game.consume_ammo():
 		if not start_reload():

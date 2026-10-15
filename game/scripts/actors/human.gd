@@ -10,6 +10,11 @@ const BODY_PIVOT := Vector2(15, 21.5)
 const MUZZLE := {"gun": Vector2(34, 9.5), "machine": Vector2(34, 9.5), "silencer": Vector2(39, 9.5), "hold": Vector2(20, 12)}
 const FLASH_SHADER := "res://assets/shaders/flash.gdshader"
 const BURN_COLOR := Color(1.0, 0.55, 0.15)
+const LUNGE_TIME := 0.14
+const LUNGE_DIST := 9.0
+const STAGGER_TIME := 0.35
+const STAGGER_SLOW := 0.25  # tốc độ còn lại khi đang lảo đảo
+const STAGGER_DEG := 22.0
 
 var skin := "manBrown"
 var pose := "stand"
@@ -25,6 +30,8 @@ var _flash := 0.0
 var _burn := 0.0
 var _burn_source: Node
 var _walk_phase := 0.0
+var _lunge := 0.0
+var _stagger := 0.0
 
 
 func _ready() -> void:
@@ -62,6 +69,9 @@ func move(desired: Vector2, delta: float) -> void:
 	if knocked > 0.0:
 		knocked -= delta
 		desired = Vector2.ZERO
+	if _stagger > 0.0:
+		_stagger -= delta
+		desired *= STAGGER_SLOW
 	velocity = desired + knock_velocity
 	var before := global_position
 	move_and_slide()
@@ -93,7 +103,20 @@ func _animate(delta: float, speed: float) -> void:
 	_walk_phase += delta * Tuning.BOB_FREQ * moving
 	var bob := absf(sin(_walk_phase)) * Tuning.BOB_SCALE * moving
 	body.scale = Vector2(1.0 + bob, 1.0 - bob * 0.5)
-	body.rotation = facing + deg_to_rad(Tuning.SWAY_DEG) * sin(_walk_phase) * moving
+	var wobble := deg_to_rad(STAGGER_DEG) * sin(_stagger * 40.0) * _stagger / STAGGER_TIME
+	body.rotation = facing + deg_to_rad(Tuning.SWAY_DEG) * sin(_walk_phase) * moving + wobble
+	_lunge = maxf(_lunge - delta, 0.0)
+	body.position = Vector2.from_angle(facing) * LUNGE_DIST * sin(PI * _lunge / LUNGE_TIME)
+
+
+## Nhoài người theo hướng đang quay mặt rồi giật về (cú đánh cận chiến).
+func lunge() -> void:
+	_lunge = LUNGE_TIME
+
+
+## Trúng đòn cận chiến: lắc lư, gần như đứng khựng một lúc.
+func stagger() -> void:
+	_stagger = STAGGER_TIME
 
 
 func take_hit(amount: float, dir: Vector2, source: Variant, knockback := 0.0) -> void:
