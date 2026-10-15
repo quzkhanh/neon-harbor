@@ -32,6 +32,10 @@ func tick(delta: float) -> bool:
 func try_fire(shooter: Node2D, origin: Vector2, angle: float, exclude: Array[RID]) -> bool:
 	if cooldown > 0.0 or reloading > 0.0:
 		return false
+	if def.kind == "melee":
+		cooldown = 1.0 / float(def.rate)
+		Combat.fire(shooter, def, origin, angle, exclude)
+		return true
 	if uses_game_ammo and not Game.consume_ammo():
 		if not start_reload():
 			Sfx.play("empty")
@@ -45,7 +49,7 @@ func try_fire(shooter: Node2D, origin: Vector2, angle: float, exclude: Array[RID
 
 
 func start_reload() -> bool:
-	if reloading > 0.0 or (uses_game_ammo and not Game.can_reload()):
+	if def.kind == "melee" or reloading > 0.0 or (uses_game_ammo and not Game.can_reload()):
 		return false
 	reloading = float(def.reload)
 	if def.kind != "throw":

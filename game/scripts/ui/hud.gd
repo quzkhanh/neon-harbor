@@ -16,6 +16,7 @@ var _health: ProgressBar
 var _armor: ProgressBar
 var _money: Label
 var _stars: Array[TextureRect] = []
+var _clock: Label
 var _objective: LiveLabel
 var _objective_panel: PanelContainer
 var _weapon_icon: TextureRect
@@ -139,10 +140,13 @@ func _build_stars(root: Control) -> VBoxContainer:
 	var row := Ui.hbox(4)
 	row.size_flags_horizontal = Control.SIZE_SHRINK_END
 	for i in Tuning.MAX_STARS:
-		var star := Ui.texture(STAR_EMPTY, Vector2(42, 40))
+		var star := Ui.texture(STAR_EMPTY, Vector2(38, 36))
 		row.add_child(star)
 		_stars.append(star)
 	col.add_child(row)
+	_clock = Ui.label("", "SmallLabel", HORIZONTAL_ALIGNMENT_RIGHT)
+	_clock.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	col.add_child(_clock)
 	return col
 
 
@@ -153,12 +157,18 @@ func _build_objective(root: Control) -> void:
 	box.add_child(_objective)
 
 
+## Thẻ súng (và thẻ xe phía trên khi đang lái).
 func _build_weapon(parent: Control) -> void:
+	var stack := Ui.vbox(10)
+	stack.size_flags_horizontal = Control.SIZE_SHRINK_END
+	stack.size_flags_vertical = Control.SIZE_SHRINK_END
+	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(stack)
+	stack.add_child(VehiclePanel.new(city))
 	var panel := PanelContainer.new()
 	panel.theme_type_variation = "HudPanel"
 	panel.size_flags_horizontal = Control.SIZE_SHRINK_END
-	panel.size_flags_vertical = Control.SIZE_SHRINK_END
-	parent.add_child(panel)
+	stack.add_child(panel)
 	var row := Ui.hbox(14)
 	panel.add_child(row)
 	var well := PanelContainer.new()
@@ -202,6 +212,7 @@ func _process(_delta: float) -> void:
 	if key != _prompt.key or key != "":
 		_prompt.setup(key)
 	_prompt_panel.visible = key != ""
+	_clock.text = I18n.fmt("HUD_CLOCK", {"h": "%02d" % int(Game.clock), "m": "%02d" % int(fmod(Game.clock, 1.0) * 60.0)})
 	var searching := Game.stars > 0 and city.police.unseen > 0.0
 	var blink := 0.45 + 0.55 * absf(sin(Time.get_ticks_msec() * 0.006))
 	for i in _stars.size():
@@ -217,6 +228,7 @@ func _on_weapon() -> void:
 	var w := Game.weapon_def()
 	_weapon_icon.texture = load(WEAPON_ICON % w.id)
 	_weapon_name.text = w.name
+	_ammo.visible = w.kind != "melee"
 	_ammo.refresh()
 
 

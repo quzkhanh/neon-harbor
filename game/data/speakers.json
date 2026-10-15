@@ -1,4 +1,6 @@
 {
  "rosa": {"name": "NAME_ROSA", "skin": "womanGreen"},
- "jay": {"name": "NAME_JAY", "skin": "hitman1"}
+ "jay": {"name": "NAME_JAY", "skin": "hitman1"},
+ "silas": {"name": "NAME_SILAS", "skin": "manOld"},
+ "vince": {"name": "NAME_VINCE", "skin": "survivor1"}
 }

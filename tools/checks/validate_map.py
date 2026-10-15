@@ -3,28 +3,33 @@
 
 Dùng: python3 tools/checks/validate_map.py [đường_dẫn_map]   (mặc định game/maps/city.txt)
 Exit code khác 0 nếu có lỗi:
-  - định dạng: các dòng dài bằng nhau, ký tự hợp lệ, đúng 1 P/G/r/d/k/m, có ít nhất 1 S/H/R, đủ 1/2/3 (mỗi số đúng 1);
+  - định dạng: các dòng dài bằng nhau, ký tự hợp lệ, đúng 1 P/G/r/d/k/m và đích NV4–9 (w/y/F/i/e/t), có ít nhất 1
+    S/H/R/Z/B/J/Q/K, đủ 1..9 (mỗi số đúng 1);
   - mọi điểm quan trọng đi bộ tới được từ P (BFS qua ô không đặc);
   - lưới làn đường liên thông có hướng (xe tự lái không kẹt ngõ cụt) — cùng quy tắc với scripts/world/lanes.gd;
-  - cửa hàng, bệnh viện, gara, tiệm sơn xe nằm cạnh vỉa hè.
+  - cửa hàng, bệnh viện, gara, tiệm sơn xe, nhà an toàn, cơ sở kinh doanh, trạm việc phụ nằm cạnh vỉa hè;
+  - data/extras.json: tuyến đua chỉ đi trên đường (giữa hai checkpoint liền nhau là đường thẳng liền mạch),
+    dốc nằm trên làn đúng hướng, thuyền nằm trên nước cạnh cầu tàu.
 """
+import json
 import sys
 from collections import deque
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MAP = ROOT / "game/maps/city.txt"
+EXTRAS = ROOT / "game/data/extras.json"
 
 SOLID = set("#Tx~")
 LANES = {"<": (-1, 0), ">": (1, 0), "^": (0, -1), "v": (0, 1)}
 ROAD = set(LANES) | {"+", "="}
 FLOORS = set(",\".~_-:") | ROAD
-SPECIAL_ONE = "PGrdkm"
-SPECIAL_SOME = "SHR"
-MISSIONS = "123"
-SPECIAL_MANY = "cbMha"
+SPECIAL_ONE = "PGrdkmwyFiet"
+SPECIAL_SOME = "SHRZBJQK"
+MISSIONS = "123456789"
+SPECIAL_MANY = "cbMhaoW"
 VALID = FLOORS | SOLID | set(SPECIAL_ONE + SPECIAL_SOME + MISSIONS + SPECIAL_MANY)
-NEEDS_SIDEWALK = "SHGR"
+NEEDS_SIDEWALK = "SHGRZBJQK"
 DIRS = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 
 
@@ -147,6 +152,34 @@ def check_facilities(g, errors):
                 errors.append(f"{c!r} tại ({x},{y}) không nằm cạnh vỉa hè")
 
 
+def check_extras(g, extras, errors):
+    for n, race in enumerate(extras["races"]):
+        x, y = race["start"]
+        if g.at(x, y) not in LANES or LANES[g.at(x, y)] != tuple(race["heading"]):
+            errors.append(f"đua {n}: ô xuất phát ({x},{y}) không phải làn hướng {race['heading']}")
+        first = race["points"][0]
+        if first[1] not in (y, y + 1) or any(g.at(cx, y) not in ROAD for cx in range(min(x, first[0]), max(x, first[0]))):
+            errors.append(f"đua {n}: từ ô xuất phát ({x},{y}) tới checkpoint đầu {first} không phải đường thẳng")
+        pts = [tuple(p) for p in race["points"]]
+        for a, b in zip(pts, pts[1:]):
+            if a[0] != b[0] and a[1] != b[1]:
+                errors.append(f"đua {n}: {a} -> {b} không thẳng hàng")
+                continue
+            steps = int(max(abs(b[0] - a[0]), abs(b[1] - a[1])))
+            for k in range(steps + 1):
+                cx = a[0] + (b[0] - a[0]) * k / max(steps, 1)
+                cy = a[1] + (b[1] - a[1]) * k / max(steps, 1)
+                if g.at(int(cx), int(cy)) not in ROAD and g.at(int(cx - 0.5), int(cy - 0.5)) not in ROAD:
+                    errors.append(f"đua {n}: đoạn {a} -> {b} đi qua ô không phải đường ({cx},{cy})")
+                    break
+    for x, y, dx, dy in extras["ramps"]:
+        if LANES.get(g.at(x, y)) != (dx, dy):
+            errors.append(f"dốc ({x},{y}) không nằm trên làn hướng ({dx},{dy})")
+    for x, y in extras["boats"]:
+        if g.at(x, y) != "~" or not any(g.at(x + dx, y + dy) == "_" for dx, dy in DIRS):
+            errors.append(f"thuyền ({x},{y}) không nằm trên nước cạnh cầu tàu")
+
+
 def main():
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_MAP
     rows = [r for r in path.read_text(encoding="utf-8").splitlines() if r.strip()]
@@ -157,6 +190,8 @@ def main():
         check_walk(g, errors)
         check_lanes(g, errors)
         check_facilities(g, errors)
+        if path == DEFAULT_MAP:
+            check_extras(g, json.loads(EXTRAS.read_text(encoding="utf-8")), errors)
     for e in errors[:40]:
         print("LỖI:", e)
     if errors:

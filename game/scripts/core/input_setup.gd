@@ -3,10 +3,10 @@ extends Object
 ## Đăng ký InputMap bằng code (bàn phím, chuột, tay cầm).
 
 const DEADZONE := 0.25
-const WEAPON_SLOTS := 8
+const WEAPON_SLOTS := 10  # phím 1..9, 0
 const TOUCH_LABELS := {  # nút cảm ứng tương ứng với action (ghi trong gợi ý thay cho phím)
 	&"interact": "TOUCH_INTERACT", &"weapon_next": "TOUCH_SWAP", &"reload": "TOUCH_RELOAD",
-	&"pause": "TOUCH_PAUSE", &"map": "TOUCH_MAP",
+	&"pause": "TOUCH_PAUSE", &"map": "TOUCH_MAP", &"nitro": "TOUCH_NITRO",
 }
 
 
@@ -21,6 +21,8 @@ static func register() -> void:
 	_add(&"steer_left", [_key(KEY_A), _key(KEY_LEFT), _axis(JOY_AXIS_LEFT_X, -1.0)])
 	_add(&"steer_right", [_key(KEY_D), _key(KEY_RIGHT), _axis(JOY_AXIS_LEFT_X, 1.0)])
 	_add(&"handbrake", [_key(KEY_SPACE), _joy(JOY_BUTTON_B)])
+	_add(&"nitro", [_key(KEY_SHIFT), _joy(JOY_BUTTON_Y)])
+	_add(&"horn", [_key(KEY_H), _joy(JOY_BUTTON_LEFT_STICK)])
 	_add(&"aim_left", [_axis(JOY_AXIS_RIGHT_X, -1.0)])
 	_add(&"aim_right", [_axis(JOY_AXIS_RIGHT_X, 1.0)])
 	_add(&"aim_up", [_axis(JOY_AXIS_RIGHT_Y, -1.0)])
@@ -33,7 +35,7 @@ static func register() -> void:
 	_add(&"map", [_key(KEY_M), _key(KEY_TAB), _joy(JOY_BUTTON_BACK)])
 	_add(&"pause", [_key(KEY_ESCAPE), _key(KEY_P), _joy(JOY_BUTTON_START)])
 	for i in WEAPON_SLOTS:
-		_add(StringName("weapon_%d" % (i + 1)), [_key(KEY_1 + i)])
+		_add(StringName("weapon_%d" % (i + 1)), [_key(KEY_0 if i == 9 else KEY_1 + i)])
 
 
 ## Tên phím để ghi trong gợi ý ("E", "R"...); trên máy cảm ứng là tên nút cảm ứng (hoặc "" nếu không có nút).

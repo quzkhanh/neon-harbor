@@ -5,10 +5,12 @@ extends Object
 const WEAPONS_PATH := "res://data/weapons.json"
 const VEHICLES_PATH := "res://data/vehicles.json"
 const DISTRICTS_PATH := "res://data/districts.json"  # sinh bởi tools/maps/build_city.py
+const EXTRAS_PATH := "res://data/extras.json"  # tuyến đua, dốc nhảy, bến thuyền (cũng sinh bởi build_city.py)
 
 static var _weapons: Array = []
 static var _vehicles: Dictionary = {}
 static var _districts: Array = []
+static var _extras: Dictionary = {}
 
 
 static func weapons() -> Array:
@@ -25,9 +27,34 @@ static func weapon(id: String) -> Dictionary:
 
 
 static func vehicle(kind: String) -> Dictionary:
+	return vehicles()[kind]
+
+
+static func vehicles() -> Dictionary:
 	if _vehicles.is_empty():
 		_vehicles = JSON.parse_string(FileAccess.get_file_as_string(VEHICLES_PATH))
-	return _vehicles[kind]
+	return _vehicles
+
+
+## Loại xe ngẫu nhiên cho dòng xe và xe đỗ ven đường, theo trọng số "traffic".
+static func traffic_kind() -> String:
+	var total := 0.0
+	for k in vehicles():
+		total += float(vehicles()[k].traffic)
+	var roll := randf() * total
+	for k in vehicles():
+		roll -= float(vehicles()[k].traffic)
+		if roll < 0.0:
+			return k
+	return "car"
+
+
+## {"races": [{"start": [x, y], "heading": [dx, dy], "points": [[x, y]...]}], "ramps": [[x, y, dx, dy]], "boats": [[x, y]]}
+## (toạ độ theo ô; điểm checkpoint là tâm giao lộ nên có thể là số nguyên = mép ô).
+static func extras() -> Dictionary:
+	if _extras.is_empty():
+		_extras = JSON.parse_string(FileAccess.get_file_as_string(EXTRAS_PATH))
+	return _extras
 
 
 ## Các khu: [{"key": khoá tên khu, "rect": [x, y, rộng, cao] theo ô}].

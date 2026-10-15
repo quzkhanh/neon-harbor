@@ -6,14 +6,19 @@ var _patrol_dir := Vector2.ZERO
 
 
 func _ready() -> void:
-	skin = "manBlue"
-	max_health = Tuning.COP_HEALTH
+	_equip()
 	heat_on_hit = Tuning.HEAT_HIT_COP
 	heat_on_kill = Tuning.HEAT_KILL_COP
-	gun = Gun.new(DataDB.weapon(Tuning.COP_WEAPON[Game.stars]))
 	pose = str(gun.def.pose)
 	super()
 	add_to_group("cops")
+
+
+## Trang phục, máu, súng; Swat ghi đè.
+func _equip() -> void:
+	skin = "manBlue"
+	max_health = Tuning.COP_HEALTH
+	gun = Gun.new(DataDB.weapon(Tuning.COP_WEAPON[Game.stars]))
 
 
 func sees_player() -> bool:

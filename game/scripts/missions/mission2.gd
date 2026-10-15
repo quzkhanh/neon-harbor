@@ -1,7 +1,6 @@
 extends MissionBase
 ## NV2 Debt Collection: Rosa đưa tiểu liên + áo giáp; tới hang ổ Red Fangs, hạ 6 tên, nhặt vali, mang về cho Rosa.
 
-const RING := 3
 const GEAR_WEAPON := "smg"
 
 var _left := Tuning.GANG_COUNT
@@ -14,24 +13,10 @@ func _ready() -> void:
 	Game.add_armor(Tuning.MAX_ARMOR)
 	Game.notice.emit(tr("NOTICE_ROSA_GEAR"))
 	var hideout := city.data.find("r")
-	var spots := _guard_spots(hideout)
-	for i in Tuning.GANG_COUNT:
-		var g: Gangster = track(city.spawn_npc(Gangster, MapData.cell_center(spots[i % spots.size()])))
+	for g in spawn_gang(hideout, Tuning.GANG_COUNT):
 		g.died.connect(_on_gang_died)
 	_update_objective()
 	mark(MapData.cell_center(hideout))
-
-
-## Các ô đi được quanh hang ổ, cách đều nhau.
-func _guard_spots(center: Vector2i) -> Array[Vector2i]:
-	var out: Array[Vector2i] = []
-	for dy in range(-RING, RING + 1):
-		for dx in range(-RING, RING + 1):
-			var c := center + Vector2i(dx, dy) * 2
-			if city.data.is_ped_walkable(c) or city.data.at(c) == "r":
-				out.append(c)
-	out.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.distance_to(center) < b.distance_to(center))
-	return out
 
 
 func _on_gang_died(_h: Human) -> void:

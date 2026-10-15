@@ -24,8 +24,6 @@ func build(map: MapData = null) -> void:
 	data = map if map else MapData.load_file(MAP_PATH)
 	_wall_table = JSON.parse_string(FileAccess.get_file_as_string(TilePalette.WALL_TABLE))
 	var solid := {}
-	for t in TilePalette.WATER:
-		solid[t] = Tuning.TILE / 2.0
 	for style in _wall_table:
 		for t in _wall_table[style].values():
 			solid[int(t)] = Tuning.TILE / 2.0
@@ -33,7 +31,7 @@ func build(map: MapData = null) -> void:
 		solid[t] = TREE_HALF
 	for t in TilePalette.CRATES:
 		solid[t] = CRATE_HALF
-	var tileset := TilePalette.build_tileset(solid)
+	var tileset := TilePalette.build_tileset(solid, TilePalette.WATER)
 	_ground = _layer("Ground", tileset, -20)
 	add_child(Crosswalks.new(data))
 	_walls = _layer("Walls", tileset, 20)

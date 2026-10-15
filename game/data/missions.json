@@ -1,5 +1,11 @@
 [
  {"id": 1, "title": "MISSION_1_TITLE", "reward": 500, "intro": [{"who": "rosa", "line": "M1_INTRO_1"}, {"who": "jay", "line": "M1_INTRO_2"}, {"who": "rosa", "line": "M1_INTRO_3"}], "outro": [{"who": "rosa", "line": "M1_OUTRO_1"}]},
  {"id": 2, "title": "MISSION_2_TITLE", "reward": 1500, "intro": [{"who": "rosa", "line": "M2_INTRO_1"}, {"who": "jay", "line": "M2_INTRO_2"}, {"who": "rosa", "line": "M2_INTRO_3"}], "outro": [{"who": "rosa", "line": "M2_OUTRO_1"}]},
- {"id": 3, "title": "MISSION_3_TITLE", "reward": 4000, "intro": [{"who": "rosa", "line": "M3_INTRO_1"}, {"who": "jay", "line": "M3_INTRO_2"}, {"who": "rosa", "line": "M3_INTRO_3"}], "outro": [{"who": "rosa", "line": "M3_OUTRO_1"}]}
+ {"id": 3, "title": "MISSION_3_TITLE", "reward": 4000, "intro": [{"who": "rosa", "line": "M3_INTRO_1"}, {"who": "jay", "line": "M3_INTRO_2"}, {"who": "rosa", "line": "M3_INTRO_3"}], "outro": [{"who": "rosa", "line": "M3_OUTRO_1"}]},
+ {"id": 4, "title": "MISSION_4_TITLE", "reward": 2500, "intro": [{"who": "rosa", "line": "M4_INTRO_1"}, {"who": "jay", "line": "M4_INTRO_2"}, {"who": "rosa", "line": "M4_INTRO_3"}], "outro": [{"who": "rosa", "line": "M4_OUTRO_1"}]},
+ {"id": 5, "title": "MISSION_5_TITLE", "reward": 3000, "intro": [{"who": "rosa", "line": "M5_INTRO_1"}, {"who": "jay", "line": "M5_INTRO_2"}, {"who": "rosa", "line": "M5_INTRO_3"}], "outro": [{"who": "rosa", "line": "M5_OUTRO_1"}]},
+ {"id": 6, "title": "MISSION_6_TITLE", "reward": 3500, "intro": [{"who": "rosa", "line": "M6_INTRO_1"}, {"who": "jay", "line": "M6_INTRO_2"}, {"who": "rosa", "line": "M6_INTRO_3"}], "outro": [{"who": "rosa", "line": "M6_OUTRO_1"}]},
+ {"id": 7, "title": "MISSION_7_TITLE", "reward": 4000, "intro": [{"who": "rosa", "line": "M7_INTRO_1"}, {"who": "jay", "line": "M7_INTRO_2"}, {"who": "rosa", "line": "M7_INTRO_3"}], "outro": [{"who": "vince", "line": "M7_OUTRO_1"}]},
+ {"id": 8, "title": "MISSION_8_TITLE", "reward": 5000, "intro": [{"who": "rosa", "line": "M8_INTRO_1"}, {"who": "jay", "line": "M8_INTRO_2"}, {"who": "rosa", "line": "M8_INTRO_3"}], "outro": [{"who": "rosa", "line": "M8_OUTRO_1"}]},
+ {"id": 9, "title": "MISSION_9_TITLE", "reward": 10000, "intro": [{"who": "rosa", "line": "M9_INTRO_1"}, {"who": "silas", "line": "M9_INTRO_2"}, {"who": "jay", "line": "M9_INTRO_3"}], "outro": [{"who": "rosa", "line": "M9_OUTRO_1"}]}
 ]

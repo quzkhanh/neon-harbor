@@ -4,7 +4,7 @@ extends Node
 const BUSES := ["Music", "SFX"]
 const SFX_DIR := "res://assets/audio/sfx/%s.wav"
 const UI_SOUNDS := {"ui_click": "res://assets/vendor/sounds/click-a.ogg", "ui_move": "res://assets/vendor/sounds/tap-a.ogg"}
-const LOOPS := ["flame", "engine", "siren", "skid"]
+const LOOPS := ["flame", "engine", "siren", "skid", "heli", "rain"]
 const POOL := 10
 const POOL_2D := 16
 const MAX_DISTANCE := 1400.0
@@ -15,6 +15,7 @@ var _players_2d: Array[AudioStreamPlayer2D] = []
 var _loops: Array[Node] = []
 var _next := 0
 var _next_2d := 0
+var _closing := false  # đang thoát: không phát thêm tiếng nào (tránh leak AudioStreamPlayback)
 
 
 func _ready() -> void:
@@ -64,7 +65,7 @@ func play_at(sound: String, pos: Vector2, volume_db := 0.0, pitch := 1.0) -> voi
 func make_loop(sound: String, parent: Node, volume_db := 0.0) -> AudioStreamPlayer2D:
 	var p := AudioStreamPlayer2D.new()
 	p.bus = &"SFX"
-	p.stream = stream(sound)
+	p.stream = null if _closing else stream(sound)
 	p.volume_db = volume_db
 	p.max_distance = MAX_DISTANCE
 	parent.add_child(p)
@@ -81,6 +82,7 @@ func set_volume(bus: String, linear: float) -> void:
 
 ## Dừng mọi player trước khi thoát để tránh cảnh báo leak AudioStreamPlayback.
 func stop_all() -> void:
+	_closing = true
 	for p in _players + _players_2d + _loops:
 		p.stop()
 		p.stream = null
@@ -88,7 +90,7 @@ func stop_all() -> void:
 
 func _start(p: Node, sound: String, volume_db: float, pitch: float) -> void:
 	var s := stream(sound)
-	if s == null:
+	if s == null or _closing:
 		return
 	p.stream = s
 	p.volume_db = volume_db

@@ -40,6 +40,27 @@ run_test SMOKE smoke.gd || fail=1
 step "6. missions.gd"
 run_test MISSIONS missions.gd || fail=1
 
+step "6a. vehicles.gd (đợt 8: hạng xe, nitro, lốp thủng, tiệm sửa, còi)"
+run_test VEHICLES vehicles.gd || fail=1
+
+step "6b. wanted.gd (đợt 8: 5 sao, trực thăng, đặc nhiệm, rào chắn, dải đinh, huy hiệu)"
+run_test WANTED wanted.gd || fail=1
+
+step "6c. activities.gd (đợt 8: đua xe, giao hàng, càn quét, taxi, tuần tra, xu neon, dốc nhảy)"
+run_test ACTIVITIES activities.gd || fail=1
+
+step "6d. atmosphere.gd (đợt 8: ngày/đêm, mưa)"
+run_test ATMOSPHERE atmosphere.gd || fail=1
+
+step "6e. combat.gd (đợt 8: cận chiến, bắn từ xe, vòng chọn súng, người đi đường phản kháng)"
+run_test COMBAT combat.gd || fail=1
+
+step "6f. economy.gd (đợt 8: nhà an toàn, gara, đàn em, cơ sở kinh doanh, tủ đồ, thành tựu, thống kê)"
+run_test ECONOMY economy.gd || fail=1
+
+step "6g. water.gd (đợt 8: bơi, thuyền, xe không xuống nước, mã gian lận, xác sống)"
+run_test WATER water.gd || fail=1
+
 step "7. touch.gd"
 run_test TOUCH touch.gd || fail=1
 
@@ -50,6 +71,9 @@ echo "$out" | grep -E "^(->|   |FAIL)|PLAYTEST" | head -30
 
 step "7b. Bot tự chơi NV1/NV2 bằng vật lý thật (chỉ báo cáo, không làm fail)"
 timeout 600 "$GODOT" --headless --fixed-fps 60 --path game -s res://tests/bot_play.gd 2>&1 | grep -E "^BOT N"
+
+step "7c. Bot lái/đấu súng thật qua NV3–9 (chỉ báo cáo, không làm fail)"
+timeout 1500 "$GODOT" --headless --fixed-fps 60 --path game -s res://tests/bot_story.gd 2>&1 | grep -E "^BOT NV" | sed 's/; thông báo cuối.*//'
 
 step "8. Thử ngược (bộ kiểm tra phải FAIL khi có lỗi)"
 TMP=$(mktemp -d)

@@ -257,8 +257,8 @@ func _carjack_sell(city: Node) -> void:
 
 func _menu_continue(city: Node) -> void:
 	await key(KEY_ESCAPE)
-	await key(KEY_DOWN)
-	await key(KEY_DOWN)
+	for i in 3:  # Tiếp tục -> Cài đặt -> Thống kê -> Về menu
+		await key(KEY_DOWN)
 	await key(KEY_ENTER)
 	expect(await until(func() -> bool: return current_scene != null and current_scene.scene_file_path == game.MENU_SCENE, 300), "Về menu không được")
 	await physics(20)

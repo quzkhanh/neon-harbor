@@ -1,7 +1,8 @@
 extends Node
 ## Autoload `Shot`: `-- --shot=<tên> [--lang=en|vi] [--pseudo] [--shot-dir=<thư mục>]`
 ## dựng sẵn tình huống, chụp viewport rồi thoát. Dùng save tạm để không đụng save thật.
-## `--shot=perf` (trên Web: `index.html?shot=perf`): thành phố với dân/xe tối đa và truy nã 3 sao, in FPS trung bình.
+## `--shot=perf` (trên Web: `index.html?shot=perf`): thành phố với dân/xe tối đa, truy nã 5 sao (trực thăng, đặc nhiệm,
+## rào chắn) và trời mưa, in FPS trung bình.
 
 const DEFAULT_DIR := "user://shots"
 const SHOT_SAVE := "user://shot_save.json"
@@ -40,7 +41,7 @@ func _ready() -> void:
 			_lang = arg.trim_prefix("--lang=")
 		elif arg == "--pseudo":
 			_pseudo = true
-	if _name in SCENARIOS or _name == "perf":
+	if _name in SCENARIOS or _name in ShotScenes.NAMES or _name == "perf":
 		_run.call_deferred()
 	elif _name != "":
 		push_error("Shot: không có tình huống '%s' (có: %s)" % [_name, ", ".join(SCENARIOS)])
@@ -62,7 +63,7 @@ func _run() -> void:
 		await _menu()
 	else:
 		await _city()
-	if not _name in ["combat", "driving", "corpses"]:
+	if not _name in ["combat", "driving", "corpses"] and not _name in ShotScenes.NAMES:
 		await _frames(SETTLE)
 	_save()
 
@@ -80,6 +81,8 @@ func _city() -> void:
 	await _frames(SETTLE)
 	var city: City = get_tree().current_scene
 	var p := city.player
+	if _name in ShotScenes.NAMES:
+		await ShotScenes.run(_name, city, self)
 	match _name:
 		"city_walk":
 			await _hold([&"move_right"], 50)
@@ -125,7 +128,8 @@ func _city() -> void:
 func _perf() -> void:
 	Game.go(Game.CITY_SCENE)
 	await _frames(SETTLE)
-	Game.set_stars(3)
+	Game.set_stars(Tuning.MAX_STARS)
+	get_tree().current_scene.get_node("Weather").set_raining(true)
 	Game.health = PERF_HEALTH
 	await get_tree().create_timer(PERF_WARMUP).timeout
 	var samples: Array[float] = []

@@ -8,13 +8,13 @@ signal weapons_changed
 signal wanted_changed(stars: int)
 signal objective_changed
 signal notice(text: String)
+signal skin_changed
 
 const MENU_SCENE := "res://scenes/menu.tscn"
 const CITY_SCENE := "res://scenes/city.tscn"
 const ENDING_SCENE := "res://scenes/ending.tscn"
 const SAVE_PATH := "user://save.json"
 const MISSIONS_PATH := "res://data/missions.json"
-const MISSION_COUNT := 3
 const AUDIO_SETTLE_MS := 200
 
 var save_path := SAVE_PATH
@@ -29,6 +29,11 @@ var objective_params := {}
 var heat := 0.0
 var stars := 0
 var settings := {"lang": "", "music": 0.7, "sfx": 0.8, "steering": "screen", "tutorial": true, "touch_scale": 1.0}
+var skin := "hitman1"  # trang phục của Jay (tủ đồ nhà an toàn)
+var god := false  # mã gian lận bất tử (không lưu)
+var zombies := false  # mã gian lận đêm zombie (không lưu)
+var clock := Tuning.START_HOUR  # giờ trong game (0..24), DayNight cho chạy
+var stats := {}  # bộ đếm (số -> int) và tập đã đạt (khoá -> Array) cho việc phụ, sưu tầm, thống kê, thành tựu
 var missions: Array = []
 
 var _fade: ColorRect
@@ -80,9 +85,13 @@ func reset_progress() -> void:
 	health = Tuning.MAX_HEALTH
 	armor = 0.0
 	owned = {}
+	_give_weapon("fists")
 	_give_weapon("pistol")
 	current = "pistol"
 	missions_done = []
+	stats = {}
+	clock = Tuning.START_HOUR
+	skin = Tuning.SKINS[0]
 	clear_objective()
 	clear_wanted()
 
@@ -94,7 +103,7 @@ func has_progress() -> bool:
 func save_game() -> void:
 	SaveIO.write(save_path, {
 		"money": money, "owned": owned, "current": current,
-		"missions_done": missions_done, "settings": settings,
+		"missions_done": missions_done, "settings": settings, "stats": stats, "clock": clock, "skin": skin,
 	})
 
 
@@ -108,10 +117,14 @@ func load_game() -> void:
 		for id in d.owned:
 			if not DataDB.weapon(id).is_empty():
 				owned[id] = {"mag": int(d.owned[id].mag)}
-		if not owned.has("pistol"):
-			_give_weapon("pistol")
+		for id in ["fists", "pistol"]:
+			if not owned.has(id):
+				_give_weapon(id)
 		current = d.current if owned.has(d.current) else "pistol"
 		missions_done = d.missions_done.map(func(n: Variant) -> int: return int(n))
+		stats = d.get("stats", {})
+		clock = float(d.get("clock", Tuning.START_HOUR))
+		skin = d.get("skin", Tuning.SKINS[0]) if d.get("skin", "") in Tuning.SKINS else Tuning.SKINS[0]
 	apply_settings()
 
 
@@ -156,6 +169,8 @@ func spend(amount: int) -> bool:
 
 ## Giáp đỡ đòn trước. Trả về true nếu người chơi chết.
 func damage_player(amount: float) -> bool:
+	if god:
+		return false
 	var absorbed := minf(armor, amount)
 	armor -= absorbed
 	health = maxf(health - (amount - absorbed), 0.0)
@@ -191,6 +206,41 @@ func hospital_respawn() -> int:
 func revive() -> void:
 	health = Tuning.MAX_HEALTH
 	vitals_changed.emit()
+
+
+# --- Thống kê và đồ sưu tầm ---
+
+func bump(key: String, n := 1) -> void:
+	stats[key] = stat(key) + n
+
+
+func stat(key: String) -> int:
+	return int(stats.get(key, 0))
+
+
+func skin_unlocked(id: String) -> bool:
+	return id != Tuning.SKINS[-1] or mission_count() in missions_done
+
+
+func set_skin(id: String) -> void:
+	if skin_unlocked(id):
+		skin = id
+		skin_changed.emit()
+		save_game()
+
+
+## Đánh dấu `id` đã đạt trong tập `key` (đồng xu, dốc nhảy...). Trả về true nếu là lần đầu.
+func mark(key: String, id: Variant) -> bool:
+	var got: Array = stats.get(key, [])
+	if got.has(id):
+		return false
+	got.append(id)
+	stats[key] = got
+	return true
+
+
+func marked(key: String) -> Array:
+	return stats.get(key, [])
 
 
 # --- Súng và đạn ---
@@ -234,7 +284,7 @@ func consume_ammo() -> bool:
 
 
 func can_reload() -> bool:
-	return ammo().mag < int(weapon_def().mag)
+	return weapon_def().kind != "melee" and ammo().mag < int(weapon_def().mag)
 
 
 func finish_reload() -> void:
@@ -290,6 +340,7 @@ func _update_stars() -> void:
 		if n > stars:
 			Sfx.play("star")
 		stars = n
+		stats["max_stars"] = maxi(stat("max_stars"), n)
 		wanted_changed.emit(stars)
 
 
@@ -299,8 +350,12 @@ func mission(n: int) -> Dictionary:
 	return missions[n - 1]
 
 
+func mission_count() -> int:
+	return missions.size()
+
+
 func next_mission() -> int:
-	for n in range(1, MISSION_COUNT + 1):
+	for n in range(1, mission_count() + 1):
 		if not n in missions_done:
 			return n
 	return 0
@@ -318,6 +373,8 @@ func clear_objective() -> void:
 
 ## Trả về danh sách id súng vừa được mở bán.
 func complete_mission(n: int) -> Array:
+	if n in missions_done:
+		return []
 	add_money(int(mission(n).reward))
 	missions_done.append(n)
 	clear_objective()
@@ -345,6 +402,7 @@ func go(scene: String) -> void:
 ## Hàm thoát duy nhất: lưu, tắt mọi âm thanh, chờ cho audio dừng hẳn rồi mới quit.
 func quit(code := 0) -> void:
 	save_game()
+	get_tree().paused = true  # cảnh dừng hẳn: không nhân vật nào phát thêm tiếng trong lúc chờ
 	Sfx.stop_all()
 	Music.stop()
 	await get_tree().create_timer(AUDIO_SETTLE_MS / 1000.0, true, false, true).timeout

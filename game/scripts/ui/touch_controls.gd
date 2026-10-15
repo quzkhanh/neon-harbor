@@ -5,9 +5,12 @@ extends CanvasLayer
 ## Chỉ hiện trên thiết bị cảm ứng hoặc khi chạy với `-- --touch`.
 
 const BUTTONS_TOP := 170.0  # dưới hàng sao và thẻ súng
-const BUTTONS := [["TOUCH_INTERACT", &"interact"], ["TOUCH_SWAP", &"weapon_next"], ["TOUCH_RELOAD", &"reload"]]
+const BUTTONS := [["TOUCH_INTERACT", &"interact"], ["TOUCH_SWAP", &"weapon_next"], ["TOUCH_RELOAD", &"reload"],
+	["TOUCH_NITRO", &"nitro"]]
 
 static var forced := false  # test bật chế độ cảm ứng khi chạy headless
+
+var _nitro: Button  # chỉ hiện khi đang lái xe
 
 
 static func wanted() -> bool:
@@ -48,6 +51,8 @@ func _build() -> void:
 		b.button_up.connect(_send.bind(def[1], false))
 		col.add_child(b)
 		aim.blocked.append(b)
+		if def[1] == &"nitro":
+			_nitro = b
 	var pause := _button("TOUCH_PAUSE", Tuning.TOUCH_BUTTON * scale)
 	pause.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	pause.grow_horizontal = Control.GROW_DIRECTION_BEGIN
@@ -56,6 +61,12 @@ func _build() -> void:
 	pause.pressed.connect(_send.bind(&"pause", true))
 	add_child(pause)
 	aim.blocked.append(pause)
+
+
+func _process(_delta: float) -> void:
+	var p := get_tree().get_first_node_in_group("player")
+	if is_instance_valid(_nitro):
+		_nitro.visible = p != null and p.vehicle != null
 
 
 ## Joystick chiếm nửa màn hình bắt đầu từ `left` (0 hoặc 0,5).

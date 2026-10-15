@@ -45,12 +45,12 @@ HUD_AMMO,{mag} / ∞,{mag} / ∞
 HINT_ENTER,[{key}] Get in,[{key}] Lên xe
 HINT_EXIT,[{key}] Get out,[{key}] Xuống xe
 HINT_SELL,[{key}] Sell this car for {price},[{key}] Bán xe này được {price}
-HINT_RESPRAY,[{key}] Respray to lose the cops ({price}),[{key}] Sơn lại xe để cắt đuôi cảnh sát ({price})
+HINT_RESPRAY,"[{key}] Repair and respray ({price}): good as new, the cops lose you","[{key}] Sửa và sơn lại xe ({price}): xe như mới, cảnh sát mất dấu"
 DIALOG_CONTINUE,[{key}] or click to continue,[{key}] hoặc nhấp để tiếp tục
 SIGN_SHOP,GUN SHOP,CỬA HÀNG SÚNG
 SIGN_HOSPITAL,HOSPITAL,BỆNH VIỆN
 SIGN_GARAGE,GARAGE,GARA
-SIGN_RESPRAY,RESPRAY,SƠN XE
+SIGN_RESPRAY,PAINT & FIX,SỬA XE
 NAME_ROSA,Rosa,Rosa
 NAME_JAY,Jay,Jay
 MISSION_1_TITLE,First Delivery,Chuyến giao đầu tiên
@@ -90,7 +90,7 @@ NOTICE_HOSPITAL,Hospital bill: {fee},Viện phí: {fee}
 NOTICE_HOSPITAL_HEAL,The hospital patched you up for free,Bệnh viện đã chữa cho bạn miễn phí
 NOTICE_REVIVE_FEE,Paid {fee} to get back on your feet,Đã trả {fee} để đứng dậy
 NOTICE_SOLD,Car sold for {price},Đã bán xe được {price}
-NOTICE_RESPRAYED,Fresh paint. The cops lost your trail.,Xe đã sơn mới. Cảnh sát mất dấu bạn.
+NOTICE_RESPRAYED,Fixed up and freshly painted. The cops lost your trail.,Xe đã sửa và sơn mới. Cảnh sát mất dấu bạn.
 NOTICE_ROSA_GEAR,Rosa handed you an SMG and body armor,Rosa đưa bạn một khẩu tiểu liên và áo giáp
 NOTICE_VEHICLE_FIRE,Your vehicle is on fire. Get out!,Xe đang bốc cháy. Xuống ngay!
 MISSION_COMPLETE,Mission complete,Hoàn thành nhiệm vụ
@@ -127,7 +127,7 @@ WEAPON_GRENADE,Grenade,Lựu đạn
 WEAPON_FLAMETHROWER,Flamethrower,Súng phun lửa
 WEAPON_BAZOOKA,Rocket Launcher,Súng phóng tên lửa
 ENDING_TITLE,The Harbor Is Yours,Bến cảng là của bạn
-ENDING_TEXT,"The Red Fangs are broken and the boss's car sits in Rosa's garage. The streets of Neon Harbor have learned a new name: Jay. The night is still young, and the city is yours to roam.","Red Fangs đã tan rã, chiếc xe của tay trùm nằm trong gara của Rosa. Đường phố Neon Harbor giờ đã biết một cái tên mới: Jay. Đêm còn dài, cả thành phố là của bạn."
+ENDING_TEXT,"Silas Crane is gone and the Red Fangs are history. The streets of Neon Harbor have learned a new name: Jay. The night is still young, and the city is yours to roam.","Silas Crane đã gục ngã, Red Fangs chỉ còn là quá khứ. Đường phố Neon Harbor giờ đã biết một cái tên mới: Jay. Đêm còn dài, cả thành phố là của bạn."
 ENDING_MONEY,Cash: {money},Tiền mặt: {money}
 ENDING_FREE_ROAM,Keep playing,Chơi tiếp tự do
 TOUCH_INTERACT,Use,Dùng
@@ -142,7 +142,7 @@ HINT_MAP_SHOPS,[{key}] City map. The blue gun icon on the map is a gun shop.,[{k
 LEGEND_MISSION,Mission,Nhiệm vụ
 LEGEND_SHOP,Gun shop,Cửa hàng súng
 LEGEND_HOSPITAL,Hospital,Bệnh viện
-LEGEND_RESPRAY,Respray (lose the cops),Sơn xe (cắt đuôi cảnh sát)
+LEGEND_RESPRAY,Repair and respray (lose the cops),Sửa và sơn xe (cắt đuôi cảnh sát)
 LEGEND_GARAGE,Garage (sell cars),Gara (bán xe)
 DISTRICT_HILLSIDE,Hillside,Đồi Hillside
 DISTRICT_DOWNTOWN,Downtown,Trung tâm
@@ -153,3 +153,175 @@ DISTRICT_EASTSIDE,Eastside,Khu Đông
 DISTRICT_RAILYARD,Rail Yard,Bãi Đường Ray
 DISTRICT_HARBOR,The Harbor,Bến Cảng
 DISTRICT_MARINA,Marina Beach,Bãi Biển Marina
+NOTICE_REPAIRED,Fixed up and freshly painted.,Xe đã sửa xong và sơn mới.
+TOUCH_NITRO,Nitro,Nitro
+NOTICE_HELI_DOWN,Police helicopter down!,Trực thăng cảnh sát đã bị bắn rơi!
+NOTICE_BRIBE,A friendly badge looks the other way. One star less.,Một tay cảnh sát quen làm ngơ. Bớt một sao.
+SIGN_RACE,STREET RACE,ĐUA XE
+SIGN_JOB,COURIER DEPOT,TRẠM GIAO HÀNG
+SIGN_SWEEP,TURF WAR,CÀN QUÉT
+LEGEND_RACE,Street race (stop on the flag),Đua xe (dừng xe trên cờ)
+LEGEND_JOB,Courier job,Giao hàng
+LEGEND_SWEEP,Turf war,Càn quét băng đảng
+LEGEND_SAFEHOUSE,Safehouse,Nhà an toàn
+LEGEND_BUSINESS,Business for sale,Cơ sở kinh doanh
+HINT_DELIVERY,[{key}] Take a courier job,[{key}] Nhận việc giao hàng
+HINT_SWEEP,[{key}] Start a turf war,[{key}] Bắt đầu càn quét
+RACE_COUNTDOWN,Get ready... {sec},Chuẩn bị... {sec}
+RACE_OBJ,Checkpoint {cp}/{total} · Position {place}/{count},Điểm kiểm tra {cp}/{total} · Hạng {place}/{count}
+NOTICE_RACE_DONE,Finished #{place} in {time}s. Prize: {money},Về đích hạng {place} sau {time} giây. Thưởng: {money}
+FAIL_RACE_CAR,your car is wrecked,xe của bạn đã hỏng
+FAIL_RACE_LEFT,you left your car,bạn đã rời xe
+FAIL_TIME,time ran out,hết giờ
+NOTICE_JOB_FAILED,Job failed: {reason},Việc thất bại: {reason}
+JOB_DELIVER,Deliver package {i}/{total}: {time}s left,Giao gói hàng {i}/{total}: còn {time} giây
+NOTICE_DELIVERED,Delivered! +{money},Đã giao! +{money}
+NOTICE_JOB_DONE,Job complete! Total pay: {money},Xong việc! Tổng tiền công: {money}
+SWEEP_OBJ,Take down the last Red Fang: {time}s left,Hạ tên Red Fangs cuối cùng: còn {time} giây
+SWEEP_OBJ_PLURAL,"Take down the Red Fangs: {n} left, {time}s","Hạ bọn Red Fangs: còn {n} tên, {time} giây"
+TAXI_OBJ_PICKUP,Pick up the waving passenger (stop next to them),Đón vị khách đang vẫy (dừng xe cạnh họ)
+TAXI_OBJ_DROP,Drive the passenger to the marker: {time}s left,Chở khách tới điểm đánh dấu: còn {time} giây
+NOTICE_TAXI_OFF,Off duty. Get back in a taxi for more fares.,Hết ca. Lên taxi để chạy tiếp.
+NOTICE_TAXI_LATE,Too slow! The passenger walked off.,Chậm quá! Khách đã bỏ đi.
+NOTICE_FARE,Fare paid: {money},Khách trả: {money}
+NOTICE_VIGILANTE_NEW,Dispatch: suspect fleeing in a car nearby!,Tổng đài: có nghi phạm đang lái xe bỏ trốn gần đây!
+NOTICE_VIGILANTE_OFF,Patrol over.,Kết thúc tuần tra.
+VIGILANTE_OBJ_CAR,Wreck the suspect's car: {time}s left,Phá xe của nghi phạm: còn {time} giây
+VIGILANTE_OBJ_CROOK,Take down the suspect: {time}s left,Hạ nghi phạm: còn {time} giây
+NOTICE_CROOK_DOWN,Suspect down! Reward: {money},Đã hạ nghi phạm! Thưởng: {money}
+NOTICE_TOKEN,Neon token {got}/{total},Xu neon {got}/{total}
+NOTICE_TOKENS_ALL,All neon tokens found! Bonus: {money},Đã tìm đủ xu neon! Thưởng: {money}
+NOTICE_STUNT,Stunt jump! +{money},Nhảy xe! +{money}
+NOTICE_STUNT_NEW,New stunt jump {got}/{total}! +{money},Cú nhảy mới {got}/{total}! +{money}
+NAME_SILAS,Silas Crane,Silas Crane
+NAME_VINCE,Vince,Vince
+MISSION_4_TITLE,Tail Job,Bám đuôi
+MISSION_5_TITLE,Hold the Line,Giữ vững
+MISSION_6_TITLE,Hot Wheels,Bánh xe bốc lửa
+MISSION_7_TITLE,Inside Man,Người bên trong
+MISSION_8_TITLE,Shipment,Chuyến hàng
+MISSION_9_TITLE,Crane's Fall,Cú ngã của Crane
+M4_INTRO_1,"Bad news, Jay. The Red Fangs have a new boss: Silas Crane. He's buying up the docks one threat at a time.","Tin xấu, Jay. Red Fangs có trùm mới: Silas Crane. Hắn đang thâu tóm bến cảng bằng đe doạ."
+M4_INTRO_2,So where is he hiding?,Vậy hắn trốn ở đâu?
+M4_INTRO_3,"That's what you'll find out. His courier leaves soon. Take the car I left you and follow him: not too close, not too far.","Đó là việc của cậu. Tay đưa tin của hắn sắp đi. Lấy chiếc xe tôi để sẵn rồi bám theo, đừng quá gần, cũng đừng để mất dấu."
+M4_OUTRO_1,A warehouse in the railyard. Now we know where Crane keeps his secrets.,Một nhà kho ở bãi đường ray. Giờ ta biết Crane giấu bí mật ở đâu rồi.
+M5_INTRO_1,Crane knows we're onto him. His crew is coming for my bar tonight.,Crane biết ta đang nhắm vào hắn. Tối nay đàn em của hắn sẽ tới đập quán của tôi.
+M5_INTRO_2,Let them come.,Cứ để chúng tới.
+M5_INTRO_3,Take this rifle and a fresh vest. Get to the bar and don't let a single Fang through the door.,Cầm khẩu súng trường và áo giáp mới này. Tới quán và đừng để tên Fang nào lọt qua cửa.
+M5_OUTRO_1,The bar still stands. Crane just learned that we bite back.,Quán vẫn đứng vững. Crane vừa biết chúng ta cũng biết cắn trả.
+M6_INTRO_1,Crane fuels his whole fleet from one depot by the railyard. I've fixed up a little present.,Cả đội xe của Crane đổ xăng ở một kho gần bãi đường ray. Tôi đã chuẩn bị một món quà nhỏ.
+M6_INTRO_2,Why do I get the feeling this present explodes?,Sao tôi có cảm giác món quà này sẽ phát nổ?
+M6_INTRO_3,"Because it does. Once it's moving, keep it fast or it blows with you inside. Drive it to the depot and jump out.","Vì nó nổ thật. Đã chạy rồi thì phải giữ tốc độ, chậm là nổ luôn với cậu bên trong. Lái tới kho xăng rồi nhảy ra."
+M6_OUTRO_1,I could see that fireball from here. Crane's trucks aren't going anywhere.,Từ đây tôi còn thấy quả cầu lửa. Đội xe của Crane hết đường chạy rồi.
+M7_INTRO_1,"One of Crane's bookkeepers, Vince, wants out. He knows where Crane hides the money.",Một tay kế toán của Crane tên Vince muốn bỏ trốn. Anh ta biết Crane giấu tiền ở đâu.
+M7_INTRO_2,And Crane wants him quiet.,Còn Crane thì muốn anh ta câm miệng.
+M7_INTRO_3,So pick him up in Uptown and get him to the safe spot. Expect company.,Vậy đón anh ta ở Uptown và đưa tới chỗ an toàn. Chuẩn bị có khách không mời.
+M7_OUTRO_1,I owe you my life. Crane moves his cash by truck through the railyard. Hit that shipment.,Tôi nợ anh một mạng. Crane chuyển tiền bằng xe tải qua bãi đường ray. Hãy cướp chuyến hàng đó.
+M8_INTRO_1,"Vince was right. Crane's cash truck is parked at the railyard, guarded by his best.","Vince nói đúng. Xe chở tiền của Crane đang đậu ở bãi đường ray, có đám giỏi nhất của hắn canh."
+M8_INTRO_2,And the cops?,Còn cảnh sát thì sao?
+M8_INTRO_3,"Crane pays half the precinct. The moment you move that truck, they'll swarm. Lose them, then bring it to my garage.",Crane nuôi nửa sở cảnh sát. Cậu vừa lái xe đi là chúng kéo tới. Cắt đuôi rồi đưa xe về gara của tôi.
+M8_OUTRO_1,Crane is broke and bleeding. Time to finish this.,Crane trắng tay và đang hấp hối. Đến lúc kết thúc chuyện này.
+M9_INTRO_1,Crane is holed up in the railyard warehouse with everyone he has left.,Crane đang cố thủ trong nhà kho ở bãi đường ray cùng toàn bộ đàn em còn lại.
+M9_INTRO_2,The courier? You should have stayed a courier.,Thằng giao hàng à? Lẽ ra mày nên mãi làm thằng giao hàng.
+M9_INTRO_3,I'm still delivering. This one's for you.,Tôi vẫn đang giao hàng đây. Lần này là cho mày.
+M9_OUTRO_1,Crane is finished and Neon Harbor is ours. Not bad for a delivery driver.,"Crane xong đời, Neon Harbor là của chúng ta. Không tệ với một tài xế giao hàng."
+M4_OBJ_CAR,Get in the car Rosa left for you,Lên chiếc xe Rosa để sẵn
+M4_OBJ_TAIL,Tail the courier. Keep your distance.,Bám đuôi tay đưa tin. Giữ khoảng cách.
+M4_OBJ_CLOSE,Too close! Back off before he spots you.,Gần quá! Lùi lại kẻo hắn phát hiện.
+M4_OBJ_FAR,You're losing him! Catch up.,Sắp mất dấu! Bám theo mau.
+M4_FAIL_COURIER,the courier's car was destroyed,xe của tay đưa tin đã bị phá
+M4_FAIL_SPOTTED,the courier spotted you,tay đưa tin đã phát hiện bạn
+M4_FAIL_LOST,you lost the courier,bạn đã mất dấu tay đưa tin
+NOTICE_ROSA_RIFLE,Rosa handed you a rifle and body armor,Rosa đưa bạn một khẩu súng trường và áo giáp
+M5_OBJ_GO,Get to Rosa's bar,Tới quán của Rosa
+M5_OBJ_HOLD,"Defend the bar: wave {wave}/{waves}, {left} left","Giữ quán: đợt {wave}/{waves}, còn {left} tên"
+M5_FAIL_LEFT,you abandoned the bar,bạn đã bỏ quán
+NOTICE_WAVE_CLEARED,Wave cleared. More are coming!,Đã dẹp xong một đợt. Còn nữa đang tới!
+M6_OBJ_CAR,Get in the rigged pickup,Lên chiếc xe bán tải gài bom
+M6_OBJ_ARM,Floor it to arm the bomb,Tăng tốc để kích hoạt bom
+M6_OBJ_DRIVE,Drive to the fuel depot. Don't slow down!,Lái tới kho xăng. Đừng giảm tốc!
+M6_OBJ_SLOW,Too slow! Speed up or it blows in {time}s!,"Chậm quá! Tăng tốc ngay, còn {time} giây là nổ!"
+M6_OBJ_BAIL,Jump out now!,Nhảy ra ngay!
+M6_FAIL_BOOM,the bomb went off too early,bom đã nổ quá sớm
+NOTICE_BOMB_ARMED,Bomb armed! Keep your speed up.,Bom đã kích hoạt! Giữ tốc độ.
+M7_OBJ_PICKUP,Pick up Vince in Uptown (stop next to him),Đón Vince ở Uptown (dừng xe cạnh anh ta)
+M7_OBJ_SAFE,Get Vince to the safe spot,Đưa Vince tới chỗ an toàn
+M7_OBJ_BACK,Get back in the car with Vince,Quay lại chiếc xe có Vince
+M7_FAIL_VINCE,Vince didn't make it,Vince đã không qua khỏi
+NOTICE_FANGS_TAIL,Red Fangs cars on your tail!,Xe Red Fangs đang bám theo!
+M8_OBJ_STEAL,Steal Crane's cash truck at the railyard,Cướp xe chở tiền của Crane ở bãi đường ray
+M8_OBJ_BACK,Get back in the cash truck,Quay lại xe chở tiền
+M8_OBJ_GARAGE,Bring the truck to the garage,Đưa xe tải về gara
+M8_FAIL_TRUCK,the cash truck was destroyed,xe chở tiền đã bị phá huỷ
+M9_OBJ_ASSAULT,Storm the warehouse: {left} guards left,Tấn công nhà kho: còn {left} tên canh
+M9_OBJ_BOSS,Take down Silas Crane,Hạ Silas Crane
+NOTICE_SILAS_DOWN,Silas Crane is down! Now lose the cops.,Silas Crane đã gục! Giờ cắt đuôi cảnh sát.
+HUD_CLOCK,{h}:{m},{h}:{m}
+NOTICE_WITNESS,A witness called the cops!,Có người đã gọi báo cảnh sát!
+WEAPON_FISTS,Fists,Tay không
+WEAPON_BAT,Baseball bat,Gậy bóng chày
+SHOP_OWNED_MELEE,Owned · close combat,Đã sở hữu · đánh cận chiến
+SIGN_SAFEHOUSE,SAFEHOUSE,NHÀ AN TOÀN
+BUSINESS_CAR_WASH,CAR WASH,RỬA XE
+BUSINESS_CLUB,NIGHT CLUB,HỘP ĐÊM
+BUSINESS_DINER,DINER,QUÁN ĂN
+BUSINESS_DOCKS,DOCK STORAGE,KHO BẾN
+HINT_STORE_CAR,[{key}] Park this car in your garage,[{key}] Cất xe này vào gara
+HINT_SAFEHOUSE,[{key}] Enter your safehouse,[{key}] Vào nhà an toàn
+HINT_BUY_SAFEHOUSE,[{key}] Buy this safehouse for {price},[{key}] Mua nhà an toàn này giá {price}
+HINT_BUSINESS_OWNED,Your business: earns {money} every midnight,Cơ sở của bạn: thu {money} mỗi nửa đêm
+HINT_BUY_BUSINESS,[{key}] Buy this business for {price} (earns {money} a day),[{key}] Mua cơ sở này giá {price} (thu {money} mỗi ngày)
+NOTICE_INCOME,Business income: {money},Thu nhập từ cơ sở kinh doanh: {money}
+NOTICE_BOUGHT_SAFEHOUSE,"Safehouse bought: rest, save, hire help and park a car here.","Đã mua nhà an toàn: nghỉ, lưu game, thuê đàn em và cất xe ở đây."
+NOTICE_BOUGHT_BUSINESS,Business bought: it pays out every midnight.,Đã mua cơ sở kinh doanh: trả tiền mỗi nửa đêm.
+NOTICE_CAR_STORED,Car parked. It will be here when you come back.,Đã cất xe. Lần sau quay lại xe vẫn ở đây.
+NOTICE_RESTED,Rested and saved.,Đã nghỉ ngơi và lưu game.
+NOTICE_ALLY_FULL,You already have two bodyguards.,Bạn đã có đủ hai đàn em.
+NOTICE_ALLY_HIRED,A bodyguard has your back.,Một đàn em đã theo bảo vệ bạn.
+SAFEHOUSE_TITLE,Safehouse,Nhà an toàn
+SAFEHOUSE_REST,Rest and save,Nghỉ ngơi và lưu game
+SAFEHOUSE_HIRE,Hire a bodyguard ({price}),Thuê đàn em ({price})
+SAFEHOUSE_OUTFIT,Change outfit,Thay trang phục
+SAFEHOUSE_LEAVE,Leave,Rời đi
+WARDROBE_TITLE,Wardrobe,Tủ đồ
+NOTICE_ACHIEVEMENT,Achievement unlocked: {name},Đạt thành tựu: {name}
+ACH_FIRST_BLOOD,First Blood: take someone down,Ra tay đầu tiên: hạ gục một người
+ACH_FIVE_STARS,Most Wanted: reach five stars,Bị truy nã gắt nhất: đạt năm sao
+ACH_STORY,Harbor King: finish the story,Vua bến cảng: hoàn thành cốt truyện
+ACH_COLLECTOR,Collector: find every neon token,Nhà sưu tầm: tìm đủ xu neon
+ACH_STUNTMAN,Stuntman: land every stunt jump,Diễn viên đóng thế: nhảy hết mọi dốc
+ACH_STREET_KING,Street King: win every street race,Vua đường phố: thắng mọi cuộc đua
+ACH_LANDLORD,Landlord: own every safehouse,Chủ nhà: sở hữu mọi nhà an toàn
+ACH_TYCOON,Tycoon: own every business,Ông trùm kinh doanh: sở hữu mọi cơ sở
+ACH_CABBIE,Cabbie: complete 10 taxi fares,Tài xế taxi: chở xong 10 cuốc
+ACH_VIGILANTE,Vigilante: take down 10 suspects,Cảnh sát tự quản: hạ 10 nghi phạm
+ACH_COURIER,Courier of the Year: finish a delivery run,Shipper của năm: giao xong một chuỗi hàng
+ACH_NITRO,Nitro Junkie: burn 60 seconds of nitro,Nghiện nitro: đốt nitro đủ 60 giây
+PAUSE_STATS,Stats,Thống kê
+STATS_TITLE,Stats,Thống kê
+STATS_COMPLETION,City completion: {pct}%,Hoàn thành thành phố: {pct}%
+STATS_MISSIONS,Story missions,Nhiệm vụ chính
+STATS_KILLS,Takedowns,Số người đã hạ
+STATS_WALKED,Distance on foot,Quãng đường đi bộ
+STATS_DRIVEN,Distance driven,Quãng đường lái xe
+STATS_MAX_STARS,Highest wanted level,Mức truy nã cao nhất
+STATS_RACES,Races won,Số cuộc đua thắng
+STATS_JOBS,Side jobs done,Việc phụ đã làm
+STATS_TOKENS,Neon tokens,Xu neon
+STATS_JUMPS,Stunt jumps,Dốc nhảy
+STATS_PLAYTIME,Time played (h:mm),Thời gian chơi (giờ:phút)
+STATS_ACHIEVEMENTS,Achievements,Thành tựu
+STATS_CLOSE,Close,Đóng
+STATS_KM,{km} km,{km} km
+NOTICE_SWIMMING,Swimming: you can't shoot in the water.,Đang bơi: dưới nước không bắn được.
+NOTICE_BREATH,Running out of breath! Get to shore.,Sắp hết hơi! Bơi vào bờ ngay.
+CHEAT_GOD_ON,Cheat: invincible,Gian lận: bất tử
+CHEAT_GOD_OFF,Cheat: invincible off,Gian lận: tắt bất tử
+CHEAT_GUNS,Cheat: every weapon,Gian lận: đủ mọi loại súng
+CHEAT_HEAT,Cheat: one more star,Gian lận: thêm một sao
+CHEAT_COOL,Cheat: wanted level cleared,Gian lận: xoá truy nã
+CHEAT_CAR,Cheat: supercar delivered,Gian lận: siêu xe tới rồi
+CHEAT_ZOMBIES_ON,Cheat: dead town. Watch your neck!,Gian lận: phố xác sống. Coi chừng bị cắn!
+CHEAT_ZOMBIES_OFF,Cheat: the dead go back to sleep,Gian lận: xác sống đã ngủ yên
+NOTICE_ROSA_CREW,"Rosa sent a rifle, body armor and two of her crew with you","Rosa đưa súng trường, áo giáp và cử hai đàn em đi cùng bạn"
+NOTICE_RACE_STOP,Street race: stop on the flag to start.,Đua xe: dừng xe trên cờ để xuất phát.

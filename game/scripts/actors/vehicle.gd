@@ -5,6 +5,8 @@ extends CharacterBody2D
 
 signal destroyed(vehicle: Vehicle)
 
+static var map: MapData  # bản đồ của cảnh thành phố (thuyền cần biết ô nào là nước); City gán
+
 const CAR_DIR := "res://assets/vendor/cars/%s.png"
 const SKID_TEX := "res://assets/vendor/objects/skidmark_short_1.png"
 
@@ -19,6 +21,11 @@ var throttle := 0.0
 var assist := false  # người chơi lái kiểu theo hướng phím (DriveInput)
 var steer := 0.0
 var handbrake := false
+var boost := false  # người lái muốn đốt nitro
+var nitro := Nitro.new()
+var flat := false  # lốp thủng (dải đinh): chậm và trơn cho tới khi sửa
+var stunt := Stunt.new()
+var hull: BoatHull  # chỉ thuyền mới có
 var burning := false
 var wrecked := false
 var last_attacker: Node
@@ -49,17 +56,19 @@ func _ready() -> void:
 	add_to_group("damageable")
 	add_to_group("vehicles")
 	collision_layer = Tuning.LAYER_VEHICLES
-	collision_mask = Tuning.LAYER_WORLD | Tuning.LAYER_VEHICLES
+	collision_mask = Tuning.LAYER_VEHICLES if spec.get("water", false) else Tuning.MASK_CAR
+	if spec.get("water", false):
+		hull = BoatHull.new()
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	body = Sprite2D.new()
-	body.texture = load(CAR_DIR % sprite_name)
-	body.rotation = PI * 0.5
-	body.scale = Vector2.ONE * Tuning.VEHICLE_SCALE
+	body.texture = load(spec.get("sprite_dir", CAR_DIR) % sprite_name)
+	body.rotation = deg_to_rad(float(spec.get("sprite_angle", 90.0)))  # sprite xe Kenney quay mũi lên trên
+	body.scale = Vector2.ONE * Tuning.VEHICLE_SCALE * float(spec.get("scale", 1.0))
 	body.material = ShaderMaterial.new()
 	body.material.shader = load(Human.FLASH_SHADER)
 	add_child(body)
-	var tex_size := body.texture.get_size() * Tuning.VEHICLE_SCALE
-	size = Vector2(tex_size.y, tex_size.x)
+	var tex_size := body.texture.get_size() * body.scale
+	size = Vector2(tex_size.y, tex_size.x) if body.rotation != 0.0 else tex_size
 	var shape := CollisionShape2D.new()
 	shape.shape = RectangleShape2D.new()
 	shape.shape.size = size * 0.92
@@ -80,6 +89,7 @@ func _ready() -> void:
 		beam.modulate = Palette.HEADLIGHT
 		beam.scale = Vector2(0.9, 0.4)
 		beam.position = Vector2(size.x * 0.5 + 26.0, side * size.y * 0.28)
+		beam.add_to_group("headlights")
 		add_child(beam)
 	if spec.get("siren", false):
 		_siren = SirenLights.new()
@@ -117,6 +127,7 @@ func set_driver(new_driver: Node) -> void:
 		throttle = 0.0
 		steer = 0.0
 		assist = false
+		boost = false
 
 
 ## Đổi sang màu khác trong các sprite của loại xe này (tiệm sơn xe).
@@ -127,12 +138,40 @@ func repaint() -> void:
 		body.texture = load(CAR_DIR % sprite_name)
 
 
+## Tiệm sửa xe: đầy máu, vá lốp, tắt khói.
+func repair() -> void:
+	hp = float(spec.hp)
+	flat = false
+	if _smoke:
+		_smoke.queue_free()
+		_smoke = null
+
+
+func pop_tires() -> void:
+	if not flat and not wrecked:
+		flat = true
+		Sfx.play_at("tire_pop", global_position)
+		Fx.burst(global_position, "spark", 14, 260.0, 0.4, Color(1, 0.85, 0.5))
+
+
+## Bấm còi: người đi đường phía trước giật mình tránh xe.
+func honk() -> void:
+	Sfx.play_at("horn", global_position)
+	for p in get_tree().get_nodes_in_group("peds"):
+		var to: Vector2 = p.global_position - global_position
+		if to.length() < Tuning.HORN_SCARE_RADIUS and to.dot(forward()) > 0.0:
+			p.flee(global_position)
+
+
 func set_siren(on: bool) -> void:
 	if _siren:
 		_siren.set_active(on)
 
 
 func _physics_process(delta: float) -> void:
+	if driver == null and autopilot == null and not burning and _flash <= 0.0 and stunt.air <= 0.0 and velocity.length_squared() < 4.0:
+		velocity = Vector2.ZERO
+		return  # xe đỗ / xác xe đứng yên: bỏ qua vật lý (bị tông thì có vận tốc và chạy lại)
 	_flash = maxf(_flash - delta / Tuning.FLASH_TIME, 0.0)
 	_crash_cooldown -= delta
 	body.material.set_shader_parameter("flash", _flash)
@@ -140,22 +179,31 @@ func _physics_process(delta: float) -> void:
 		_burn_left -= delta
 		if _burn_left <= 0.0:
 			_explode()
+	if stunt.update(self, delta):
+		move_and_slide()
+		return
 	var kinematic := false
 	if wrecked:
 		throttle = 0.0
+		boost = false
 		handbrake = true
 	elif autopilot:
 		kinematic = autopilot.update(self, delta)
-	elif is_player_driven() and driver.controls_enabled:
+	elif is_player_driven() and driver.controls_enabled and driver.alive:
 		_input_reader.read(self)
 	else:
 		throttle = 0.0
 		steer = 0.0
+		boost = false
 		handbrake = true
 	if not kinematic:
 		_drive(delta)
 	var before := velocity
+	var was_at := global_position
 	move_and_slide()
+	if hull:
+		hull.keep_afloat(self, was_at)
+		hull.wake(self, delta)
 	_check_crashes(before)
 	_update_audio(delta)
 
@@ -163,6 +211,13 @@ func _physics_process(delta: float) -> void:
 func _drive(delta: float) -> void:
 	var speed := forward_speed()
 	var max_speed := float(spec.max_speed)
+	var accel := float(spec.accel)
+	if nitro.update(self, boost and not burning, delta):
+		max_speed *= Tuning.NITRO_SPEED
+		accel *= Tuning.NITRO_ACCEL
+		throttle = maxf(throttle, 1.0) if throttle >= 0.0 else throttle
+	if flat:
+		max_speed *= Tuning.FLAT_SPEED
 	var full_speed := Tuning.ASSIST_STEER_FULL_SPEED if assist else Tuning.STEER_FULL_SPEED
 	var steer_factor := clampf(absf(speed) / full_speed, 0.0, 1.0) * (1.0 - 0.35 * clampf(absf(speed) / max_speed, 0.0, 1.0))
 	var turn := float(spec.turn) * (Tuning.ASSIST_TURN_SCALE if assist else 1.0)
@@ -172,15 +227,17 @@ func _drive(delta: float) -> void:
 	speed = velocity.dot(fwd)
 	var lateral := velocity.dot(side)
 	if throttle > 0.0:
-		speed = minf(speed + float(spec.accel) * throttle * delta, max_speed) if speed >= 0.0 else speed + float(spec.brake) * delta
+		speed = minf(speed + accel * throttle * delta, maxf(max_speed, speed)) if speed >= 0.0 else speed + float(spec.brake) * delta
 	elif throttle < 0.0:
 		if speed > 20.0:
 			speed -= float(spec.brake) * -throttle * delta
 		else:
-			speed = maxf(speed - float(spec.accel) * 0.6 * delta, -float(spec.reverse))
+			speed = maxf(speed - accel * 0.6 * delta, -float(spec.reverse))
 	else:
 		speed = move_toward(speed, 0.0, (Tuning.ASSIST_DRAG if assist else Tuning.VEHICLE_DRAG) * delta)
-	var grip := float(spec.grip)
+	if speed > max_speed:  # hết nitro / thủng lốp: hụt tốc dần, không phanh gấp
+		speed = move_toward(speed, max_speed, Tuning.OVERSPEED_DRAG * delta)
+	var grip := float(spec.grip) * (Tuning.FLAT_GRIP if flat else 1.0) * lerpf(1.0, Tuning.RAIN_GRIP, Weather.wet)
 	if handbrake:
 		grip = Tuning.HANDBRAKE_GRIP
 		speed = move_toward(speed, 0.0, float(spec.brake) * 0.35 * delta)
@@ -189,7 +246,7 @@ func _drive(delta: float) -> void:
 	lateral = lerpf(lateral, 0.0, minf(grip * delta, 1.0))
 	velocity = fwd * speed + side * lateral
 	_skid_timer -= delta
-	var skidding := absf(lateral) > Tuning.DRIFT_MIN_LATERAL
+	var skidding := absf(lateral) > Tuning.DRIFT_MIN_LATERAL and hull == null
 	if skidding and _skid_timer <= 0.0:
 		_skid_timer = Tuning.SKID_EVERY
 		_leave_skid(side)
@@ -238,7 +295,7 @@ func _check_crashes(before: Vector2) -> void:
 		take_hit(damage * _crash_scale(), c.get_normal(), driver)
 		var other := c.get_collider()
 		if other is Vehicle:
-			other.take_hit(damage * other._crash_scale(), -c.get_normal(), driver if driver else self)
+			other.take_hit(damage * other._crash_scale() * float(spec.get("ram", 1.0)), -c.get_normal(), driver if driver else self)
 			other.velocity += before * 0.35
 		Sfx.play_at("crash", c.get_position(), clampf((impact - 300.0) / 40.0, -12.0, 0.0))
 		Fx.impact(c.get_position())
@@ -251,6 +308,8 @@ func _crash_scale() -> float:
 
 
 func _on_body_touched(other: Node) -> void:
+	if stunt.air > 0.0:  # đang bay qua đầu người
+		return
 	var speed := velocity.length()
 	if other is Human and other != driver and speed > Tuning.RUNOVER_SPEED and not wrecked:
 		other.knock_down(velocity * 0.6, speed * Tuning.RUNOVER_DAMAGE_PER_SPEED, driver if driver else self)
@@ -259,6 +318,11 @@ func _on_body_touched(other: Node) -> void:
 func take_hit(amount: float, _dir: Vector2, source: Variant, _knockback := 0.0) -> void:
 	if wrecked:
 		return
+	if source is Npc:
+		if has_npc_driver:  # đạn NPC không phá xe do NPC lái (tránh chuỗi xe cảnh sát tự nổ quanh người chơi)
+			return
+		if is_player_driven():
+			amount *= Tuning.PLAYER_VEHICLE_BULLET_SCALE  # xe Jay lái chịu đạn NPC nhẹ hơn: truy đuổi vẫn thoát được
 	hp -= amount
 	_flash = 0.6
 	if Combat.source_or_null(source):
@@ -311,7 +375,7 @@ func exit_point() -> Vector2:
 	for offset in [side * (size.y * 0.5 + 22.0), -side * (size.y * 0.5 + 22.0), -forward() * (size.x * 0.5 + 22.0)]:
 		var q := PhysicsPointQueryParameters2D.new()
 		q.position = global_position + offset
-		q.collision_mask = Tuning.LAYER_WORLD | Tuning.LAYER_VEHICLES
+		q.collision_mask = Tuning.LAYER_WORLD | Tuning.LAYER_VEHICLES | Tuning.LAYER_WATER
 		if space.intersect_point(q).is_empty():
 			return q.position
 	return global_position + forward() * (size.x * 0.5 + 22.0)

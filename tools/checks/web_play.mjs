@@ -1,7 +1,7 @@
 // Chơi thử bản Web trong Chrome qua DevTools Protocol (Node 24 có sẵn WebSocket).
 // Dùng: node tools/checks/web_play.mjs <url index.html> <thư mục ảnh> [perf]
 //   mặc định: vào menu -> Chơi mới (Enter) -> đi (D) -> bắn (chuột trái), chụp ảnh từng bước, fail nếu console có lỗi.
-//   perf: mở <url>?shot=perf, chờ dòng "PERF ..." trong console (thành phố tối đa người/xe + 3 sao).
+//   perf: mở <url>?shot=perf, chờ dòng "PERF ..." trong console (thành phố tối đa người/xe + 5 sao + mưa).
 //   persist: Chơi mới -> tải lại trang -> đọc IndexedDB tìm save.json, chụp menu (phải có "Chơi tiếp").
 //   mobile: giả lập điện thoại cảm ứng 915×412: menu -> Toàn màn hình -> Chơi mới -> kéo joystick trái bằng chạm,
 //           rồi xoay dọc 412×915 (phải hiện lớp phủ xoay ngang); fail nếu console có lỗi.

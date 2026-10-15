@@ -1,18 +1,24 @@
 class_name Police
 extends Node
-## Truy nã: sinh cảnh sát (đi bộ, xe) ngoài màn hình theo số sao; không bị thấy đủ lâu thì giảm sao.
+## Truy nã: sinh cảnh sát (đi bộ, xe, đặc nhiệm, rào chắn, trực thăng) ngoài màn hình theo số sao;
+## không bị thấy đủ lâu thì giảm sao.
 
 const COPS_PER_CAR := 2
 
 var city: City
 var unseen := 0.0
+var heli: Helicopter
+var roadblocks: Roadblocks
 var _cars: Array = []  # không khai kiểu: có thể chứa xe đã bị giải phóng cho tới lần lọc kế tiếp
 var _timer := 0.0
+var _heli_cd := 0.0
 
 
 func _init(c: City) -> void:
 	city = c
 	name = "Police"
+	roadblocks = Roadblocks.new(c)
+	add_child(roadblocks)
 
 
 func cops() -> Array[Node]:
@@ -24,10 +30,13 @@ func _process(delta: float) -> void:
 	var stars := Game.stars
 	for v in _cars:
 		v.set_siren(stars > 0 and not v.wrecked and not v.is_player_driven())
+	_update_heli(delta, stars)
+	roadblocks.prune()
 	if stars == 0 or not city.player.alive:
 		unseen = 0.0
 		_despawn_far(0.0)
 		return
+	roadblocks.tick(delta, stars)
 	if _seen():
 		unseen = 0.0
 	else:
@@ -42,7 +51,23 @@ func _process(delta: float) -> void:
 		_spawn(stars)
 
 
+func _update_heli(delta: float, stars: int) -> void:
+	_heli_cd -= delta
+	if is_instance_valid(heli):
+		if stars < Tuning.HELI_STARS or not city.player.alive:
+			heli.leave()
+		return
+	if stars >= Tuning.HELI_STARS and _heli_cd <= 0.0 and city.player.alive:
+		heli = Helicopter.new()
+		heli.city = city
+		heli.global_position = city.camera.get_screen_center_position() + Vector2.from_angle(randf() * TAU) * Tuning.SPAWN_MAX_DIST
+		heli.downed.connect(func() -> void: _heli_cd = Tuning.HELI_RESPAWN)
+		city.actors.add_child(heli)
+
+
 func _seen() -> bool:
+	if is_instance_valid(heli) and heli.sees_player():
+		return true
 	for c in cops():
 		if c.sees_player():
 			return true
@@ -58,25 +83,43 @@ func _seen() -> bool:
 
 func _spawn(stars: int) -> void:
 	var on_foot := cops().filter(func(c: Node) -> bool: return c.alive).size()
-	var active := _cars.filter(func(v: Vehicle) -> bool: return v.autopilot is ChaseDriver and not v.wrecked).size()
-	if on_foot < mini(Tuning.COPS_ON_FOOT[stars] + COPS_PER_CAR * active, Tuning.MAX_COPS):
+	var cars := _active("police")
+	var vans := _active("swat")
+	if on_foot < mini(Tuning.COPS_ON_FOOT[stars] + COPS_PER_CAR * cars + Tuning.SWAT_PER_VAN * vans, Tuning.MAX_COPS):
 		var cell := _offscreen_cell(false)
 		if cell.x >= 0:
 			city.spawn_npc(Cop, MapData.cell_center(cell))
-	if active < Tuning.COP_CARS[stars]:
-		var cell := _offscreen_cell(true)
-		if cell.x >= 0:
-			var v := city.spawn_vehicle("police", cell, Vector2(city.data.lane_dir(cell)).angle())
-			var driver := ChaseDriver.new(city)
-			driver.arrived.connect(_deploy, CONNECT_ONE_SHOT)
-			v.autopilot = driver
-			v.has_npc_driver = true
-			_cars.append(v)
+	if cars < Tuning.COP_CARS[stars]:
+		_spawn_car("police")
+	elif vans < Tuning.SWAT_VANS[stars]:
+		_spawn_car("swat")
+
+
+func _active(kind: String) -> int:
+	return _cars.filter(func(v: Vehicle) -> bool: return v.kind == kind and v.autopilot is ChaseDriver and not v.wrecked).size()
+
+
+func _spawn_car(kind: String) -> void:
+	var cell := _offscreen_cell(true)
+	if cell.x < 0:
+		return
+	var v := city.spawn_vehicle(kind, cell, Vector2(city.data.lane_dir(cell)).angle())
+	var driver := ChaseDriver.new(city)
+	driver.arrived.connect(_deploy, CONNECT_ONE_SHOT)
+	v.autopilot = driver
+	v.has_npc_driver = true
+	_cars.append(v)
+
+
+## Còn chỗ cho bao nhiêu cảnh sát còn sống (giới hạn chung cho cả người thả từ xe và rào chắn, giữ FPS).
+func room() -> int:
+	return Tuning.MAX_COPS - cops().filter(func(c: Node) -> bool: return c.alive).size()
 
 
 func _deploy(v: Vehicle) -> void:
-	for i in COPS_PER_CAR:
-		city.spawn_npc(Cop, v.exit_point() + Vector2(randf_range(-10, 10), randf_range(-10, 10)))
+	var swat := v.kind == "swat"
+	for i in maxi(mini(Tuning.SWAT_PER_VAN if swat else COPS_PER_CAR, room()), 0):
+		city.spawn_npc(Swat if swat else Cop, v.exit_point() + Vector2(randf_range(-10, 10), randf_range(-10, 10)))
 
 
 func _offscreen_cell(road: bool) -> Vector2i:
@@ -106,6 +149,11 @@ func _despawn_far(dist: float) -> void:
 
 
 func clear_all() -> void:
+	roadblocks.clear_all()
+	if is_instance_valid(heli):
+		heli.queue_free()
+	heli = null
+	_heli_cd = 0.0
 	for c in cops():
 		c.queue_free()
 	for v in _cars:

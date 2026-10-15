@@ -46,6 +46,9 @@ func show_pause() -> void:
 		"settings":
 			await open(SettingsPanel.new())
 			show_pause()
+		"stats":
+			await open(StatsPanel.new())
+			show_pause()
 		"menu":
 			Game.save_game()
 			Game.go(Game.MENU_SCENE)

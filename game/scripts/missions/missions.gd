@@ -6,6 +6,12 @@ const SCRIPTS := {
 	1: "res://scripts/missions/mission1.gd",
 	2: "res://scripts/missions/mission2.gd",
 	3: "res://scripts/missions/mission3.gd",
+	4: "res://scripts/missions/mission4.gd",
+	5: "res://scripts/missions/mission5.gd",
+	6: "res://scripts/missions/mission6.gd",
+	7: "res://scripts/missions/mission7.gd",
+	8: "res://scripts/missions/mission8.gd",
+	9: "res://scripts/missions/mission9.gd",
 }
 
 const GIVER_OFFSET := Vector2(52, -8)
@@ -15,6 +21,7 @@ var current: MissionBase
 var current_n := 0
 var retry_mission := 0  # nhiệm vụ vừa thất bại vì người chơi chết (màn chết cho thử lại)
 var _start_marker: Marker
+var _rosa: Sprite2D
 var _busy := false
 
 
@@ -23,21 +30,15 @@ func _init(c: City) -> void:
 	name = "Missions"
 
 
+## Rosa đứng cạnh điểm nhận nhiệm vụ kế tiếp (chỉ để nhìn, không tương tác vật lý).
 func _ready() -> void:
+	_rosa = Sprite2D.new()
+	_rosa.texture = load(Human.CHAR_DIR % ["womanGreen", "stand"])
+	_rosa.centered = false
+	_rosa.offset = -Human.BODY_PIVOT
+	_rosa.rotation = PI
+	city.effects.add_child(_rosa)
 	_refresh_marker()
-	for n in range(1, Game.MISSION_COUNT + 1):
-		_place_giver(giver_pos(n) + GIVER_OFFSET)
-
-
-## Rosa đứng cạnh mỗi điểm nhận nhiệm vụ (chỉ để nhìn, không tương tác vật lý).
-func _place_giver(pos: Vector2) -> void:
-	var rosa := Sprite2D.new()
-	rosa.texture = load(Human.CHAR_DIR % ["womanGreen", "stand"])
-	rosa.centered = false
-	rosa.offset = -Human.BODY_PIVOT
-	rosa.global_position = pos
-	rosa.rotation = PI
-	city.effects.add_child(rosa)
 
 
 func giver_pos(n: int) -> Vector2:
@@ -61,17 +62,22 @@ func _refresh_marker() -> void:
 	var n := Game.next_mission()
 	if n > 0 and current == null:
 		_start_marker = Marker.make(city.effects, giver_pos(n), Palette.MARKER_MISSION, Game.mission(n).title)
+	_rosa.visible = n > 0
+	if n > 0:
+		_rosa.global_position = giver_pos(n) + GIVER_OFFSET
 
 
 func _process(_delta: float) -> void:
 	var n := Game.next_mission()
-	if current or _busy or n == 0 or not city.player.alive or get_tree().paused:
+	if current or _busy or n == 0 or not city.player.alive or get_tree().paused or city.activities.current:
 		return
 	if city.player.global_position.distance_to(giver_pos(n)) < Tuning.MISSION_RADIUS:
 		start(n)
 
 
 func start(n: int, intro := true) -> void:
+	if current or _busy:
+		return
 	_busy = true
 	if city.player.vehicle:
 		city.player.exit_vehicle()
@@ -81,27 +87,32 @@ func start(n: int, intro := true) -> void:
 	current_n = n
 	current = load(SCRIPTS[n]).new()
 	current.city = city
-	current.completed.connect(_on_completed.bind(n))
-	current.failed.connect(_on_failed)
+	current.completed.connect(_on_completed.bind(n, current))
+	current.failed.connect(_on_failed.bind(current))
 	add_child(current)
 	_refresh_marker()
 
 
-func _on_completed(n: int) -> void:
+## Tín hiệu của nhiệm vụ đã kết thúc (vd. nổ chết người chơi rồi mới phát `completed`) thì bỏ qua.
+func _on_completed(n: int, mission: MissionBase) -> void:
+	if mission != current:
+		return
 	_end_current()
 	Sfx.play("mission_complete")
 	await city.overlays.show_dialog(Game.mission(n).outro)
 	var unlocked := Game.complete_mission(n)
 	var reward := int(Game.mission(n).reward)
 	await city.overlays.show_mission_complete(n, reward, unlocked)
-	if n == Game.MISSION_COUNT:
+	if n == Game.mission_count():
 		Game.go(Game.ENDING_SCENE)
 	_refresh_marker()
 
 
 ## Thất bại không phải do chết thì hỏi làm lại ngay (về điểm nhận nhiệm vụ, bỏ qua hội thoại);
 ## chết thì màn chết lo việc đó.
-func _on_failed(reason_key: String) -> void:
+func _on_failed(reason_key: String, mission: MissionBase) -> void:
+	if mission != current:
+		return
 	var n := current_n
 	_end_current()
 	Game.clear_objective()
@@ -128,5 +139,5 @@ func _end_current() -> void:
 func on_player_died() -> void:
 	if current:
 		retry_mission = current_n
-		_on_failed("FAIL_DIED")
+		_on_failed("FAIL_DIED", current)
 

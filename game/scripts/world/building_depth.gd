@@ -1,6 +1,6 @@
 class_name BuildingDepth
 extends Node2D
-## Nhà nổi khối kiểu GTA 2: chân nhà (lớp Walls, có va chạm) đứng yên; các lớp tường và mái phóng quanh tâm camera,
+## Nhà nổi khối kiểu game hành động nhìn từ trên xuống cổ điển: chân nhà (lớp Walls, có va chạm) đứng yên; các lớp tường và mái phóng quanh tâm camera,
 ## nên nhà càng xa tâm màn hình thì mái càng lệch ra ngoài và lộ thành tường phía hướng về người chơi.
 
 const SLICES := 4  # số lớp tường giữa chân nhà và mái

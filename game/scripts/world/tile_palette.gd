@@ -31,12 +31,14 @@ static func atlas_coords(tile: int) -> Vector2i:
 
 
 ## TileSet một atlas; `solid` là danh sách tile có va chạm (giá trị: nửa cạnh hình vuông va chạm).
-static func build_tileset(solid: Dictionary) -> TileSet:
+## `solid`: ô -> nửa cạnh khối va chạm lớp thế giới; `water`: các ô nước (lớp va chạm riêng, Jay bơi qua được).
+static func build_tileset(solid: Dictionary, water: Array = []) -> TileSet:
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(Tuning.TILE, Tuning.TILE)
-	ts.add_physics_layer()
-	ts.set_physics_layer_collision_layer(0, Tuning.LAYER_WORLD)
-	ts.set_physics_layer_collision_mask(0, 0)
+	for layer in [Tuning.LAYER_WORLD, Tuning.LAYER_WATER]:
+		ts.add_physics_layer()
+		ts.set_physics_layer_collision_layer(ts.get_physics_layers_count() - 1, layer)
+		ts.set_physics_layer_collision_mask(ts.get_physics_layers_count() - 1, 0)
 	var src := TileSetAtlasSource.new()
 	src.texture = load(SHEET)
 	src.texture_region_size = ts.tile_size
@@ -46,9 +48,14 @@ static func build_tileset(solid: Dictionary) -> TileSet:
 		for x in grid.x:
 			src.create_tile(Vector2i(x, y))
 	for tile in solid:
-		var half: float = solid[tile]
-		var data := src.get_tile_data(atlas_coords(tile), 0)
-		data.set_collision_polygons_count(0, 1)
-		data.set_collision_polygon_points(0, 0, PackedVector2Array([
-			Vector2(-half, -half), Vector2(half, -half), Vector2(half, half), Vector2(-half, half)]))
+		_square(src, tile, 0, solid[tile])
+	for tile in water:
+		_square(src, tile, 1, Tuning.TILE / 2.0)
 	return ts
+
+
+static func _square(src: TileSetAtlasSource, tile: int, layer: int, half: float) -> void:
+	var data := src.get_tile_data(atlas_coords(tile), 0)
+	data.set_collision_polygons_count(layer, 1)
+	data.set_collision_polygon_points(layer, 0, PackedVector2Array([
+		Vector2(-half, -half), Vector2(half, -half), Vector2(half, half), Vector2(-half, half)]))

@@ -8,12 +8,13 @@ UI=vendor/kenney-ui-pack
 OUT=game/assets/vendor
 mkdir -p "$OUT"/{chars,cars,objects,ui,sounds}
 cp "$SHOOT/Tilesheet/tilesheet_complete.png" "$OUT/"
-for dir in "Hitman 1" "Man Blue" "Man Brown" "Man Old" "Soldier 1" "Survivor 1" "Woman Green"; do
+for dir in "Hitman 1" "Man Blue" "Man Brown" "Man Old" "Soldier 1" "Survivor 1" "Woman Green" "Robot 1"; do
   cp "$SHOOT/PNG/$dir"/*.png "$OUT/chars/"
 done
-for c in red_1 red_2 red_3 red_5 blue_1 blue_2 blue_3 green_1 green_2 green_3 yellow_1 yellow_3 black_1 black_2 black_3; do
-  cp "$RACE/Cars/car_$c.png" "$OUT/cars/"
+for f in "$SHOOT/PNG/Zombie 1"/*.png; do  # Kenney đặt tên nhầm "zoimbie1"
+  cp "$f" "$OUT/chars/$(basename "$f" | sed 's/zoimbie1/zombie1/')"
 done
+cp "$RACE"/Cars/*.png "$OUT/cars/"
 cp "$RACE"/Motorcycles/*.png "$OUT/cars/"
 for o in skidmark_short_1 cone_straight barrel_red tires_white tent_red tent_blue; do cp "$RACE/Objects/$o.png" "$OUT/objects/"; done
 cp "$UI/PNG/Yellow/Default/star.png" "$OUT/ui/star.png"

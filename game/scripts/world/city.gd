@@ -17,18 +17,24 @@ var hud: Hud
 var population: Population
 var police: Police
 var missions: Missions
+var activities: Activities
+var properties: Properties
 var interactions: Interactions
 var overlays: Overlays
+var _warm: Array[Texture2D] = []  # sprite xe/người nạp sẵn: lần đầu xe loại mới xuất hiện không bị khựng
 
 
 func _ready() -> void:
 	if Game.health <= 0.0:
 		Game.revive()
+	_warm_textures()
 	map = CityMap.new()
 	add_child(map)
 	map.build()
 	data = map.data
+	Vehicle.map = data
 	_build_nav()
+	add_child(Ramps.new())
 	effects = Node2D.new()
 	effects.name = "Effects"
 	add_child(effects)
@@ -36,9 +42,7 @@ func _ready() -> void:
 	actors = Node2D.new()
 	actors.name = "Actors"
 	add_child(actors)
-	var night := CanvasModulate.new()
-	night.color = Palette.NIGHT_TINT
-	add_child(night)
+	add_child(DayNight.new(self))
 	player = Player.new()
 	player.global_position = MapData.cell_center(data.find("P"))
 	actors.add_child(player)
@@ -46,10 +50,13 @@ func _ready() -> void:
 	camera = CameraRig.new()
 	add_child(camera)
 	camera.setup(data.world_rect(), player)
+	add_child(Weather.new(camera))
 	for cell in data.find_all("c"):
-		spawn_vehicle("car", cell, randf() * TAU)
+		spawn_vehicle(DataDB.traffic_kind(), cell, randf() * TAU)
 	for cell in data.find_all("m") + data.find_all("b"):
 		spawn_vehicle("moto", cell, -PI * 0.5)
+	for b in DataDB.extras().boats:
+		spawn_vehicle("boat", Vector2i(int(b[0]), int(b[1])), PI * 0.5)
 	population = Population.new(self)
 	add_child(population)
 	police = Police.new(self)
@@ -59,6 +66,12 @@ func _ready() -> void:
 	add_child(PickupSpots.new(self))
 	missions = Missions.new(self)
 	add_child(missions)
+	activities = Activities.new(self)
+	add_child(activities)
+	properties = Properties.new(self)
+	add_child(properties)
+	add_child(Achievements.new(self))
+	add_child(Cheats.new(self))
 	hud = Hud.new(self)
 	add_child(hud)
 	overlays = Overlays.new(self)
@@ -68,13 +81,24 @@ func _ready() -> void:
 	Music.play()
 	if Tutorial.wanted() and Game.missions_done.is_empty():
 		add_child(Tutorial.new(self))
-	elif Game.missions_done.size() < Game.MISSION_COUNT:
+	elif Game.missions_done.size() < Game.mission_count():
 		get_tree().create_timer(Tuning.START_HINT_DELAY).timeout.connect(func() -> void:
 			Game.notice.emit(I18n.fmt("HINT_MAP_SHOPS", {"key": InputSetup.key_label(&"map")})))
 
 
 func _exit_tree() -> void:
 	Fx.root = null
+	Vehicle.map = null
+
+
+func _warm_textures() -> void:
+	for kind in DataDB.vehicles():
+		var spec := DataDB.vehicle(kind)
+		for sprite in spec.sprites:
+			_warm.append(load(spec.get("sprite_dir", Vehicle.CAR_DIR) % sprite))
+	for skin in Tuning.SKINS + ["manBlue"]:  # + cảnh sát
+		for pose in ["stand", "gun", "machine", "hold", "reload", "silencer"]:
+			_warm.append(load(Human.CHAR_DIR % [skin, pose]))
 
 
 ## Hai lưới A*: đi bộ (mọi ô không đặc) và lái xe (ưu tiên lòng đường).
@@ -140,6 +164,7 @@ func view_rect() -> Rect2:
 
 func _on_player_died(_human: Human) -> void:
 	missions.on_player_died()
+	activities.on_player_died()
 	await get_tree().create_timer(Tuning.DEATH_SCREEN_DELAY).timeout
 	overlays.show_death()
 
@@ -153,6 +178,7 @@ func respawn(choice: DeathScreen.Revive) -> void:
 		Game.notice.emit(I18n.fmt("NOTICE_REVIVE_FEE", {"fee": I18n.money(fee)}))
 	if here:
 		Game.revive()
+		pos = nearest_land(pos)
 	elif choice == DeathScreen.Revive.RETRY:  # làm lại nhiệm vụ: miễn phí, xoá truy nã
 		Game.clear_wanted()
 		Game.revive()
@@ -169,6 +195,18 @@ func respawn(choice: DeathScreen.Revive) -> void:
 	if choice == DeathScreen.Revive.RETRY:
 		missions.start(missions.retry_mission, false)
 	missions.retry_mission = 0
+
+
+## Ô đi được gần nhất (hồi sinh tại chỗ khi chết đuối: đưa lên bờ).
+func nearest_land(from: Vector2) -> Vector2:
+	var c0 := MapData.world_to_cell(from)
+	for r in 40:
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				var c := c0 + Vector2i(dx, dy)
+				if maxi(absi(dx), absi(dy)) == r and data.in_bounds(c) and not data.is_solid(c):
+					return from if r == 0 else MapData.cell_center(c)
+	return from
 
 
 func nearest_hospital(from: Vector2) -> Vector2:

@@ -1,6 +1,7 @@
 class_name Population
 extends Node
 ## Giữ số người đi đường và xe tự lái quanh camera: sinh ngoài màn hình, xoá khi đi quá xa.
+## Sau NV2 và trước khi xong NV9, Red Fangs canh gác trong lãnh địa của chúng (Tuning.GANG_TURF) và bắn khi thấy Jay.
 
 const SPAWN_TRIES := 24
 const CAR_CLEARANCE := 150.0
@@ -46,13 +47,17 @@ func _fill(initial: bool) -> void:
 		if cell.x < 0:
 			break
 		city.spawn_npc(Pedestrian, MapData.cell_center(cell)).add_to_group("peds")
+	if _turf_active() and get_tree().get_nodes_in_group("turf").size() < Tuning.MAX_TURF_GANG:
+		var cell := _pick(_walk_cells, initial)
+		if cell.x >= 0 and DataDB.district_at(cell) in Tuning.GANG_TURF:
+			city.spawn_npc(Gangster, MapData.cell_center(cell)).add_to_group("turf")
 	budget = 99 if initial else 1
 	while budget > 0 and cars.size() < Tuning.MAX_CARS:
 		budget -= 1
 		var cell := _pick(_lane_cells, initial)
 		if cell.x < 0 or _car_near(MapData.cell_center(cell)):
 			continue
-		var v := city.spawn_vehicle("car", cell, Vector2(city.data.lane_dir(cell)).angle())
+		var v := city.spawn_vehicle(DataDB.traffic_kind(), cell, Vector2(city.data.lane_dir(cell)).angle())
 		v.autopilot = TrafficDriver.new(city.data, cell)
 		v.has_npc_driver = true
 		cars.append(v)
@@ -80,10 +85,15 @@ func _car_near(pos: Vector2) -> bool:
 	return false
 
 
+## Lãnh địa Red Fangs: sau NV2, trước khi xong NV9, và không trong lúc làm nhiệm vụ (nhiệm vụ tự cân số địch).
+func _turf_active() -> bool:
+	return 2 in Game.missions_done and not 9 in Game.missions_done and city.missions != null and city.missions.current == null
+
+
 func _despawn() -> void:
 	var center := city.camera.get_screen_center_position()
 	var view := city.view_rect().grow(Tuning.TILE)
-	for p in peds():
+	for p in peds() + get_tree().get_nodes_in_group("turf"):
 		if p.global_position.distance_to(center) > Tuning.DESPAWN_DIST and not view.has_point(p.global_position):
 			p.queue_free()
 	cars = cars.filter(func(v: Variant) -> bool: return is_instance_valid(v))

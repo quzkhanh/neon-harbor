@@ -31,7 +31,7 @@ func _ready() -> void:
 	add_to_group("damageable")
 	add_to_group("humans")
 	collision_layer = Tuning.LAYER_ACTORS
-	collision_mask = Tuning.LAYER_WORLD | Tuning.LAYER_VEHICLES | Tuning.LAYER_ACTORS
+	collision_mask = Tuning.MASK_HUMAN
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	var shape := CollisionShape2D.new()
 	shape.shape = CircleShape2D.new()
@@ -63,7 +63,12 @@ func move(desired: Vector2, delta: float) -> void:
 		knocked -= delta
 		desired = Vector2.ZERO
 	velocity = desired + knock_velocity
+	var before := global_position
 	move_and_slide()
+	# Đẩy lùi mạnh có thể ép người lọt qua khe giữa các ô tường; lọt vào ô nhà thì trả về chỗ cũ.
+	if Vehicle.map and Vehicle.map.at(MapData.world_to_cell(global_position)) == "#" and Vehicle.map.at(MapData.world_to_cell(before)) != "#":
+		global_position = before
+		knock_velocity = Vector2.ZERO
 	_animate(delta, desired.length())
 
 

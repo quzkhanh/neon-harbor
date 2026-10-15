@@ -24,8 +24,10 @@ func _build(content: VBoxContainer) -> void:
 		label.position = (Vector2(float(r[0]), float(r[1])) + Vector2(float(r[2]), float(r[3])) * 0.5) * px - Vector2(150, 14)
 		label.size = Vector2(300, 28)
 		view.add_child(label)
-	var legend := Ui.hbox(22)
-	legend.alignment = BoxContainer.ALIGNMENT_CENTER
+	var legend := HFlowContainer.new()
+	legend.alignment = FlowContainer.ALIGNMENT_CENTER
+	legend.add_theme_constant_override("h_separation", 22)
+	legend.add_theme_constant_override("v_separation", 6)
 	for entry in MapIcon.LEGEND:
 		var row := Ui.hbox(8)
 		row.add_child(LegendIcon.new(entry[0], entry[1]))

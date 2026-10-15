@@ -1,6 +1,6 @@
 class_name Interactions
 extends Node
-## Tìm hành động khả dụng quanh người chơi (lên/xuống xe, bán xe ở gara, sơn xe để xoá truy nã),
+## Tìm hành động khả dụng quanh người chơi (lên/xuống xe, bán xe ở gara, sửa + sơn xe để xoá truy nã),
 ## hiện gợi ý trên HUD, thực hiện khi bấm `interact`. Đi vào cửa hàng thì tự mở giao diện cửa hàng;
 ## đi vào cửa bệnh viện thì được chữa đầy máu miễn phí.
 
@@ -56,9 +56,9 @@ func _process(_delta: float) -> void:
 		var price := sell_price(v)
 		if price > 0 and v.global_position.distance_to(_garage_pos) < GARAGE_RADIUS:
 			_set_prompt("HINT_SELL", _sell.bind(v), {"price": I18n.money(price)})
-		elif Game.stars > 0 and _near(v.global_position, _resprays, GARAGE_RADIUS):
+		elif _needs_shop(v) and _near(v.global_position, _resprays, GARAGE_RADIUS):
 			_set_prompt("HINT_RESPRAY", _respray.bind(v), {"price": I18n.money(Tuning.RESPRAY_PRICE)})
-		else:
+		elif not _job_prompt():
 			_set_prompt("HINT_EXIT", p.exit_vehicle)
 		return
 	if Game.health < Tuning.MAX_HEALTH and _near(p.global_position, _hospitals, DOOR_RADIUS):
@@ -71,9 +71,22 @@ func _process(_delta: float) -> void:
 		city.overlays.show_shop()
 	elif not near_shop:
 		_shop_armed = true
+	if _job_prompt():
+		return
 	var v := nearest_vehicle()
 	if v:
 		_set_prompt("HINT_ENTER", _enter.bind(v))
+
+
+## Điểm bắt đầu việc phụ (đua xe, giao hàng, càn quét) hoặc cửa nhà an toàn / cơ sở kinh doanh ở gần.
+func _job_prompt() -> bool:
+	var job := city.activities.prompt()
+	if job.is_empty():
+		job = city.properties.prompt()
+	if job.is_empty():
+		return false
+	_set_prompt(job[0], job[1], job[2] if job.size() > 2 else {})
+	return true
 
 
 func _set_prompt(key: String, action: Callable, params := {}) -> void:
@@ -93,7 +106,8 @@ func nearest_vehicle() -> Vehicle:
 	var best_d := Tuning.INTERACT_RADIUS
 	for v in get_tree().get_nodes_in_group("vehicles"):
 		var d: float = v.global_position.distance_to(city.player.global_position) - v.size.y * 0.5
-		if not v.wrecked and not v.burning and d < best_d:
+		var scripted: bool = v.has_meta("mission") and v.has_npc_driver  # xe nhiệm vụ do NPC lái (đối thủ đua, xe đưa tin...)
+		if not v.wrecked and not v.burning and not scripted and d < best_d:
 			best = v
 			best_d = d
 	return best
@@ -104,7 +118,10 @@ func _enter(v: Vehicle) -> void:
 	if v.has_npc_driver:
 		var ped := city.spawn_npc(Pedestrian, v.exit_point())
 		ped.add_to_group("peds")
-		ped.flee(city.player.global_position)
+		if randf() < Tuning.CARJACK_FIGHT_CHANCE:
+			ped.provoke()
+		else:
+			ped.flee(city.player.global_position)
 		for c in city.police.cops():
 			if c.alive and c.can_see(v.global_position, Tuning.COP_SIGHT):
 				Game.add_heat(Tuning.HEAT_CARJACK_SEEN)
@@ -115,11 +132,13 @@ func _enter(v: Vehicle) -> void:
 func sell_price(v: Vehicle) -> int:
 	if v.has_meta("mission"):
 		return 0
-	var base: int = Tuning.CAR_SELL_PRICE.get(v.kind, 0)
+	var base := int(v.spec.get("sell", 0))
 	return int(base * clampf(v.hp / float(v.spec.hp), 0.3, 1.0))
 
 
 func _sell(v: Vehicle) -> void:
+	if v.has_meta("garage"):  # xe lấy từ gara nhà an toàn: bán rồi thì gara trống
+		Game.stats.erase("garage_%d" % v.get_meta("garage"))
 	var price := sell_price(v)
 	city.player.exit_vehicle()
 	Game.add_money(price)
@@ -129,11 +148,17 @@ func _sell(v: Vehicle) -> void:
 	v.queue_free()
 
 
-## Tiệm sơn xe: trả tiền, xe đổi màu, cảnh sát mất dấu (xoá truy nã).
+func _needs_shop(v: Vehicle) -> bool:
+	return Game.stars > 0 or v.flat or v.hp < float(v.spec.hp)
+
+
+## Tiệm sửa và sơn xe: trả tiền, xe đầy máu, vá lốp, đổi màu; cảnh sát mất dấu (xoá truy nã).
 func _respray(v: Vehicle) -> void:
 	if not Game.spend(Tuning.RESPRAY_PRICE):
 		return
+	var wanted := Game.stars > 0
+	v.repair()
 	v.repaint()
 	Game.clear_wanted()
 	Sfx.play("cash")
-	Game.notice.emit(tr("NOTICE_RESPRAYED"))
+	Game.notice.emit(tr("NOTICE_RESPRAYED" if wanted else "NOTICE_REPAIRED"))

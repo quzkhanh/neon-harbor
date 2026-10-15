@@ -12,6 +12,7 @@ var _turning_back := false
 
 func read(v: Vehicle) -> void:
 	v.handbrake = Input.is_action_pressed("handbrake")
+	v.boost = Input.is_action_pressed("nitro") and v.hull == null
 	v.assist = Game.settings.steering != CLASSIC
 	if not v.assist:
 		v.throttle = Input.get_action_strength("accelerate") - Input.get_action_strength("brake")

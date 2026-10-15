@@ -1,11 +1,12 @@
 extends "res://tests/harness.gd"
-## Hoàn thành lần lượt 3 nhiệm vụ qua API kiểm thử (dịch chuyển, hạ mục tiêu).
+## Hoàn thành lần lượt 9 nhiệm vụ qua API kiểm thử (dịch chuyển, hạ mục tiêu).
 ## Assert tiền tăng đúng, súng mở bán đúng, lưu rồi nạp lại save.json giữ nguyên state,
 ## chết: về bệnh viện gần nhất mất 10% tiền; làm lại nhiệm vụ; hồi sinh tại chỗ mất 20% và giữ sao.
 ## NV2 được Rosa trang bị; thất bại không do chết thì hỏi làm lại; máu tự hồi tới mức trần.
 ## Mọi súng đạn vô hạn: bắn hết băng rồi nạp lại đầy, lặp nhiều lần.
 
-const UNLOCKS := {1: ["smg"], 2: ["rifle", "flamethrower"], 3: ["sniper", "bazooka"]}
+const UNLOCKS := {1: ["smg"], 2: ["rifle", "flamethrower"], 3: ["sniper", "bazooka"], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []}
+const MISSIONS := [1, 2, 3, 4, 5, 6, 7, 8, 9]
 const MAX_WAIT := 300
 const REVIVE_HOSPITAL := 0  # khớp DeathScreen.Revive (test không được tham chiếu class_name của game)
 const REVIVE_HERE := 1
@@ -13,18 +14,41 @@ const REVIVE_RETRY := 2
 
 
 func _run() -> void:
+	watchdog_sec = 240.0
 	var city := await open_city()
-	for n in [1, 2, 3]:
+	for n in MISSIONS:
 		city = await _play_mission(city, n)
-	expect(game.missions_done == [1, 2, 3], "missions_done sai: %s" % [game.missions_done])
-	await _wait(func() -> bool: return current_scene != null and current_scene.scene_file_path == game.ENDING_SCENE, "xong NV3 không sang màn kết")
+		if n == 3:
+			expect(current_scene == city and current_scene.scene_file_path == game.CITY_SCENE, "xong NV3 mà rời thành phố (cốt truyện có 9 nhiệm vụ)")
+	expect(game.missions_done == MISSIONS, "missions_done sai: %s" % [game.missions_done])
+	await _wait(func() -> bool: return current_scene != null and current_scene.scene_file_path == game.ENDING_SCENE, "xong NV9 không sang màn kết")
 	_check_save_roundtrip()
 	_check_infinite_ammo()
 	city = await open_city()
 	await _check_death(city)
 	await _check_fail_retry(city)
 	await _check_regen(city)
+	await _check_stale_signals(city)
 	finish("MISSIONS")
+
+
+## Nhiệm vụ đã kết thúc (vd. chết vì bom NV6) mà sau đó mới phát `completed` thì không được tính xong / trả tiền;
+## hoàn thành lại một nhiệm vụ đã xong không trả tiền lần nữa.
+func _check_stale_signals(city: Node) -> void:
+	await close_overlays(city)
+	game.missions_done = []
+	city.missions.start(1, false)
+	await frames(3)
+	var m: Node = city.missions.current
+	city.missions.on_player_died()
+	var money: int = game.money
+	m.completed.emit()
+	await frames(5)
+	expect(not 1 in game.missions_done and game.money == money, "nhiệm vụ đã thất bại vẫn được tính hoàn thành")
+	game.missions_done = [1]
+	game.complete_mission(1)
+	expect(game.missions_done == [1] and game.money == money, "hoàn thành lại NV đã xong mà vẫn trả tiền / ghi trùng")
+	city.missions.retry_mission = 0
 
 
 ## Thất bại không do chết: hỏi làm lại; đồng ý thì về điểm nhận và nhiệm vụ chạy lại ngay.
@@ -86,6 +110,62 @@ func _play_mission(city: Node, n: int) -> Node:
 			await frames(5)
 			expect(game.objective == "M3_OBJ_GARAGE", "NV3: cắt đuôi xong chưa hiện mục tiêu gara (%s)" % game.objective)
 			mission.car.global_position = mission.cell_pos("G")
+		4:
+			p.enter_vehicle(mission._car)
+			await frames(5)
+			var courier: Node = mission.courier
+			expect(not courier.autopilot.waiting, "NV4: lên xe rồi mà xe đưa tin chưa chạy")
+			await physics(60)
+			expect(game.objective in ["M4_OBJ_TAIL", "M4_OBJ_CLOSE", "M4_OBJ_FAR"], "NV4: mục tiêu bám đuôi sai (%s)" % game.objective)
+			courier.global_position = courier.autopilot.target
+			mission._car.global_position = courier.autopilot.target + Vector2(400, 0)
+		5:
+			expect(game.current == "rifle", "NV5: Rosa chưa đưa súng trường")
+			p.global_position = mission.cell_pos("y")
+			for wave in 3:
+				await _wait(func() -> bool: return _alive_gang().size() > 0, "NV5: đợt %d không tới" % (wave + 1))
+				for g in _alive_gang():
+					g.take_hit(999.0, Vector2.RIGHT, p)
+				await frames(3)
+		6:
+			var car: Node = mission.car
+			p.enter_vehicle(car)
+			for i in 10:
+				car.velocity = Vector2.from_angle(car.rotation) * 320.0
+				await physics_frame
+			expect(mission._armed, "NV6: chạy nhanh mà bom chưa kích hoạt")
+			car.global_position = mission.cell_pos("F") + Vector2(300, 0)
+			car.velocity = Vector2(-300, 0)
+			await physics(2)
+			p.exit_vehicle()
+			p.global_position = mission.cell_pos("F") + Vector2(900, 0)
+		7:
+			var v: Node = city.spawn_vehicle("car", Vector2i(mission.cell_pos("i") / 64.0), 0.0)
+			p.enter_vehicle(v)
+			v.global_position = mission.cell_pos("i")
+			v.velocity = Vector2.ZERO
+			await _wait(func() -> bool: return mission._aboard, "NV7: dừng cạnh Vince mà anh ta không lên xe")
+			v.global_position = mission.cell_pos("e")
+			v.velocity = Vector2.ZERO
+		8:
+			p.enter_vehicle(mission.truck)
+			await frames(5)
+			expect(game.stars == 0, "NV8: vừa lên xe tải, chưa chạy khỏi bãi đã bị truy nã")
+			mission.truck.global_position += Vector2(0, -600)
+			await frames(5)
+			expect(game.stars == 3, "NV8: chạy xe tải khỏi bãi phải lên 3 sao (đang %d)" % game.stars)
+			game.clear_wanted()
+			await frames(5)
+			mission.truck.global_position = mission.cell_pos("G")
+		9:
+			expect(is_instance_valid(mission.boss) and mission.boss.max_health > 300.0, "NV9: không có trùm Silas")
+			mission.boss.knock_down(Vector2(400, 0), 9999.0, null)  # xe tự lái tông phải
+			expect(mission.boss.alive and not mission._escaping, "NV9: xe tự lái tông chết trùm thay người chơi")
+			for g in _alive_gang():
+				g.take_hit(9999.0, Vector2.RIGHT, p)
+			await frames(5)
+			expect(game.stars == 4, "NV9: hạ trùm xong phải lên 4 sao (đang %d)" % game.stars)
+			game.clear_wanted()
 	var money_before: int = game.money
 	await _wait(func() -> bool: return city.missions.current == null, "NV%d: không hoàn thành" % n)
 	await _wait(func() -> bool: return city.overlays.current != null, "NV%d: không có hội thoại kết" % n)
@@ -97,6 +177,10 @@ func _play_mission(city: Node, n: int) -> Node:
 		expect(game.is_unlocked(id), "NV%d: %s chưa mở bán" % [n, id])
 	await frames(30)
 	return current_scene
+
+
+func _alive_gang() -> Array:
+	return get_nodes_in_group("gang").filter(func(g: Node) -> bool: return g.alive)
 
 
 func _check_save_roundtrip() -> void:
@@ -117,6 +201,8 @@ func _check_save_roundtrip() -> void:
 
 func _check_infinite_ammo() -> void:
 	for w in JSON.parse_string(FileAccess.get_file_as_string("res://data/weapons.json")):
+		if w.kind == "melee":  # tay không, gậy: không có băng đạn
+			continue
 		game.grant_weapon(w.id)
 		for cycle in 3:
 			while game.consume_ammo():

@@ -126,5 +126,6 @@ func _die(dir: Vector2, source: Node) -> void:
 	queue_redraw()
 	if source is Player:
 		Game.add_heat(heat_on_kill)
+		Game.bump("kills")
 		Fx.kill_mark(global_position + Vector2(0, BAR_OFFSET.y))
 		Sfx.play("kill")

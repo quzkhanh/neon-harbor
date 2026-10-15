@@ -105,7 +105,8 @@ func _refresh() -> void:
 		_bars[key].value = ShopWidgets.stat_value(w, key)
 	var owned := Game.owned.has(selected)
 	var unlocked := Game.is_unlocked(selected)
-	_info.setup("SHOP_LOCKED" if not unlocked else ("SHOP_OWNED_INFO" if owned else "SHOP_NOT_OWNED"))
+	var owned_key := "SHOP_OWNED_MELEE" if w.kind == "melee" else "SHOP_OWNED_INFO"
+	_info.setup("SHOP_LOCKED" if not unlocked else (owned_key if owned else "SHOP_NOT_OWNED"))
 	_buy.visible = unlocked and not owned
 	_buy.text = I18n.fmt("SHOP_BUY", {"price": I18n.money(int(w.price))})
 	_armor.text = I18n.fmt("SHOP_ARMOR", {"price": I18n.money(Tuning.ARMOR_PRICE)})

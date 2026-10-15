@@ -9,10 +9,19 @@ const LAYER_WORLD := 1
 const LAYER_ACTORS := 2
 const LAYER_VEHICLES := 4
 const LAYER_PICKUPS := 8
+const LAYER_AIR := 16  # trực thăng: trúng đạn được, không va chạm với ai
+const LAYER_WATER := 32  # mặt nước: chặn xe và NPC; Jay đi bộ thì bơi qua được, thuyền thì chỉ chạy trên nước
+const MASK_HUMAN := LAYER_WORLD | LAYER_VEHICLES | LAYER_ACTORS | LAYER_WATER
+const MASK_SWIMMER := LAYER_WORLD | LAYER_VEHICLES | LAYER_ACTORS
+const MASK_CAR := LAYER_WORLD | LAYER_VEHICLES | LAYER_WATER
 
 # Người chơi
 const WALK_SPEED := 220.0
 const WALK_ACCEL := 1600.0
+const SWIM_SPEED := 110.0
+const SWIM_BREATH := 20.0  # giây bơi trước khi hết hơi
+const SWIM_RECOVER := 3.0  # lên bờ: hồi hơi nhanh gấp chừng này
+const SWIM_DROWN_DPS := 10.0
 const MAX_HEALTH := 100.0
 const MAX_ARMOR := 100.0
 const REGEN_DELAY := 4.0  # giây không trúng đòn thì bắt đầu hồi máu
@@ -37,12 +46,25 @@ const TOUCH_EDGE := 20.0
 const TOUCH_SCALE_RANGE := Vector2(0.9, 1.4)  # thanh trượt "Cỡ nút điều khiển" (0,9: nút vẫn ≥ 56px ở 915×412)
 const AIM_ASSIST_DEG := 20.0  # joystick/analog: hút tâm vào kẻ địch lệch tối đa chừng này độ
 const MOUSE_AIM_IDLE := 2.0  # giây không động chuột thì chuyển sang ngắm bằng tay cầm
+const WHEEL_HOLD := 0.25  # giữ phím đổi súng chừng này giây thì mở vòng chọn súng
+const WHEEL_SLOWMO := 0.25
 
 # Người (NPC)
 const PED_SPEED := 70.0
 const PED_FLEE_SPEED := 190.0
 const PED_HEALTH := 40.0
 const PED_FLEE_TIME := 6.0
+const ARMED_PED_CHANCE := 0.15  # người đi đường có súng, bị tấn công thì bắn trả
+const ANGRY_TIME := 8.0
+const CARJACK_FIGHT_CHANCE := 0.25  # tài xế bị cướp xe đánh lại
+const WITNESS_DELAY := 3.5  # người chứng kiến còn sống sau chừng này giây thì cuộc gọi báo cảnh sát tới nơi
+const WITNESS_COOLDOWN := 10.0
+const ZOMBIE_SPEED := 95.0
+const ZOMBIE_SENSE := 700.0
+const ZOMBIE_REACH := 34.0
+const ZOMBIE_BITE := 8.0
+const ZOMBIE_BITE_EVERY := 0.9
+const HEAT_WITNESS := 45.0
 const HEAR_GUNSHOT_RADIUS := 520.0
 const KNOCKDOWN_TIME := 1.6
 const CORPSE_TIME := 25.0
@@ -81,6 +103,7 @@ const CRASH_COOLDOWN := 0.35
 const CRASH_BOUNCE := 0.35
 const CRASH_DAMAGE_PER_SPEED := 0.08
 const PLAYER_CRASH_SCALE := 0.5  # xe người chơi lái chịu nửa sát thương va chạm
+const PLAYER_VEHICLE_BULLET_SCALE := 0.35  # ... và nửa sát thương đạn của NPC
 const VEHICLE_SMOKE_RATIO := 0.35
 const VEHICLE_BURN_TIME := 3.0
 const VEHICLE_EXPLOSION_DAMAGE := 160.0
@@ -90,6 +113,16 @@ const DRIFT_GRIP := 2.2
 const HANDBRAKE_GRIP := 1.2
 const STEER_FULL_SPEED := 180.0  # tốc độ đạt bán kính lái đầy đủ
 const BAIL_SPEED := 120.0  # xuống xe khi nhanh hơn thì ngã lăn
+const NITRO_TIME := 2.5  # giây đốt hết bình
+const NITRO_RECHARGE := 8.0  # giây nạp đầy bình
+const NITRO_REARM := 0.25  # đốt cạn thì phải nạp lại tới mức này mới bật lại
+const NITRO_ACCEL := 1.8
+const NITRO_SPEED := 1.35
+const NITRO_SHAKE := 12.0  # độ rung mỗi giây khi đốt
+const OVERSPEED_DRAG := 260.0
+const FLAT_SPEED := 0.55  # lốp thủng: tốc tối đa và độ bám còn lại
+const FLAT_GRIP := 0.6
+const HORN_SCARE_RADIUS := 260.0
 
 # Xe tự lái
 const TRAFFIC_SPEED := 150.0
@@ -107,27 +140,46 @@ const DESPAWN_DIST := 1500.0
 const POPULATION_TICK := 0.5
 
 # Truy nã
-const MAX_STARS := 3
+const MAX_STARS := 5
 const HEAT_SHOOT_PED := 35.0
 const HEAT_KILL_PED := 60.0
 const HEAT_HIT_COP := 60.0
 const HEAT_KILL_COP := 120.0
 const HEAT_CARJACK_SEEN := 110.0
 const HEAT_GUNFIRE_SEEN := 15.0
-const LOSE_STAR_TIME := [0.0, 8.0, 12.0, 16.0]  # giây không bị thấy để giảm 1 sao (theo số sao hiện tại)
+const LOSE_STAR_TIME := [0.0, 8.0, 12.0, 16.0, 20.0, 24.0]  # giây không bị thấy để giảm 1 sao (theo số sao hiện tại)
 const COP_SIGHT := 560.0
-const COPS_ON_FOOT := [0, 2, 3, 4]
-const COP_CARS := [0, 0, 1, 2]
-const MAX_COPS := 8
-const COP_WEAPON := ["pistol", "pistol", "pistol", "smg"]
+const COPS_ON_FOOT := [0, 2, 3, 4, 4, 4]
+const COP_CARS := [0, 0, 1, 2, 2, 2]
+const SWAT_VANS := [0, 0, 0, 0, 1, 2]  # 4★: đặc nhiệm; mỗi xe thả SWAT_PER_VAN người
+const SWAT_PER_VAN := 3
+const MAX_COPS := 12  # tổng cảnh sát còn sống (bộ, thả từ xe, rào chắn)
+const COP_WEAPON := ["pistol", "pistol", "pistol", "smg", "smg", "rifle"]
 const COP_CAR_STOP_DIST := 260.0
+const SWAT_HEALTH := 150.0
+const SWAT_WEAPON := "rifle"
+const ROADBLOCK_STARS := 4  # từ mức sao này cảnh sát lập rào chắn phía trước xe người chơi
+const ROADBLOCK_EVERY := 14.0
+const ROADBLOCK_AHEAD := Vector2i(13, 20)  # khoảng cách (ô) phía trước theo hướng chạy
+const ROADBLOCK_MIN_SPEED := 160.0  # chỉ chặn khi người chơi đang lái nhanh hơn mức này
+const MAX_ROADBLOCKS := 2
+const HELI_STARS := 5
+const HELI_HP := 650.0
+const HELI_SPEED := 340.0  # chậm hơn xe nhanh: chạy thẳng đủ lâu thì thoát được đèn rọi
+const HELI_SPOT_RADIUS := 230.0  # chỉ "thấy" người chơi trong vòng đèn rọi
+const HELI_FIRE_EVERY := 2.2
+const HELI_BURST := 4
+const HELI_HIT_CHANCE := 0.35
+const HELI_DAMAGE := 9.0
+const HELI_RESPAWN := 30.0
+const HELI_HEAT := 200.0  # bắn rơi trực thăng
+const BADGE_RESPAWN := 180.0
 
 # Tiền và chết
 const START_MONEY := 300
 const DEATH_FEE := 0.10
 const REVIVE_HERE_FEE := 0.20  # hồi sinh tại chỗ: đắt hơn, giữ nguyên sao truy nã
 const REVIVE_GRACE := 2.5  # giây bất tử sau khi hồi sinh tại chỗ
-const CAR_SELL_PRICE := {"moto": 250, "car": 500, "police": 800, "sports": 900}
 const ARMOR_PRICE := 400
 const MEDKIT_PRICE := 150
 const RESPRAY_PRICE := 250
@@ -135,10 +187,87 @@ const DEATH_SCREEN_DELAY := 1.2
 const AUTOSAVE_INTERVAL := 30.0
 const START_HINT_DELAY := 1.5
 
+# Kinh tế và tiến trình (đợt 8)
+const SAFEHOUSE_PRICES := [3000, 5000, 8000]  # theo thứ tự ô "Z" trên bản đồ (trên xuống, trái sang)
+const BUSINESS_PRICES := [4000, 7000, 10000, 15000]
+const BUSINESS_INCOME := [400, 800, 1200, 2000]  # trả mỗi nửa đêm trong game
+const ALLY_PRICE := 500
+const ALLY_MAX := 2
+const ALLY_HEALTH := 120.0
+const SKINS := ["hitman1", "manBrown", "manOld", "survivor1", "womanGreen", "soldier1", "robot1", "zombie1"]  # cuối: mở sau cốt truyện
+const STATS_FLUSH := 1.0  # giây giữa hai lần ghi quãng đường/thời gian chơi vào Game.stats
+
+# Việc phụ (đợt 8)
+const RACE_TIME_LIMIT := 240.0
+const RACE_STOP_TIME := 1.0  # dừng xe trên cờ đua chừng này giây thì xuất phát
+const RACE_STOP_SPEED := 25.0
+const RACE_PRIZES := [1200, 500, 200, 0]  # theo hạng về đích
+const DELIVERY_DROPS := 5
+const DELIVERY_RANGE := Vector2(700, 1800)  # px từ chỗ đang đứng tới điểm giao kế tiếp
+const DELIVERY_TIME_BASE := 12.0
+const DELIVERY_TIME_SPEED := 160.0  # px/giây coi là tốc độ đi "vừa kịp"
+const DELIVERY_PAY_BASE := 60
+const DELIVERY_PAY_PER_PX := 0.06
+const DELIVERY_BONUS := 400
+const SWEEP_COUNT := 8
+const SWEEP_TIME := 90.0
+const SWEEP_REWARD := 1500
+const TAXI_PICKUP_RANGE := Vector2(300, 900)
+const TAXI_DROP_RANGE := Vector2(1000, 2400)
+const TAXI_TIME_BASE := 10.0
+const TAXI_TIME_SPEED := 170.0
+const TAXI_PAY_BASE := 40
+const TAXI_PAY_PER_PX := 0.07
+const TAXI_TIP := 50  # tới trong nửa đầu thời gian
+const FLEE_SPEED_RATIO := 0.8
+const VIGILANTE_TIME := 120.0
+const VIGILANTE_DISABLE := 0.35  # xe tội phạm còn dưới tỉ lệ máu này thì hắn nhảy ra
+const VIGILANTE_REWARD := 250  # nhân với số tên đã bắt trong lượt
+const TOKEN_VALUE := 100
+const TOKEN_ALL_BONUS := 10000
+const RAMP_MIN_SPEED := 240.0
+const RAMP_AIR_PER_SPEED := 1.0 / 600.0  # giây bay theo tốc độ lúc rời dốc
+const RAMP_AIR := Vector2(0.5, 1.4)
+const RAMP_LIFT := 0.35  # sprite phóng to tối đa chừng này khi lên cao nhất
+const STUNT_PAY_PER_SEC := 300
+const STUNT_REPEAT_SCALE := 0.1  # nhảy lại dốc đã nhảy: thưởng chừng này
+
 # Nhiệm vụ
 const MISSION1_TIME := 75.0
 const MISSION_RADIUS := 56.0
 const GANG_COUNT := 6
+const M4_COURIER_SPEED := 0.55  # tỉ lệ tốc tối đa của xe đưa tin
+const M4_TOO_CLOSE := 150.0
+const M4_SPOT_TIME := 2.5  # bám sát quá lâu thì bị phát hiện
+const M4_TOO_FAR := 1400.0
+const M4_LAG_SLOWDOWN := 0.45
+const M4_COURIER_HP := 1500.0
+const M5_WAVES := [4, 5, 6]
+const M5_LEAVE_RADIUS := 900.0
+const M6_MIN_SPEED := 150.0  # dưới tốc độ vào cua tự phanh (CORNER_SPEED) để rẽ được
+const M6_GRACE := 3.5  # chậm hơn tốc tối thiểu quá chừng này giây là nổ (bot lái thật: 2 giây là nổ giữa dòng xe)
+const M6_BAIL_RADIUS := 380.0
+const M6_CAR_HP := 650.0
+const M6_FUSE := 3.0  # nhảy ra rồi, xe nổ chậm nhất sau chừng này giây
+const M7_CHASERS := 2
+const M7_CAR_HP := 600.0
+const M8_GUARDS := 5
+const M8_TRUCK_HP := 700.0
+const M8_ALARM_DIST := 500.0  # chạy xe tải khỏi bãi chừng này px thì cảnh sát mới được báo
+const M9_GUARDS := 6
+const BOSS_HEALTH := 500.0
+const GANG_TURF := ["DISTRICT_HARBOR", "DISTRICT_RAILYARD", "DISTRICT_MARINA"]  # Red Fangs tuần tra sau NV2, tới khi xong NV9
+const MAX_TURF_GANG := 3
+
+# Ngày/đêm và thời tiết (đợt 8)
+const DAY_LENGTH := 960.0  # giây thật cho 24 giờ trong game
+const START_HOUR := 20.0
+const LIGHTS_DAY := 0.12  # độ sáng còn lại của đèn đường/neon/đèn pha giữa trưa
+const RAIN_START := 0.18  # mỗi giờ trong game: xác suất bắt đầu mưa
+const RAIN_STAY := 0.6  # đang mưa: xác suất mưa tiếp giờ sau
+const RAIN_FADE := 6.0  # giây để mưa nặng hạt dần / tạnh dần
+const RAIN_DROPS := 260
+const RAIN_GRIP := 0.72  # đường ướt: độ bám còn lại
 
 # Hiệu ứng
 const SHAKE_DECAY := 2.2
@@ -146,9 +275,9 @@ const SHAKE_MAX_OFFSET := 18.0
 const TRACER_TIME := 0.06
 const MUZZLE_TIME := 0.05
 
-# Ngưỡng nhiệt truy nã cho từng sao (1, 2, 3)
-const STAR_HEAT := [40.0, 140.0, 260.0]
-const MAX_HEAT := 400.0
+# Ngưỡng nhiệt truy nã cho từng sao (1..5)
+const STAR_HEAT := [40.0, 140.0, 260.0, 420.0, 600.0]
+const MAX_HEAT := 760.0
 const FADE_TIME := 0.25
 
 
