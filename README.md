@@ -11,6 +11,9 @@ Made with Godot 4.7.2 (GDScript, Compatibility renderer).
 
 **Play in the browser:** https://quzkhanh.github.io/neon-harbor-web/ (Web build only; deployed with `tools/deploy_web.sh`).
 
+**On iPhone / iPad** (there is no App Store build): open that link in Safari, tap **Share → Add to Home Screen**, and
+launch it from the new icon for a full-screen, installable web app. On Android Chrome use **Install app**.
+
 | | |
 |---|---|
 | ![City](screenshots/city_walk_en.png) | ![Combat](screenshots/combat_en.png) |
