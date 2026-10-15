@@ -2,6 +2,11 @@ A top-down open-world action game: nine story missions, a five-star wanted syste
 safehouses and businesses, day and night with rain, English and Vietnamese. Play in the browser:
 https://quzkhanh.github.io/neon-harbor-web/
 
+## What's new in 0.9.1
+
+- Smoother motion on 75/120/144 Hz screens: no more judder while walking or driving.
+- Gentler screen shake: enemy gunfire no longer shakes your screen, shakes are smooth, and crashes no longer whip the camera around.
+
 ## Download
 
 | System | File | How to run |
