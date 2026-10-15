@@ -5,8 +5,10 @@ extends Object
 
 const RADIUS := 56.0
 const ERRAND_CHANCE := 0.3
-const LINES := ["PED_HELLO_1", "PED_HELLO_2", "PED_HELLO_3", "PED_HELLO_4", "PED_RUMOR_1", "PED_RUMOR_2", "PED_RUMOR_3", "PED_RUMOR_4",
-	"PED_TIP_RESPRAY", "PED_TIP_HOSPITAL", "PED_TIP_RACE", "PED_TIP_COINS", "PED_TIP_BUSINESS", "PED_TIP_TAXI"]
+const TIPS := ["PED_TIP_RESPRAY", "PED_TIP_HOSPITAL", "PED_TIP_RACE", "PED_TIP_COINS", "PED_TIP_BUSINESS", "PED_TIP_TAXI"]
+const CONTEXT_CHANCE := 0.5  # gặp hoàn cảnh hợp (mưa, đêm, đang bị truy nã) thì bấy nhiêu khả năng nói về nó
+const QUIRK_LINES := {"robot": "PED_ROBOT", "feeder": "PED_FEEDER", "drunk": "PED_DRUNK", "nightshift": "PED_NIGHTSHIFT", "loiter": "PED_LOITER"}
+const QUIRK_CHANCE := 0.75  # người kỳ dị hầu như luôn nói kiểu của mình
 
 
 ## Người đi đường gần Jay nhất mà đang rảnh để nói chuyện, hoặc null.
@@ -27,4 +29,22 @@ static func talk(ped: Pedestrian, city: City) -> void:
 		Speech.say(ped, "PED_ERRAND_ASK")
 		city.activities.start("errand", 0, ped)
 	else:
-		Speech.say(ped, LINES.pick_random())
+		Speech.say(ped, _line(city, ped))
+
+
+## Câu hợp hoàn cảnh (đang bị truy nã, trời mưa, ban đêm) hoặc câu chào/tin đồn/mẹo thường.
+static func _line(city: City, ped: Pedestrian) -> String:
+	if ped.quirk != "" and randf() < QUIRK_CHANCE:
+		return Speech.pick(QUIRK_LINES[ped.quirk])
+	var topics := []
+	var weather: Weather = city.get_node_or_null("Weather")
+	if Game.stars > 0:
+		topics.append("PED_COPS")
+	if weather and weather.raining:
+		topics.append("PED_RAIN")
+	if Game.is_night():
+		topics.append("PED_NIGHT")
+	if not topics.is_empty() and randf() < CONTEXT_CHANCE:
+		return Speech.pick(topics.pick_random())
+	var roll := randi() % 3
+	return TIPS.pick_random() if roll == 0 else Speech.pick("PED_HELLO" if roll == 1 else "PED_RUMOR")

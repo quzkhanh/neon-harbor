@@ -49,3 +49,26 @@ static func plan_intersection(map: MapData, entry: Vector2i, heading: Vector2i) 
 		c = came[c]
 	route.push_front(entry)
 	return route
+
+
+static var _blocks := {}
+
+
+## Số định danh của khối giao lộ "+" chứa `cell` (ô nhỏ nhất của khối): các ô "+" liền nhau là một giao lộ.
+static func block_id(map: MapData, cell: Vector2i) -> Vector2i:
+	if _blocks.has(cell):
+		return _blocks[cell]
+	var seen := {cell: true}
+	var queue: Array[Vector2i] = [cell]
+	var lowest := cell
+	while queue.size() > 0:
+		var c: Vector2i = queue.pop_front()
+		if c.y < lowest.y or (c.y == lowest.y and c.x < lowest.x):
+			lowest = c
+		for d in MapData.DIRS:
+			if map.at(c + d) == "+" and not seen.has(c + d):
+				seen[c + d] = true
+				queue.append(c + d)
+	for c in seen:
+		_blocks[c] = lowest
+	return lowest

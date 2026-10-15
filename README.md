@@ -71,6 +71,12 @@ Made with Godot 4.7.2 (GDScript, Compatibility renderer).
 - Property: three safehouses (rest and save, hire up to two bodyguards who follow you and fight, change outfit,
   park one car that stays there between sessions) and four businesses that pay out every in-game midnight.
 - Stats screen (from the pause menu) with city completion, distances, takedowns and twelve achievements.
+- Street life: pigeons, cats, dogs, seagulls and crabs wander the city and simply run or fly away from you and traffic.
+  Animals can never be hurt (bullets, melee and cars pass through them). Pedestrians also chat with each other, and
+  react to rain, night and your wanted level.
+- Traffic incidents: now and then two cars crash on a road near you. Traffic piles up behind them, honking, while both
+  drivers get out, argue, sometimes brawl, make up and drive away.
+- How to play screen (main menu and pause menu): a controls page (keyboard, or the touch buttons on phones) and a basics page covering healing, losing the cops, avoiding stars, earning money, cars and water.
 - Swimming: Jay can swim slowly (no shooting); stay in the water too long and you start to drown.
 - Cheat codes typed on the keyboard (they disable achievements for that save): `NEONGOD` invincible,
   `FULLCLIP` every weapon, `HEATWAVE` one more star, `COOLOFF` lose the cops, `FASTLANE` a supercar,

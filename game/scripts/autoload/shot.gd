@@ -14,7 +14,7 @@ const COMBAT_CELL := Vector2i(5, -5)  # tính từ điểm xuất phát P (khu c
 const DRIVE_CELL := Vector2i(-15, -11)
 const CORPSE_CELL := Vector2i(6, -9)
 const SCENARIOS := [
-	"menu", "settings", "city_walk", "combat", "driving", "wanted3", "shop", "dialog",
+	"menu", "settings", "help", "help_basics", "city_walk", "combat", "driving", "moto", "wanted3", "shop", "dialog",
 	"mission_complete", "death", "hospital", "pause", "touch", "corpses", "map",
 	"downtown", "market", "uptown", "marina", "tutorial",
 ]
@@ -59,11 +59,11 @@ func _run() -> void:
 	if _name == "perf":
 		await _perf()
 		return
-	if _name in ["menu", "settings"]:
+	if _name in ["menu", "settings", "help", "help_basics"]:
 		await _menu()
 	else:
 		await _city()
-	if not _name in ["combat", "driving", "corpses"] and not _name in ShotScenes.NAMES:
+	if not _name in ["combat", "driving", "moto", "corpses"] and not _name in ShotScenes.NAMES:
 		await _frames(SETTLE)
 	_save()
 
@@ -71,7 +71,12 @@ func _run() -> void:
 func _menu() -> void:
 	await _frames(SETTLE)
 	if _name == "settings":
-		get_tree().current_scene._settings()
+		get_tree().current_scene._open(SettingsPanel)
+	elif _name.begins_with("help"):
+		get_tree().current_scene._open(HelpPanel)
+		await _frames(SETTLE)
+		if _name == "help_basics":
+			get_tree().current_scene.get_child(-1)._show(1)
 
 
 func _city() -> void:
@@ -90,6 +95,8 @@ func _city() -> void:
 			await _combat(city)
 		"driving":
 			await _drive(city)
+		"moto":
+			await _drive(city, "moto", "motorcycle_red")
 		"wanted3":
 			Game.set_stars(3)
 			await _frames(420)
@@ -162,8 +169,8 @@ func _combat(city: City) -> void:
 	await _frames(1)  # ảnh viewport là frame đã vẽ xong
 
 
-func _drive(city: City) -> void:
-	var v := city.spawn_vehicle("car", city.data.find("P") + DRIVE_CELL, 0.0, "car_red_1")
+func _drive(city: City, kind := "car", sprite := "car_red_1") -> void:
+	var v := city.spawn_vehicle(kind, city.data.find("P") + DRIVE_CELL, 0.0, sprite)
 	city.player.global_position = v.global_position + Vector2(0, 50)
 	await _frames(5)
 	city.player.enter_vehicle(v)

@@ -43,6 +43,9 @@ func open(modal: Modal) -> Variant:
 func show_pause() -> void:
 	var choice: Variant = await open(PauseMenu.new())
 	match choice:
+		"help":
+			await open(HelpPanel.new())
+			show_pause()
 		"settings":
 			await open(SettingsPanel.new())
 			show_pause()

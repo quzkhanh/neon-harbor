@@ -2,7 +2,7 @@ class_name ShotScenes
 extends RefCounted
 ## Tình huống chụp ảnh của đợt mở rộng (Shot gọi sang để shot.gd không phình ra).
 
-const NAMES := ["nitro", "wanted5", "roadblock", "race", "noon", "dusk", "rain", "wheel", "stats", "safehouse", "wardrobe", "boat", "zombies", "death_home", "melee", "holdup", "talk", "taunt", "lucky"]
+const NAMES := ["nitro", "wanted5", "roadblock", "race", "noon", "dusk", "rain", "wheel", "stats", "safehouse", "wardrobe", "boat", "zombies", "death_home", "melee", "bat_idle", "holdup", "talk", "taunt", "chatter", "critters", "quirks", "incident", "night_life", "lucky"]
 
 
 static func run(scene_name: String, city: City, shot: Node) -> void:
@@ -72,7 +72,7 @@ static func run(scene_name: String, city: City, shot: Node) -> void:
 			await shot._frames(30)
 			lucky.say("LUCKY_LIVE_2")
 			await shot._frames(10)
-		"melee", "holdup", "talk", "taunt":
+		"melee", "bat_idle", "holdup", "talk", "taunt", "chatter", "critters", "quirks", "incident", "night_life":
 			await _social(scene_name, city, shot)
 		"noon", "dusk", "rain":
 			Game.clock = {"noon": 12.0, "dusk": 18.6, "rain": 22.0}[scene_name]
@@ -120,7 +120,7 @@ static func _race(city: City, shot: Node) -> void:
 	await shot._frames(5)
 	city.player.enter_vehicle(v)
 	city.activities.start("race", city.activities._race_index(q))
-	await shot._frames(200)
+	await shot._frames(175)
 	await shot._hold([&"move_right"], 50, false)
 
 
@@ -135,6 +135,72 @@ static func _social(scene_name: String, city: City, shot: Node) -> void:
 		city.spawn_npc(Gangster, p.global_position + Vector2(170, -20))
 		await shot._frames(20)
 		return
+	if scene_name == "critters":
+		var x := 200.0
+		for kind in ["pigeon", "cat", "dog", "crab", "gull"]:
+			var c := Critter.new()
+			c.kind = kind
+			c.city = city
+			c.global_position = p.global_position + Vector2(x, -40.0 if kind == "gull" else 30.0)
+			city.actors.add_child(c)
+			x += 85.0
+		await shot._frames(60)
+		return
+	if scene_name == "incident":
+		var spawner: RoadIncidents = city.get_node("RoadIncidents")
+		spawner.set_process(false)
+		var best := Vector2i.ZERO
+		for cell in spawner._lanes:
+			if spawner._straight(cell) and (best == Vector2i.ZERO or MapData.cell_center(cell).distance_to(p.global_position) < MapData.cell_center(best).distance_to(p.global_position)):
+				best = cell
+		for v in city.get_tree().get_nodes_in_group("vehicles"):
+			if v.global_position.distance_to(MapData.cell_center(best)) < 400.0:
+				v.queue_free()
+		city.population.set_process(false)
+		spawner._stage(best)
+		p.global_position = spawner._active.cars[0].global_position + Vector2(0, 140)
+		await shot._frames(60 * 4)
+		return
+	if scene_name == "night_life":
+		Game.clock = 23.5
+		var x := 100.0
+		for q in ["drunk", "nightshift", "loiter"]:
+			var ped := city.spawn_npc(Pedestrian, p.global_position + Vector2(x, -20.0 if q == "loiter" else 25.0))
+			ped.add_to_group("peds")
+			ped.quirk = q
+			ped.skin = Pedestrian.QUIRK_SKINS.get(q, ped.skin)
+			ped.set_pose("stand")
+			ped._next_quirk_line = 0.5
+			x += 90.0
+		await shot._frames(120)
+		return
+	if scene_name == "quirks":
+		for q in [["robot1", "robot", 150.0], ["manOld", "feeder", 330.0]]:
+			var ped := city.spawn_npc(Pedestrian, p.global_position + Vector2(q[2], 0))
+			ped.add_to_group("peds")
+			ped.skin = q[0]
+			ped.set_pose("stand")
+			ped.quirk = q[1]
+			if q[1] == "feeder":
+				ped.add_to_group("feeders")
+				for i in 5:
+					var c := Critter.new()
+					c.kind = "pigeon"
+					c.city = city
+					c.global_position = ped.global_position + Vector2.from_angle(i * 1.3) * 70.0
+					city.actors.add_child(c)
+			else:
+				Speech.say(ped, Speech.pick("PED_ROBOT"))
+		await shot._frames(150)
+		return
+	if scene_name == "chatter":
+		var a := city.spawn_npc(Pedestrian, p.global_position + Vector2(110, -20))
+		var b := city.spawn_npc(Pedestrian, p.global_position + Vector2(160, 10))
+		a.add_to_group("peds")
+		b.add_to_group("peds")
+		city.get_node("PedChatter")._talk(a, b)
+		await shot._frames(175)
+		return
 	var ped := city.spawn_npc(Pedestrian, p.global_position + Vector2(44 if scene_name == "melee" else 120, 0))
 	ped.add_to_group("peds")
 	ped.armed = false
@@ -147,6 +213,10 @@ static func _social(scene_name: String, city: City, shot: Node) -> void:
 			p.gun.cooldown = 0.0
 			p.gun.try_fire(p, p.muzzle_position(), 0.0, [p.get_rid()])
 			await shot._frames(3)
+		"bat_idle":
+			Game.grant_weapon("bat")
+			Game.select_weapon("bat")
+			await shot._frames(5)
 		"holdup":
 			Game.select_weapon("pistol")
 			Input.action_press(&"aim_right")

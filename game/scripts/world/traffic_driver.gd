@@ -6,6 +6,8 @@ const LOOKAHEAD := 3
 const REACH := 26.0
 const TURN_RATE := 6.0
 const TURN_SLOWDOWN := 0.55
+const STOP_DIST := 80.0  # cách giao lộ chừng này mà chưa được vào thì dừng chờ
+const CLAIM_TIMEOUT_MS := 8000  # xe giữ giao lộ quá lâu (bị chặn, bị tông) thì xe khác được vào
 
 var map: MapData
 var cell: Vector2i
@@ -14,6 +16,11 @@ var points: Array[Vector2] = []
 var speed := 0.0
 var _plan: Array[Vector2i] = []
 var _blocked := 0.0
+var _inside := false
+var _held := Vector2i(-1, -1)
+
+## Giao lộ -> [mã xe đang giữ, thời điểm giữ]: mỗi giao lộ chỉ một xe tự lái vào một lúc, tránh hai xe cắt mặt nhau rồi kẹt.
+static var _claims := {}
 var _honk_cd := 0.0
 
 
@@ -35,7 +42,7 @@ func update(v: Vehicle, delta: float) -> bool:
 	var turn := absf(angle_difference(v.rotation, to.angle()))
 	var target := Tuning.TRAFFIC_SPEED * (TURN_SLOWDOWN if turn > 0.4 else 1.0)
 	_honk_cd -= delta
-	if _obstacle_ahead(v):
+	if _obstacle_ahead(v) or not _right_of_way(v):
 		target = 0.0
 		_blocked += delta
 		if _blocked > Tuning.HONK_AFTER and _honk_cd <= 0.0:
@@ -74,3 +81,40 @@ func _obstacle_ahead(v: Vehicle) -> bool:
 		if not space.intersect_ray(q).is_empty():
 			return true
 	return false
+
+
+## Số giây xe bị chặn liên tục (để xoá xe kẹt khi ở ngoài màn hình).
+func stuck_time() -> float:
+	return _blocked
+
+
+## Có được tiến vào giao lộ phía trước không: giữ "thẻ" của giao lộ trong lúc đi qua, trả lại khi ra khỏi.
+func _right_of_way(v: Vehicle) -> bool:
+	var here := MapData.world_to_cell(v.global_position)
+	if map.at(here) == "+":
+		_inside = true
+		return _claim(Lanes.block_id(map, here), v)
+	if _inside:
+		_inside = false
+		_release(v)
+	for p in points:
+		var c := MapData.world_to_cell(p)
+		if map.at(c) == "+":
+			return v.global_position.distance_to(p) > STOP_DIST or _claim(Lanes.block_id(map, c), v)
+	return true
+
+
+func _claim(block: Vector2i, v: Vehicle) -> bool:
+	var now := Time.get_ticks_msec()
+	var held: Array = _claims.get(block, [])
+	if held.is_empty() or held[0] == v.get_instance_id() or now - held[1] > CLAIM_TIMEOUT_MS or not is_instance_id_valid(held[0]):
+		_claims[block] = [v.get_instance_id(), held[1] if not held.is_empty() and held[0] == v.get_instance_id() else now]
+		_held = block
+		return true
+	return false
+
+
+func _release(v: Vehicle) -> void:
+	var held: Array = _claims.get(_held, [])
+	if not held.is_empty() and held[0] == v.get_instance_id():
+		_claims.erase(_held)

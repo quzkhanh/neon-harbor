@@ -41,8 +41,13 @@ def load_csv(path, errors):
     return header[1:], table
 
 
+POOL_LITERAL = re.compile(r'"([A-Z][A-Z_]*[A-Z])"')
+POOL_KEY = re.compile(r"^(.+?)_\d+(?:_\d+)?$")
+
+
 def scan_sources(game, keys, errors):
     used = set()
+    pools = {m.group(1) for k in keys if (m := POOL_KEY.match(k))}
     for path in sorted(game.rglob("*")):
         if path.suffix not in (".gd", ".tscn", ".json") or ".godot" in path.parts or "tests" in path.parts:
             continue
@@ -55,6 +60,8 @@ def scan_sources(game, keys, errors):
                 lit = m.group(1)
                 if lit in keys:
                     used.add(lit)
+                elif lit in pools:
+                    continue
                 elif KEY_SHAPE.match(lit) and path.suffix != ".json" or (path.suffix == ".json" and KEY_SHAPE.match(lit) and _json_text_field(line, lit)):
                     errors.append(f"{rel}:{n}: khoá {lit!r} không có trong strings.csv")
             if path.suffix in (".gd", ".tscn"):
@@ -63,6 +70,14 @@ def scan_sources(game, keys, errors):
                     if lit and lit not in keys:
                         errors.append(f"{rel}:{n}: chữ viết cứng {lit!r} (phải là khoá dịch)")
     return used
+
+
+def pool_keys(game, keys):
+    """Nhóm câu thoại `X_1..X_n` (và `X_k_j`) chọn ngẫu nhiên bằng Speech.pick/count: dùng cả nhóm khi mã nguồn có chuỗi "X"."""
+    literals = set()
+    for path in (game / "scripts").rglob("*.gd"):
+        literals |= set(POOL_LITERAL.findall(path.read_text(encoding="utf-8")))
+    return {k for k in keys if (m := POOL_KEY.match(k)) and m.group(1) in literals}
 
 
 def check_table(langs, table, errors):
@@ -84,6 +99,7 @@ def main():
     keys = set(table)
     used = scan_sources(game, keys, errors)
     used |= {k for k in keys if k.endswith(PLURAL) and k[: -len(PLURAL)] in used}
+    used |= pool_keys(game, keys)
     check_table(langs, table, errors)
     for key in sorted(keys - used):
         errors.append(f"khoá {key} trong CSV không còn được dùng")

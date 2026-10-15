@@ -9,11 +9,33 @@ const FONT_SIZE := 15
 const MAX_WIDTH := 230.0  # câu dài hơn thì xuống dòng
 const NODE_NAME := "Speech"
 
+static var _counts := {}
 
-static func say(who: Node2D, key: String, params := {}, color := Palette.TEXT) -> void:
+
+## Một câu ngẫu nhiên trong nhóm `prefix_1`, `prefix_2`... (thêm câu mới chỉ cần thêm dòng vào bảng dịch).
+static func pick(prefix: String) -> String:
+	return "%s_%d" % [prefix, randi_range(1, count(prefix))]
+
+
+## Số khoá liên tiếp `prefix_1..n` (kèm `suffix` nếu có) có trong bảng dịch.
+static func count(prefix: String, suffix := "") -> int:
+	var id := prefix + suffix
+	if not _counts.has(id):
+		var n := 0
+		while TranslationServer.translate("%s_%d%s" % [prefix, n + 1, suffix]) != "%s_%d%s" % [prefix, n + 1, suffix]:
+			n += 1
+		_counts[id] = n
+	return _counts[id]
+
+
+static func clear(who: Node2D) -> void:
 	var old := who.get_node_or_null(NODE_NAME)
 	if old:
 		old.free()
+
+
+static func say(who: Node2D, key: String, params := {}, color := Palette.TEXT) -> void:
+	clear(who)
 	var s := Speech.new()
 	s.name = NODE_NAME
 	s.z_index = 23

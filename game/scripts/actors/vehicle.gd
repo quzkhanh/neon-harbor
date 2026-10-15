@@ -9,6 +9,7 @@ static var map: MapData  # bản đồ của cảnh thành phố (thuyền cần
 
 const CAR_DIR := "res://assets/vendor/cars/%s.png"
 const SKID_TEX := "res://assets/vendor/objects/skidmark_short_1.png"
+const SHADOW_DROP := 0.4  # bóng xe ngắn hơn bóng nhà (`Tuning.SHADOW_OFFSET`) vì xe thấp
 
 var kind := "car"
 var spec: Dictionary
@@ -28,10 +29,12 @@ var stunt := Stunt.new()
 var hull: BoatHull  # chỉ thuyền mới có
 var burning := false
 var wrecked := false
+var hazard := false  # đèn cảnh báo nhấp nháy (xe đang trong sự cố giao thông)
 var last_attacker: Node
 var size := Vector2.ZERO
 
 var body: Sprite2D
+var _shadow: Sprite2D
 var _engine: AudioStreamPlayer2D
 var _skid_sound: AudioStreamPlayer2D
 var _smoke: CPUParticles2D
@@ -66,6 +69,12 @@ func _ready() -> void:
 	body.scale = Vector2.ONE * Tuning.VEHICLE_SCALE * float(spec.get("scale", 1.0))
 	body.material = ShaderMaterial.new()
 	body.material.shader = load(Human.FLASH_SHADER)
+	_shadow = Sprite2D.new()
+	_shadow.texture = body.texture
+	_shadow.rotation = body.rotation
+	_shadow.scale = body.scale
+	_shadow.modulate = Palette.GROUND_SHADOW
+	add_child(_shadow)
 	add_child(body)
 	var tex_size := body.texture.get_size() * body.scale
 	size = Vector2(tex_size.y, tex_size.x) if body.rotation != 0.0 else tex_size
@@ -91,6 +100,10 @@ func _ready() -> void:
 		beam.position = Vector2(size.x * 0.5 + 26.0, side * size.y * 0.28)
 		beam.add_to_group("headlights")
 		add_child(beam)
+	if not spec.get("water", false):
+		add_child(VehicleLamps.new(self))
+	if kind == "moto":
+		add_child(MotoRider.new(self))
 	if spec.get("siren", false):
 		_siren = SirenLights.new()
 		add_child(_siren)
@@ -136,6 +149,7 @@ func repaint() -> void:
 	if options.size() > 0:
 		sprite_name = options[randi() % options.size()]
 		body.texture = load(CAR_DIR % sprite_name)
+		_shadow.texture = body.texture
 
 
 ## Tiệm sửa xe: đầy máu, vá lốp, tắt khói.
@@ -169,6 +183,7 @@ func set_siren(on: bool) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_shadow.position = (Tuning.SHADOW_OFFSET * SHADOW_DROP).rotated(-rotation)
 	if driver == null and autopilot == null and not burning and _flash <= 0.0 and stunt.air <= 0.0 and velocity.length_squared() < 4.0:
 		velocity = Vector2.ZERO
 		return  # xe đỗ / xác xe đứng yên: bỏ qua vật lý (bị tông thì có vận tốc và chạy lại)

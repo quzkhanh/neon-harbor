@@ -7,8 +7,18 @@ extends Npc
 
 const SKINS := ["manBrown", "womanGreen", "survivor1"]
 const BRAWLER_CHANCE := 0.35
-const FIGHT_LINES := ["PED_FIGHT_1", "PED_FIGHT_2", "PED_FIGHT_3"]
 const CHAT_TIME := 3.0
+## [kiểu, xác suất]: người kỳ dị theo thời điểm. Ban đêm đổi hẳn dàn nhân vật: người say, người làm ca đêm, kẻ đứng ở góc phố.
+## "feeder": ông lão cho bồ câu ăn, bồ câu quanh đó tụ lại (Critter).
+const DAY_QUIRKS := [["robot", 0.05], ["feeder", 0.06]]
+const NIGHT_QUIRKS := [["drunk", 0.2], ["nightshift", 0.14], ["loiter", 0.12], ["robot", 0.03]]
+const QUIRK_SKINS := {"robot": "robot1", "feeder": "manOld", "nightshift": "manBlue", "loiter": "survivor1"}
+const DRUNK_SPEED := 0.55
+const DRUNK_SWAY := 38.0  # px/giây lắc ngang khi đi
+const DRUNK_SWAY_RATE := 2.2
+const HICCUP_EVERY := Vector2(8.0, 16.0)
+const LOITER_RANGE := 220.0
+const LOITER_EVERY := Vector2(7.0, 14.0)
 
 var _target := Vector2.ZERO
 var _heading := Vector2i.RIGHT
@@ -19,15 +29,24 @@ var _angry := 0.0
 var _report := 0.0
 var zombie := false
 var brawler := false
+var scripted := false  # đang trong một sự cố giao thông (RoadIncident): kịch bản điều khiển, không tự đi lang thang
+var quirk := ""  # "robot", "feeder" hoặc "" (người thường): quyết định kiểu nói chuyện
 var waiting := false  # đang chờ Jay mang đồ về (việc vặt)
 var holdup := PedHoldup.new()
 var _chat := 0.0
+var _chat_with: Pedestrian
+var _quirk_time := 0.0
+var _next_quirk_line := randf_range(HICCUP_EVERY.x, HICCUP_EVERY.y)
 
 static var _last_report_ms := -100000
 
 
 func _ready() -> void:
 	skin = SKINS[randi() % SKINS.size()]
+	quirk = _roll_quirk()
+	skin = QUIRK_SKINS.get(quirk, skin)
+	if quirk == "feeder":
+		add_to_group("feeders")
 	max_health = Tuning.PED_HEALTH
 	heat_on_hit = Tuning.HEAT_SHOOT_PED
 	heat_on_kill = Tuning.HEAT_KILL_PED
@@ -43,6 +62,8 @@ func _ready() -> void:
 
 
 func _think(delta: float) -> void:
+	if scripted:
+		return
 	if zombie:
 		_shamble(delta)
 		return
@@ -72,11 +93,41 @@ func _think(delta: float) -> void:
 	if _chat > 0.0 or waiting:
 		_chat -= delta
 		walk_dir(Vector2.ZERO, delta)
-		face(lerp_angle(facing, (player().global_position - global_position).angle(), minf(8.0 * delta, 1.0)))
+		var listener: Node2D = _chat_with if is_instance_valid(_chat_with) else player()
+		face(lerp_angle(facing, (listener.global_position - global_position).angle(), minf(8.0 * delta, 1.0)))
+		return
+	_quirk_time += delta
+	_say_quirk_line(delta)
+	if quirk == "loiter":  # đứng yên ở góc phố, nhìn người qua lại
+		walk_dir(Vector2.ZERO, delta)
 		return
 	if global_position.distance_to(_target) < 6.0:
 		_pick_next()
-	walk_dir((_target - global_position).normalized() * Tuning.PED_SPEED, delta)
+	var walk := (_target - global_position).normalized() * Tuning.PED_SPEED
+	if quirk == "drunk":
+		walk = walk * DRUNK_SPEED + walk.orthogonal().normalized() * sin(_quirk_time * DRUNK_SWAY_RATE) * DRUNK_SWAY
+	walk_dir(walk, delta)
+
+
+func _roll_quirk() -> String:
+	var roll := randf()
+	for q in NIGHT_QUIRKS if Game.is_night() else DAY_QUIRKS:
+		if roll < q[1]:
+			return q[0]
+		roll -= q[1]
+	return ""
+
+
+## Người say thỉnh thoảng nấc / lảm nhảm; kẻ đứng góc phố lên tiếng khi Jay đi ngang.
+func _say_quirk_line(delta: float) -> void:
+	_next_quirk_line -= delta
+	if _next_quirk_line > 0.0 or not (quirk == "drunk" or quirk == "loiter"):
+		return
+	var reach := LOITER_RANGE if quirk == "loiter" else INF
+	if global_position.distance_to(player().global_position) < reach and global_position.distance_to(city.camera.get_screen_center_position()) < Tuning.SPAWN_MIN_DIST:
+		Speech.say(self, Speech.pick("PED_DRUNK" if quirk == "drunk" else "PED_LOITER"))
+	var every := HICCUP_EVERY if quirk == "drunk" else LOITER_EVERY
+	_next_quirk_line = randf_range(every.x, every.y)
 
 
 ## Đêm zombie (mã gian lận): lê về phía Jay, tới sát thì cắn.
@@ -126,12 +177,24 @@ func _pick_next() -> void:
 
 ## Có thể bắt chuyện: còn sống, bình tĩnh (không chạy trốn, không đánh nhau, không bị chĩa súng).
 func can_chat() -> bool:
-	return alive and not zombie and _angry <= 0.0 and _flee_time <= 0.0 and not holdup.active()
+	return alive and not zombie and not scripted and _angry <= 0.0 and _flee_time <= 0.0 and not holdup.active()
 
 
 ## Dừng lại, quay sang nói chuyện với Jay một lúc.
 func chat() -> void:
 	_chat = CHAT_TIME
+	_chat_with = null
+
+
+## Rảnh rỗi: có đang đi dạo, không bận gì, nên bắt chuyện với người khác được.
+func is_idle() -> bool:
+	return can_chat() and _chat <= 0.0 and not waiting
+
+
+## Dừng lại, quay sang `other` nói chuyện trong `seconds` giây.
+func chat_with(other: Pedestrian, seconds: float) -> void:
+	_chat = seconds
+	_chat_with = other
 
 
 ## Thấy Jay phạm tội ở `pos` (khi chưa bị truy nã, không trong lúc làm nhiệm vụ): vài giây sau gọi cảnh sát.
@@ -173,17 +236,19 @@ func provoke(weapon := "pistol") -> void:
 	if armed:
 		Emote.show_on(self, Emote.Kind.ANGRY)
 	else:
-		Speech.say(self, FIGHT_LINES.pick_random())
+		Speech.say(self, Speech.pick("PED_FIGHT"))
 
 
 func flee(from: Vector2) -> void:
 	_flee_from = from
 	_flee_time = Tuning.PED_FLEE_TIME
 	_chat = 0.0
+	_chat_with = null
 	holdup.release(self)
 
 
 func _on_attacked(source: Node) -> void:
+	scripted = false  # bị tấn công giữa vụ cãi nhau: thôi kịch bản, phản ứng như người thường
 	if zombie or not source is Node2D:
 		return
 	var punched: bool = source is Player and source.vehicle == null and source.gun.def.kind == "melee"

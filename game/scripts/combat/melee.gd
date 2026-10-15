@@ -42,7 +42,7 @@ static func swing(shooter: Node2D, w: Dictionary, angle: float, step := 1) -> vo
 
 static func _strike(n: Node2D, shooter: Node2D, w: Dictionary, to: Vector2, finisher: bool) -> void:
 	var damage := float(w.damage) * (FINISHER_DAMAGE if finisher else 1.0)
-	_star(n.global_position - to.normalized() * Tuning.HUMAN_RADIUS, finisher)
+	star(n.global_position - to.normalized() * Tuning.HUMAN_RADIUS, finisher)
 	if finisher and n is Human:
 		n.knock_down(to.normalized() * float(w.knockback) * FINISHER_KNOCKBACK, damage, shooter)
 		return
@@ -52,7 +52,7 @@ static func _strike(n: Node2D, shooter: Node2D, w: Dictionary, to: Vector2, fini
 
 
 ## Sao tóe ở điểm trúng (cú cuối combo: to hơn).
-static func _star(pos: Vector2, big: bool) -> void:
+static func star(pos: Vector2, big: bool) -> void:
 	if Fx.root:
 		Fx.burst(pos, "spark", 10 if big else 6, 220.0 if big else 150.0, 0.22, Palette.HIT_STAR)
 		var glow := Fx.burst(pos, "glow", 1, 1.0, 0.14, Palette.HIT_STAR)

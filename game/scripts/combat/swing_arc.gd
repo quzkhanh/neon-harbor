@@ -9,7 +9,7 @@ const START := 0.5  # vệt hiện ra đã quét nửa chừng: lúc khựng hì
 const INNER := 0.45  # bán kính trong của vệt, so với tầm đánh
 const WIDTH := 7.0
 const POINTS := 14
-const BAT_WIDTH := 6.0
+const BAT_START := 0.15  # cán gậy cách tâm người đánh bao nhiêu phần tầm đánh
 
 var _angle := 0.0
 var _spread := 0.0
@@ -50,4 +50,4 @@ func _draw() -> void:
 	var radius := _reach * (1.0 + INNER) * 0.5
 	draw_arc(Vector2.ZERO, radius, start, tip, POINTS, Color(_color, _color.a * fade), _width * fade, true)
 	if _bat:
-		draw_line(Vector2.from_angle(tip) * _reach * INNER, Vector2.from_angle(tip) * _reach, Color(Palette.BAT_WOOD, fade), BAT_WIDTH, true)
+		BatShape.draw(self, Vector2.from_angle(tip) * _reach * BAT_START, tip, _reach * (1.0 - BAT_START), fade)

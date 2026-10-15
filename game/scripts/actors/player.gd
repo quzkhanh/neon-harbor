@@ -5,6 +5,7 @@ extends Human
 
 var vehicle: Vehicle
 var gun := Gun.new({}, true)
+var _held_bat: HeldBat
 var aim_angle := 0.0
 var aiming := false  # đang ngắm có chủ đích (chuột, analog/joystick phải), không phải hướng ngắm đi theo hướng chạy
 var controls_enabled := true
@@ -24,6 +25,8 @@ func _ready() -> void:
 	super()
 	collision_mask = Tuning.MASK_SWIMMER
 	add_to_group("player")
+	_held_bat = HeldBat.new(self)
+	body.add_child(_held_bat)
 	Game.weapons_changed.connect(_sync_weapon)
 	Game.skin_changed.connect(func() -> void:
 		skin = Game.skin
@@ -37,6 +40,7 @@ func _sync_weapon() -> void:
 		gun.reloading = 0.0
 		gun.cooldown = 0.2
 	set_pose("reload" if gun.reloading > 0.0 else str(gun.def.pose))
+	_held_bat.equipped = gun.def.get("id", "") == "bat"
 
 
 func _input(event: InputEvent) -> void:

@@ -134,6 +134,10 @@ const HONK_COOLDOWN := 3.0
 
 # Dân số quanh camera
 const MAX_PEDS := 16
+const NIGHT_FROM := 21.0  # giờ bắt đầu "ban đêm" (người đi đường đổi kiểu, thoại về đêm)
+const NIGHT_TO := 5.0
+## [giờ, tỉ lệ MAX_PEDS]: mật độ người đi đường theo giờ, nội suy giữa các mốc. Đêm vắng hơn nhưng không trống.
+const PED_DENSITY := [[0.0, 0.4], [5.0, 0.4], [7.0, 1.0], [18.0, 1.0], [22.0, 0.4], [24.0, 0.4]]
 const MAX_CARS := 10
 const SPAWN_MIN_DIST := 800.0
 const SPAWN_MAX_DIST := 1150.0

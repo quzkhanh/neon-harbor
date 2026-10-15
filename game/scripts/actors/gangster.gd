@@ -5,7 +5,6 @@ extends Npc
 
 const SKINS := ["soldier1", "manOld"]
 const KEEP_DISTANCE := 230.0
-const TAUNTS := ["GANG_TAUNT_1", "GANG_TAUNT_2", "GANG_TAUNT_3", "GANG_TAUNT_4"]
 const TAUNT_PAUSE := 0.7  # buông câu chọc ghẹo xong mới bắn
 
 var guard_pos := Vector2.ZERO
@@ -30,7 +29,7 @@ func _think(delta: float) -> void:
 	if not alerted:
 		if p.alive and can_see(target.global_position):
 			alert()
-			Speech.say(self, TAUNTS.pick_random(), {}, Palette.EMOTE_ANGRY)
+			Speech.say(self, Speech.pick("GANG_TAUNT"), {}, Palette.EMOTE_ANGRY)
 			_react += TAUNT_PAUSE
 		move(Vector2.ZERO, delta)
 		return

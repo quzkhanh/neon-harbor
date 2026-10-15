@@ -347,7 +347,6 @@ JOB_ERRAND_FIND,Find the lost package,Tìm gói đồ bị rơi
 JOB_ERRAND_RETURN,Bring the package back to its owner,Mang gói đồ về trả người nhờ
 NOTICE_ERRAND_FOUND,Found it. Bring it back to the owner.,Tìm thấy rồi. Mang về trả người nhờ.
 FAIL_ERRAND_OWNER,the owner died,người nhờ đã chết
-PED_PLEAD,Take it! Just don't shoot!,Cầm lấy! Đừng bắn tôi!
 PED_FIGHT_1,You want some? Come on!,Muốn ăn đòn hả? Nhào vô!
 PED_FIGHT_2,"Big mistake, buddy!","Sai lầm rồi, anh bạn!"
 PED_FIGHT_3,Hey! I'll knock you flat!,Này! Tao cho mày nằm đất!
@@ -379,3 +378,209 @@ JOB_PHONE_RETURN,Bring the phone back to Lucky,Mang điện thoại về trả L
 NOTICE_PHONE_FOUND,Got the phone. Bring it back to Lucky.,Lấy lại được điện thoại. Mang về trả Lucky.
 FAIL_THIEF_ESCAPED,the thief got away,tên trộm đã chạy thoát
 PED_RUMOR_4,Lucky Live owes half the harbor a lunch.,Lucky Live nợ nửa bến cảng một bữa trưa.
+MENU_HELP,How to play,Hướng dẫn chơi
+PAUSE_HELP,Controls and tips,Phím tắt và mẹo
+HELP_TITLE,How to play,Hướng dẫn chơi
+HELP_TAB_KEYS,Controls,Phím điều khiển
+HELP_TAB_BASICS,Basics,Cách chơi cơ bản
+HELP_CLOSE,Close,Đóng
+HELP_KEY_MOVE,W A S D / arrow keys,W A S D / phím mũi tên
+HELP_KEY_AIM,Mouse / left click,Chuột / chuột trái
+HELP_KEY_RELOAD,R,R
+HELP_KEY_SWAP,Mouse wheel / Q,Lăn chuột / Q
+HELP_KEY_SLOTS,1 to 0,Phím 1 đến 0
+HELP_KEY_INTERACT,E,E
+HELP_KEY_NITRO,Shift,Shift
+HELP_KEY_HANDBRAKE,Space,Space
+HELP_KEY_HORN,H,H
+HELP_KEY_MAP,M / Tab,M / Tab
+HELP_KEY_PAUSE,Esc / P,Esc / P
+HELP_TOUCH_LEFT,Left stick,Joystick trái
+HELP_TOUCH_RIGHT,Right stick,Joystick phải
+HELP_DO_MOVE,"Walk, or steer the car (the car turns the way you press)","Đi bộ, hoặc lái xe (bấm hướng muốn đi, xe tự rẽ theo)"
+HELP_DO_AIM,Aim and shoot (or swing a melee weapon),Ngắm và bắn (hoặc vung vũ khí cận chiến)
+HELP_DO_AIM_TOUCH,Aim; drag further to shoot (it locks onto nearby enemies),Ngắm; kéo xa hơn để bắn (tự hút tâm vào kẻ địch gần)
+HELP_DO_RELOAD,Reload,Nạp đạn
+HELP_DO_SWAP,Next weapon (hold to open the weapon wheel),Đổi súng kế tiếp (giữ để mở vòng chọn súng)
+HELP_DO_SWAP_TOUCH,Switch to the next weapon,Đổi sang súng kế tiếp
+HELP_DO_SLOTS,Pick a weapon directly,Chọn thẳng một khẩu súng
+HELP_DO_INTERACT,"Get in or out of a car, talk, enter doors, start jobs","Lên xuống xe, bắt chuyện, vào cửa, nhận việc"
+HELP_DO_NITRO,Nitro boost while driving,Tăng tốc nitro khi lái xe
+HELP_DO_HANDBRAKE,Handbrake: drift around corners,Phanh tay: drift qua khúc cua
+HELP_DO_HORN,Honk the horn,Bấm còi
+HELP_DO_MAP,"City map: shops, hospitals, garages and missions","Bản đồ thành phố: cửa hàng, bệnh viện, gara và nhiệm vụ"
+HELP_DO_PAUSE,Pause and open this guide,Tạm dừng và mở hướng dẫn này
+HELP_TIP_HEAL,How to heal,Cách hồi máu
+HELP_TIP_HEAL_BODY,"Stay out of trouble for a few seconds and your health comes back by itself, but only up to 60%. For more: walk into a hospital (free), pick up the medkits lying around, or buy a medkit at a gun shop. Armor is sold there too.","Tránh đòn vài giây là máu tự hồi, nhưng chỉ tới 60%. Muốn hơn: đi vào bệnh viện (miễn phí), nhặt hộp máu rơi trên đường, hoặc mua hộp máu ở cửa hàng súng. Giáp cũng bán ở đó."
+HELP_TIP_COPS,How to lose the cops,Cách cắt đuôi cảnh sát
+HELP_TIP_COPS_BODY,"The stars go down one by one while no cop can see you: drive away fast, turn into side streets and break the line of sight. The quickest way is a paint shop (paint-drop icon on the map): drive in and use it to lose every star at once. Sleeping at your own safehouse also clears them.","Sao truy nã giảm dần khi không cảnh sát nào nhìn thấy bạn: phóng xe thật nhanh, rẽ vào hẻm để mất tầm nhìn. Nhanh nhất là vào tiệm sửa xe (biểu tượng giọt sơn trên bản đồ): lái vào rồi dùng để mất hết sao ngay. Ngủ ở nhà an toàn của bạn cũng xoá hết sao."
+HELP_TIP_AVOID,How to avoid wanted stars,Cách tránh bị truy nã
+HELP_TIP_AVOID_BODY,"Cops only react to what they see. Shooting, stealing a car or hurting people in front of witnesses or cops raises your stars. Do it out of sight, or don't do it.","Cảnh sát chỉ phản ứng với điều họ thấy. Nổ súng, cướp xe hoặc đánh người trước mặt nhân chứng hay cảnh sát sẽ tăng sao. Muốn làm thì làm khuất tầm nhìn, hoặc đừng làm."
+HELP_TIP_MONEY,How to earn money,Cách kiếm tiền
+HELP_TIP_MONEY_BODY,"Follow the arrow to the pink circles for story missions. Between missions, take side jobs: couriers, taxi fares and more. Talk to people on the street for tips.","Đi theo mũi tên tới các vòng tròn hồng để làm nhiệm vụ chính. Giữa các nhiệm vụ có việc phụ: giao hàng, chở khách taxi và nhiều việc khác. Nói chuyện với người đi đường để biết thêm mẹo."
+HELP_TIP_CARS,Cars and garage,Xe cộ và gara
+HELP_TIP_CARS_BODY,"Walk up to any car and press the use key to take it. A wrecked or ugly car can be sold at a garage, and a safehouse lets you park your favorites.","Đi tới bất kỳ chiếc xe nào rồi bấm phím dùng để lên xe. Xe nát có thể bán ở gara, còn nhà an toàn cho bạn cất những chiếc xe ưng ý."
+HELP_TIP_WATER,Water,Dưới nước
+HELP_TIP_WATER_BODY,You can swim but you can't shoot in the water. Get out before the cops reach the shore.,Bạn có thể bơi nhưng không bắn được dưới nước. Lên bờ trước khi cảnh sát tới nơi.
+PED_HELLO_5,Mind the puddles. And the pigeons.,Coi chừng vũng nước. Với cả bầy bồ câu nữa.
+PED_HELLO_6,You look like you need a coffee.,Trông anh cần một ly cà phê đấy.
+PED_HELLO_7,"Fresh fish at the pier, if you're hungry.","Ngoài bến có cá tươi đấy, nếu anh đói."
+PED_HELLO_8,Don't stare at the neon. It stares back.,Đừng nhìn đèn neon lâu. Nó nhìn lại đấy.
+PED_HELLO_9,My dog does the same walk every day. So do I.,Con chó nhà tôi ngày nào cũng đi đúng một vòng. Tôi cũng vậy.
+PED_HELLO_10,"Nice night for a walk, huh?",Tối đẹp trời để đi dạo nhỉ?
+PED_HELLO_11,"Sorry, no spare change. Rent ate it.","Xin lỗi, hết tiền lẻ rồi. Tiền nhà ăn sạch."
+PED_HELLO_12,You new around here? Everybody waves in the harbor.,Anh mới tới à? Ở cảng này ai cũng vẫy tay chào.
+PED_RUMOR_5,They say the old cannery is haunted. Or just damp.,Nghe nói nhà máy đồ hộp cũ có ma. Hoặc chỉ là ẩm thôi.
+PED_RUMOR_6,Someone cleaned out a gun shop last week. Quietly.,Tuần trước có người vét sạch một tiệm súng. Rất êm.
+PED_RUMOR_7,The cops here only run when the donuts are warm.,Cảnh sát ở đây chỉ chịu chạy khi bánh còn nóng.
+PED_RUMOR_8,A man in a red car pays double for no questions.,Có gã lái xe đỏ trả gấp đôi để khỏi bị hỏi han.
+PED_RUMOR_9,I heard the harbor master sleeps in a boat. Every night.,Nghe nói ông chủ bến ngủ trên thuyền. Đêm nào cũng vậy.
+PED_RUMOR_10,The new streamer on the corner says he's a millionaire.,Gã livestream mới ở góc phố bảo mình là triệu phú.
+PED_RUMOR_11,Red Fangs got a new boss. Nobody's seen his face.,Red Fangs có sếp mới. Chưa ai thấy mặt.
+PED_RUMOR_12,They say a motorbike can outrun a helicopter. Don't test it.,Nghe nói xe máy chạy thắng được trực thăng. Đừng thử nhé.
+PED_FIGHT_4,"Oh, you picked the wrong guy!","Ồ, anh chọn nhầm người rồi!"
+PED_FIGHT_5,I'll show you how we do it downtown!,Để tôi chỉ cho anh cách của dân trung tâm!
+PED_FIGHT_6,Put 'em up!,Giơ nắm đấm lên!
+PED_FIGHT_7,Nobody pushes me around!,Không ai được đụng vào tôi!
+PED_FIGHT_8,You'll pay for that!,Anh sẽ trả giá!
+GANG_TAUNT_5,This block belongs to the Fangs. Leave. Or don't.,Dãy phố này của Red Fangs. Cút đi. Hoặc ở lại cũng được.
+GANG_TAUNT_6,Nice jacket. It'd look better on me.,Áo đẹp đấy. Mặc trên người tao còn đẹp hơn.
+GANG_TAUNT_7,Boss said no strangers. Boss didn't say no bullets.,Sếp bảo không cho người lạ. Sếp đâu cấm đạn.
+GANG_TAUNT_8,"Smile, Jay. It's your last photo.",Cười lên Jay. Đây là tấm ảnh cuối của mày.
+GANG_TAUNT_9,"Hey, hey, hey! Wrong neighborhood!",Này này này! Nhầm khu rồi nhé!
+GANG_TAUNT_10,"Fangs, on me! We got a visitor!","Anh em Fangs, theo tao! Có khách tới!"
+PED_PLEAD_1,Take it! Just don't shoot!,Cầm lấy! Đừng bắn tôi!
+PED_PLEAD_2,Please! It's all I have!,Làm ơn! Tôi chỉ có chừng này thôi!
+PED_PLEAD_3,"Easy, easy! Here, take the wallet!","Từ từ, từ từ! Đây, lấy ví đi!"
+PED_PLEAD_4,I have a family! Take the cash!,Tôi còn gia đình! Lấy tiền đi!
+PED_PLEAD_5,Don't hurt me! It's yours!,Đừng làm tôi đau! Của anh hết đấy!
+PED_RAIN_1,Of course it rains the one day I forget my umbrella.,Đúng là mưa đúng hôm tôi quên mang dù.
+PED_RAIN_2,Rain makes the neon look nicer. Still wet though.,Mưa làm đèn neon đẹp hơn. Nhưng vẫn ướt.
+PED_RAIN_3,Drive slow in this. Roads get slick near the docks.,Lái chậm thôi. Đường gần bến trơn lắm.
+PED_RAIN_4,My shoes have a lake in them.,Giày tôi giờ thành cái hồ rồi.
+PED_RAIN_5,Good weather for staying home and doing nothing.,Thời tiết đẹp để ở nhà và chẳng làm gì.
+PED_NIGHT_1,Late for walking alone. Stay near the lights.,Muộn rồi mà còn đi một mình. Đi gần chỗ có đèn nhé.
+PED_NIGHT_2,The harbor is different after midnight.,Cảng về khuya khác hẳn.
+PED_NIGHT_3,Only thieves and bakers are awake now.,Giờ này chỉ có trộm với thợ làm bánh còn thức.
+PED_NIGHT_4,I can't sleep. The foghorn never stops.,Tôi không ngủ được. Còi sương mù kêu mãi.
+PED_NIGHT_5,"Neon looks best at night. Everything else, worst.",Neon đẹp nhất về đêm. Mọi thứ khác thì tệ nhất.
+PED_COPS_1,"Whatever you did, I didn't see it. Honest.",Anh làm gì tôi cũng không thấy. Thật đấy.
+PED_COPS_2,Sirens behind you? Don't stand next to me!,Còi hú sau lưng anh à? Đừng đứng cạnh tôi!
+PED_COPS_3,Cops are asking about you. Get off the street.,Cảnh sát đang hỏi thăm anh đấy. Rời khỏi đường đi.
+PED_COPS_4,"A paint shop fixes that problem, you know.",Tiệm sơn xe giải quyết được chuyện đó đấy.
+PED_COPS_5,You're hot right now. Keep walking.,Giờ anh đang bị truy đó. Cứ đi tiếp đi.
+PED_CONVO_1_1,Did you feed the cat?,Cậu cho mèo ăn chưa?
+PED_CONVO_1_2,I thought you did.,Tớ tưởng cậu cho rồi.
+PED_CONVO_1_3,Then who has the cat?,Vậy ai đang giữ con mèo?
+PED_CONVO_2_1,They raised the dock fee again.,Họ lại tăng phí bến rồi.
+PED_CONVO_2_2,Everything goes up except my pay.,Cái gì cũng tăng trừ lương của tôi.
+PED_CONVO_3_1,Heard the helicopter last night?,Đêm qua nghe thấy trực thăng không?
+PED_CONVO_3_2,Heard it? It parked on my roof.,Nghe á? Nó đậu trên mái nhà tôi luôn.
+PED_CONVO_4_1,My cousin swears he saw a shark in the harbor.,Anh họ tôi thề là thấy cá mập ngoài cảng.
+PED_CONVO_4_2,Your cousin swears about a lot of things.,Anh họ cậu thề về nhiều thứ lắm.
+PED_CONVO_4_3,This time he had photos!,Lần này ổng có ảnh đấy!
+PED_CONVO_5_1,Lunch at the noodle stand?,Trưa nay ăn mì ở xe đẩy nhé?
+PED_CONVO_5_2,Only if you're paying.,Chỉ khi cậu trả tiền.
+PED_CONVO_5_3,Deal. Next time you pay.,Chốt. Lần sau cậu trả.
+PED_CONVO_6_1,"Another shift, another bad coffee.","Lại một ca nữa, lại một ly cà phê dở."
+PED_CONVO_6_2,At least it's warm.,Ít ra nó còn ấm.
+PED_CONVO_7_1,Did you hear that engine? Beautiful.,Nghe tiếng máy đó chưa? Tuyệt vời.
+PED_CONVO_7_2,Sounds like a loan I can't afford.,Nghe như khoản vay tôi không trả nổi.
+PED_CONVO_8_1,"I'm telling you, the lottery is rigged.","Tớ nói thật, xổ số có gian lận."
+PED_CONVO_8_2,You've never won because you never buy a ticket.,Cậu chưa trúng vì chưa bao giờ mua vé.
+PED_CONVO_8_3,Exactly. Rigged.,Đúng vậy. Gian lận.
+PED_CONVO_9_1,Watch out near the Red Fangs corner.,Coi chừng góc phố của Red Fangs.
+PED_CONVO_9_2,I always do. I cross the street.,Lúc nào tôi cũng thế. Tôi sang đường khác.
+PED_CONVO_10_1,"Is it me, or is the neon brighter today?",Tớ bị hoa mắt hay hôm nay neon sáng hơn?
+PED_CONVO_10_2,It's you. You need glasses.,Cậu hoa mắt thật. Cậu cần đeo kính.
+PED_CONVO_11_1,My phone says it's raining. It's not.,Điện thoại tớ báo đang mưa. Mà đâu có mưa.
+PED_CONVO_11_2,Your phone and my knees disagree.,Điện thoại cậu với đầu gối tớ bất đồng ý kiến rồi.
+PED_CONVO_11_3,Take an umbrella anyway.,Cứ mang dù đi cho chắc.
+PED_CONVO_12_1,Did you see that streamer shouting at nobody?,Cậu thấy gã livestream hét với không khí chưa?
+PED_CONVO_12_2,He's shouting at his chat.,Ổng đang hét với khán giả.
+PED_CONVO_12_3,Same thing.,Cũng như nhau thôi.
+PED_CONVO_13_1,Think the harbor will ever get quiet?,Cậu nghĩ cảng này có lúc nào yên không?
+PED_CONVO_13_2,Quiet is just the pause between sirens.,Yên tĩnh chỉ là quãng nghỉ giữa các hồi còi.
+PED_CONVO_14_1,I saw a man walking a lobster.,Tớ thấy một ông dắt con tôm hùm đi dạo.
+PED_CONVO_14_2,On a leash?,Có dây xích luôn à?
+PED_CONVO_14_3,A very small one.,Một sợi rất nhỏ.
+CRITTER_DOG_1,Woof!,Gâu!
+CRITTER_DOG_2,Woof woof!,Gâu gâu!
+CRITTER_DOG_3,Arf!,Hửm gâu!
+CRITTER_DOG_4,Hmph. Woof.,Hừm. Gâu.
+CRITTER_CAT_1,Meow.,Meo.
+CRITTER_CAT_2,Mrrp?,Gừ?
+CRITTER_CAT_3,...Meow.,...Meo.
+CRITTER_CAT_4,Purr.,Rừ rừ.
+CRITTER_GULL_1,Kree!,Quác!
+CRITTER_GULL_2,Kree-ah!,Quác quác!
+CRITTER_GULL_3,Give me fries!,Cho miếng khoai nào!
+CRITTER_CRAB_1,Click click.,Tách tách.
+CRITTER_CRAB_2,Snip!,Kẹp!
+CRITTER_CRAB_3,Sideways is a lifestyle.,Đi ngang là phong cách sống.
+PED_ROBOT_1,"BEEP. Greetings, organic.","BÍP. Chào bạn, sinh vật hữu cơ."
+PED_ROBOT_2,I am not a robot. Beep.,Tôi không phải robot. Bíp.
+PED_ROBOT_3,Battery at 12 percent. Send snacks.,Pin còn 12 phần trăm. Gửi đồ ăn vặt.
+PED_ROBOT_4,Calculating... you owe me a high five.,Đang tính... bạn nợ tôi một cú đập tay.
+PED_ROBOT_5,Error 404: street not found.,Lỗi 404: không tìm thấy con phố.
+PED_ROBOT_6,Oil change is on Thursday. Please clap.,Thay nhớt vào thứ Năm. Xin hãy vỗ tay.
+PED_ROBOT_7,My hobby is standing still. I am winning.,Sở thích của tôi là đứng yên. Tôi đang thắng.
+PED_ROBOT_8,Do you have a charger? Asking for me.,Bạn có sạc không? Tôi hỏi giùm tôi.
+PED_FEEDER_1,Shh. You'll scare my pigeons.,Suỵt. Cậu làm bầy bồ câu của ông sợ bây giờ.
+PED_FEEDER_2,Every one of them has a name. That's Gary.,Con nào ông cũng đặt tên. Kia là Gary.
+PED_FEEDER_3,Forty years on this bench. Never bored.,Bốn mươi năm ngồi ghế này. Chưa bao giờ chán.
+PED_FEEDER_4,Crumbs? No. Premium seed. They have standards.,Vụn bánh á? Không. Hạt xịn. Chúng nó kén lắm.
+PED_FEEDER_5,Pigeons hear everything. Be nice.,Bồ câu nghe hết đấy. Ăn nói cho đàng hoàng.
+PED_FEEDER_6,"In my day, the harbor had more fish and fewer sirens.","Hồi ông trẻ, cảng nhiều cá hơn và ít còi hú hơn."
+PED_FEEDER_7,Careful with that thing. They bruise easily.,Cẩn thận cái thứ đó. Chúng dễ hoảng lắm.
+PED_FEEDER_8,"Go on, scoot. You're blocking my audience.",Đi đi. Cậu đang chắn khán giả của ông.
+HELP_TIP_BADGE,The star-shaped badge,Huy hiệu hình ngôi sao
+HELP_TIP_BADGE_BODY,"Pick up a badge lying on the street and a friendly cop looks the other way: one wanted star less. Badges grow back after a few minutes. Animals are harmless and can't be hurt, so enjoy them.","Nhặt huy hiệu nằm trên đường là một cảnh sát quen sẽ làm ngơ: bớt một sao truy nã. Huy hiệu mọc lại sau vài phút. Thú vật vô hại và không thể bị thương, cứ thoải mái ngắm chúng."
+INCIDENT_BLAME_1,You hit me!,Anh đâm vào xe tôi!
+INCIDENT_BLAME_2,"Where did you learn to drive, the docks?","Học lái xe ở đâu vậy, ngoài bến à?"
+INCIDENT_BLAME_3,My bumper! Look at my bumper!,Cái cản của tôi! Nhìn cái cản của tôi đi!
+INCIDENT_BLAME_4,You stopped out of nowhere!,Tự dưng anh phanh gấp!
+INCIDENT_BLAME_5,Did you even check your mirror?,Anh có nhìn gương không vậy?
+INCIDENT_BLAME_6,"That's my brother's car, you know!",Xe này của anh trai tôi đấy!
+INCIDENT_DENY_1,You were way too close!,Anh bám sát quá mà!
+INCIDENT_DENY_2,I signaled. Probably.,Tôi có xi-nhan. Chắc là có.
+INCIDENT_DENY_3,"Your brakes, not mine!",Phanh của anh chứ đâu phải của tôi!
+INCIDENT_DENY_4,You came out of nowhere!,Anh từ đâu chui ra vậy!
+INCIDENT_DENY_5,"Call the insurance, pal.","Gọi bảo hiểm đi, anh bạn."
+INCIDENT_DENY_6,Blame the weather!,Đổ thừa thời tiết đi!
+INCIDENT_FIGHT_1,Say that again!,Nói lại coi!
+INCIDENT_FIGHT_2,Take that!,Ăn này!
+INCIDENT_FIGHT_3,"Come here, you!",Lại đây!
+INCIDENT_FIGHT_4,Enough! Enough!,Đủ rồi! Đủ rồi!
+INCIDENT_FIGHT_5,Ow! My shirt!,Á! Cái áo của tôi!
+INCIDENT_FIGHT_6,Both of us are paying!,Cả hai đứa mình cùng đền đấy!
+INCIDENT_SETTLE_1,Fine. Insurance will handle it.,Thôi được. Bảo hiểm lo.
+INCIDENT_SETTLE_2,Forget it. I'm late anyway.,Bỏ đi. Dù sao tôi cũng trễ rồi.
+INCIDENT_SETTLE_3,"Next time, use your mirrors.",Lần sau nhớ nhìn gương.
+INCIDENT_SETTLE_4,"Alright, alright. No hard feelings.",Được rồi. Coi như không có gì.
+INCIDENT_SETTLE_5,Shake on it?,Bắt tay nhé?
+INCIDENT_SETTLE_6,Let's just go.,"Thôi, đi thôi."
+PED_DRUNK_1,*hic* Is the street always this crooked?,*hức* Đường này lúc nào cũng cong vậy hả?
+PED_DRUNK_2,"I love you, man. Who are you?",Tao quý mày lắm. Mà mày là ai?
+PED_DRUNK_3,One more drink and I'm going home. Promise.,Thêm một ly nữa là tao về. Hứa.
+PED_DRUNK_4,The moon is following me. Rude.,Mặt trăng cứ đi theo tôi. Vô duyên.
+PED_DRUNK_5,*hic* Sorry. Wrong lamppost.,*hức* Xin lỗi. Nhầm cột đèn.
+PED_DRUNK_6,Where's my car? Oh. I walked here.,Xe tôi đâu? À. Tôi đi bộ tới.
+PED_DRUNK_7,Everything is great! Everything is... spinning.,Mọi thứ tuyệt lắm! Mọi thứ... đang quay.
+PED_DRUNK_8,Don't tell my wife. Or my boss. Or my wife's boss.,Đừng nói với vợ tôi. Hay sếp tôi. Hay sếp của vợ tôi.
+PED_NIGHTSHIFT_1,Third night shift in a row. Send coffee.,Ca đêm thứ ba liên tiếp. Gửi cà phê đi.
+PED_NIGHTSHIFT_2,Night is the only time the harbor is honest.,Đêm là lúc duy nhất cảng này thành thật.
+PED_NIGHTSHIFT_3,Clocking in. Again.,Đi chấm công. Lại nữa.
+PED_NIGHTSHIFT_4,The pay is bad but the view is neon.,Lương thì tệ nhưng cảnh thì neon.
+PED_NIGHTSHIFT_5,"Don't walk near the docks alone, friend.","Đừng đi một mình gần bến, bạn ơi."
+PED_NIGHTSHIFT_6,I haven't seen the sun in nine days.,Chín ngày rồi tôi chưa thấy mặt trời.
+PED_NIGHTSHIFT_7,Quiet shift so far. Don't jinx it.,Ca này yên ắng. Đừng nói gở.
+PED_NIGHTSHIFT_8,"Taxi's off duty. So am I, soon.",Taxi nghỉ ca rồi. Tôi cũng sắp.
+PED_LOITER_1,"Looking for something, friend?",Tìm gì đó hả bạn?
+PED_LOITER_2,Keep walking. Nothing to see.,Đi tiếp đi. Không có gì để xem đâu.
+PED_LOITER_3,Nice night. Shame if it got complicated.,Đêm đẹp trời. Tiếc là nếu nó rắc rối.
+PED_LOITER_4,We're just waiting. Don't ask for whom.,Bọn tôi chỉ đứng chờ. Đừng hỏi chờ ai.
+PED_LOITER_5,You're on our corner.,Cậu đang đứng trên góc phố của bọn tôi.
+PED_LOITER_6,Got a light? No? Then move along.,Có lửa không? Không à? Vậy đi tiếp đi.
+PED_LOITER_7,Nobody here. Never was.,Ở đây chả có ai. Chưa bao giờ có.
+PED_LOITER_8,Hey. Walk faster.,Này. Đi nhanh lên.

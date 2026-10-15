@@ -114,6 +114,10 @@ func lunge() -> void:
 	_lunge = LUNGE_TIME
 
 
+func is_swinging() -> bool:
+	return _lunge > 0.0
+
+
 ## Trúng đòn cận chiến: lắc lư, gần như đứng khựng một lúc.
 func stagger() -> void:
 	_stagger = STAGGER_TIME

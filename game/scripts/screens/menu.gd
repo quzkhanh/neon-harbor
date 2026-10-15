@@ -34,7 +34,7 @@ func _ready() -> void:
 	var spacer := Control.new()
 	spacer.custom_minimum_size.y = 24
 	col.add_child(spacer)
-	var keys := ["MENU_CONTINUE", "MENU_NEW_GAME", "MENU_FULLSCREEN", "MENU_SETTINGS", "MENU_QUIT"]
+	var keys := ["MENU_CONTINUE", "MENU_NEW_GAME", "MENU_FULLSCREEN", "MENU_HELP", "MENU_SETTINGS", "MENU_QUIT"]
 	for key in keys:
 		var b := Ui.button(key, "AccentButton" if key == "MENU_CONTINUE" or (key == "MENU_NEW_GAME" and not Game.has_progress()) else "")
 		b.custom_minimum_size.x = 320
@@ -42,12 +42,13 @@ func _ready() -> void:
 		_buttons.append(b)
 	_buttons[0].visible = Game.has_progress()
 	_buttons[2].visible = OS.has_feature("web") and TouchControls.wanted() and JavaScriptBridge.eval("document.fullscreenEnabled ? 1 : 0") == 1
-	_buttons[4].visible = not OS.has_feature("web")
+	_buttons[5].visible = not OS.has_feature("web")
 	_buttons[0].pressed.connect(Game.continue_game)
 	_buttons[1].pressed.connect(_new_game)
 	_buttons[2].pressed.connect(_fullscreen)
-	_buttons[3].pressed.connect(_settings)
-	_buttons[4].pressed.connect(Game.quit)
+	_buttons[3].pressed.connect(_open.bind(HelpPanel))
+	_buttons[4].pressed.connect(_open.bind(SettingsPanel))
+	_buttons[5].pressed.connect(Game.quit)
 	var credits := Ui.label("MENU_CREDITS", "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT)
 	credits.size_flags_vertical = Control.SIZE_SHRINK_END
 	margin.add_child(credits)
@@ -89,8 +90,8 @@ func _new_game() -> void:
 	Game.new_game()
 
 
-func _settings() -> void:
-	var modal := SettingsPanel.new()
+func _open(panel: GDScript) -> void:
+	var modal: Modal = panel.new()
 	add_child(modal)
 	await modal.closed
 	Ui.focus_chain(_buttons)

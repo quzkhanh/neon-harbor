@@ -329,6 +329,10 @@ func lose_star() -> void:
 	_update_stars()
 
 
+func is_night() -> bool:
+	return clock >= Tuning.NIGHT_FROM or clock < Tuning.NIGHT_TO
+
+
 func clear_wanted() -> void:
 	heat = 0.0
 	_update_stars()

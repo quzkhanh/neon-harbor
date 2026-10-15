@@ -54,7 +54,7 @@ func _drop_wallet(ped: Pedestrian) -> void:
 	_mugged = true
 	var to_player := (ped.player().global_position - ped.global_position).normalized()
 	Pickup.spawn_cash(ped.city.effects, ped.global_position + to_player * Tuning.HUMAN_RADIUS * 2.0, randi_range(WALLET.x, WALLET.y))
-	Speech.say(ped, "PED_PLEAD")
+	Speech.say(ped, Speech.pick("PED_PLEAD"))
 	ped.flee(ped.player().global_position)
 	for other in ped.get_tree().get_nodes_in_group("peds"):
 		if other != ped and other.alive:

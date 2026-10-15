@@ -64,6 +64,9 @@ run_test WATER water.gd || fail=1
 step "6h. social.gd (đợt 10: giơ tay, rơi ví, đấm trả, bắt chuyện, việc vặt, Red Fangs chọc ghẹo)"
 run_test SOCIAL social.gd || fail=1
 
+step "6i. incident.gd (đợt 11: va chạm giao thông, tài xế cãi nhau / đánh nhau rồi đi tiếp)"
+run_test INCIDENT incident.gd || fail=1
+
 step "7. touch.gd"
 run_test TOUCH touch.gd || fail=1
 

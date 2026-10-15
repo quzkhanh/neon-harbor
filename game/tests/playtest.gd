@@ -194,7 +194,8 @@ func _pause_settings(city: Node) -> void:
 		await key(KEY_E)
 	await key(KEY_ESCAPE)
 	expect(city.overlays.current != null and paused, "Esc không mở menu tạm dừng")
-	await key(KEY_DOWN)
+	for i in 2:  # Tiếp tục -> Phím tắt -> Cài đặt
+		await key(KEY_DOWN)
 	await key(KEY_ENTER)
 	await physics(5)
 	await key(KEY_RIGHT)
@@ -257,7 +258,7 @@ func _carjack_sell(city: Node) -> void:
 
 func _menu_continue(city: Node) -> void:
 	await key(KEY_ESCAPE)
-	for i in 3:  # Tiếp tục -> Cài đặt -> Thống kê -> Về menu
+	for i in 4:  # Tiếp tục -> Phím tắt -> Cài đặt -> Thống kê -> Về menu
 		await key(KEY_DOWN)
 	await key(KEY_ENTER)
 	expect(await until(func() -> bool: return current_scene != null and current_scene.scene_file_path == game.MENU_SCENE, 300), "Về menu không được")
