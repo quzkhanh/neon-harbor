@@ -38,6 +38,7 @@ func _start() -> void:
 	game = root.get_node("Game")
 	game.save_path = TEST_SAVE
 	game.reset_progress()
+	game.settings["tutorial"] = true  # không phụ thuộc cài đặt thật của người chơi (đã tắt hướng dẫn)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_SAVE))
 	_run()
 
