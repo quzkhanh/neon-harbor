@@ -2,14 +2,9 @@ A top-down open-world action game: nine story missions, a five-star wanted syste
 safehouses and businesses, day and night with rain, English and Vietnamese. Play in the browser:
 https://quzkhanh.github.io/neon-harbor-web/
 
-## What's new in 0.10.0
+## What's new in 0.10.1
 
-- A living street: pigeons, cats, dogs, seagulls and crabs wander the city (and can never be hurt, they just run or fly away). Quirky pedestrians too: a robot, an old man feeding pigeons.
-- Pedestrians talk much more: many more lines, chatter between two people, and remarks about the rain, the night or your wanted level.
-- Traffic accidents: two cars crash and block the road, traffic piles up honking, the drivers get out, argue, sometimes brawl, make up and drive away. Intersections no longer freeze cars forever.
-- Night changes the streets instead of emptying them: fewer people, but drunks, night-shift workers and corner loiterers.
-- The baseball bat is now clearly visible in your hands. Cars have head and tail lamps so you can tell front from back, and motorbikes show their rider.
-- New "How to play" screen (main menu and pause menu): controls, healing, losing the cops, the police badge and more.
+- Cars now push each other: bump a parked car and it moves, ram a traffic car and it is shoved instead of ignoring you. This also makes it easier to clear a queue behind a road accident.
 
 ## Download
 
