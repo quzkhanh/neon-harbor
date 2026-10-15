@@ -118,7 +118,10 @@ func _enter(next: Phase) -> void:
 
 func _aborted() -> bool:
 	for p in _peds:
-		if not is_instance_valid(p) or not p.alive or not p.scripted:  # người đã bị free so với null cũng bằng null
+		var gone := not is_instance_valid(p)  # người đã bị free so với null cũng bằng null, nên phải hỏi is_instance_valid
+		if gone and _phase != Phase.LEAVE:  # pha LEAVE tự đặt null cho người đã lên xe
+			return true
+		if not gone and (not p.alive or not p.scripted):
 			return true
 	return false
 
