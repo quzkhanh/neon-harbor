@@ -1,7 +1,7 @@
 class_name Police
 extends Node
 ## Truy nã: sinh cảnh sát (đi bộ, xe, đặc nhiệm, rào chắn, trực thăng) ngoài màn hình theo số sao;
-## không bị thấy đủ lâu thì giảm sao.
+## không bị thấy đủ lâu thì giảm sao. Chia lượt bắn: chỉ vài cảnh sát gần nhất trong tầm được nổ súng cùng lúc.
 
 const COPS_PER_CAR := 2
 
@@ -12,6 +12,7 @@ var roadblocks: Roadblocks
 var _cars: Array = []  # không khai kiểu: có thể chứa xe đã bị giải phóng cho tới lần lọc kế tiếp
 var _timer := 0.0
 var _heli_cd := 0.0
+var _turn_timer := 0.0
 
 
 func _init(c: City) -> void:
@@ -37,6 +38,10 @@ func _process(delta: float) -> void:
 		_despawn_far(0.0)
 		return
 	roadblocks.tick(delta, stars)
+	_turn_timer -= delta
+	if _turn_timer <= 0.0:
+		_turn_timer = Tuning.FIRE_TURN_EVERY
+		_share_fire(stars)
 	if _seen():
 		unseen = 0.0
 	else:
@@ -79,6 +84,18 @@ func _seen() -> bool:
 		if space.intersect_ray(PhysicsRayQueryParameters2D.create(v.global_position, target, Tuning.LAYER_WORLD)).is_empty():
 			return true
 	return false
+
+
+func _share_fire(stars: int) -> void:
+	var target := city.player.vehicle.global_position if city.player.vehicle else city.player.global_position
+	var in_range := cops().filter(func(c: Node) -> bool:
+		return c.alive and c.global_position.distance_to(target) < Tuning.NPC_SHOOT_RANGE and c.can_see(target))
+	in_range.sort_custom(func(a: Node, b: Node) -> bool:
+		return a.global_position.distance_squared_to(target) < b.global_position.distance_squared_to(target))
+	for c in cops():
+		c.may_fire = false
+	for i in mini(in_range.size(), Tuning.COP_SHOOTERS[stars]):
+		in_range[i].may_fire = true
 
 
 func _spawn(stars: int) -> void:

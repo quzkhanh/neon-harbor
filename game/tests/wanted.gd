@@ -1,6 +1,7 @@
 extends "res://tests/harness.gd"
 ## Truy nã 5 sao (đợt 8): HUD 5 sao; trực thăng tới, rọi đèn thấy người chơi, bắn rơi được; xe đặc nhiệm thả
-## 3 lính súng trường; rào chắn chặn phía trước xe đang chạy, dải đinh làm thủng lốp; huy hiệu hối lộ giảm 1 sao.
+## 3 lính súng trường; rào chắn chặn phía trước xe đang chạy, dải đinh làm thủng lốp; huy hiệu hối lộ giảm 1 sao;
+## chia lượt bắn: cả đám cảnh sát vây quanh nhưng chỉ vài người gần nhất được nổ súng cùng lúc.
 ## Chạy: godot --headless --path game -s res://tests/wanted.gd
 
 const ROAD := Vector2i(30, 22)
@@ -18,6 +19,7 @@ func _run() -> void:
 	await _check_swat(city)
 	await _check_roadblock(city)
 	await _check_badge(city)
+	await _check_fire_turns(city)
 	finish("WANTED")
 
 
@@ -106,3 +108,22 @@ func _check_badge(city: Node) -> void:
 	city.player.global_position = badge
 	await physics(10)
 	expect(game.stars == 2, "nhặt huy hiệu hối lộ: còn %d sao (mong 2)" % game.stars)
+
+
+func _check_fire_turns(city: Node) -> void:
+	game.set_stars(5)
+	game.health = 100000.0
+	var p: Node = city.player
+	var ring: Array = []
+	for i in 8:
+		ring.append(city.spawn_npc(load("res://scripts/actors/cop.gd"), p.global_position + Vector2.from_angle(i * TAU / 8.0) * (120.0 + i * 15.0)))
+	await physics(40)
+	var shooters := ring.filter(func(c: Node) -> bool: return c.may_fire)
+	var limit: int = load("res://scripts/core/tuning.gd").COP_SHOOTERS[5]
+	expect(shooters.size() > 0 and shooters.size() <= limit, "8 cảnh sát vây quanh mà %d người được bắn (tối đa %d)" % [shooters.size(), limit])
+	var nearest: Node = ring[0]
+	expect(nearest.may_fire, "người gần nhất không được lượt bắn")
+	for c in ring:
+		c.queue_free()
+	game.clear_wanted()
+	game.health = 100.0

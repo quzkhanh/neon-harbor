@@ -56,6 +56,7 @@ func _check_holdup(city: Node) -> void:
 	game.select_weapon("pistol")
 	var victim := _ped(city, Vector2(150, 0))
 	var witness := _ped(city, Vector2(0, -160))
+	witness.set_physics_process(false)  # đứng yên: tự đi lang thang có thể khuất sau toà nhà ngay cạnh
 	await physics(30)
 	expect(victim.pose == "stand" and victim._flee_time <= 0.0, "cầm súng đứng yên (không ngắm) mà người phía trước đã giơ tay")
 	victim.global_position = p.global_position + Vector2(150, 0)  # người này tự đi lang thang trong lúc chờ

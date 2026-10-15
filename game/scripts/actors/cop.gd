@@ -3,6 +3,7 @@ extends Npc
 ## Cảnh sát NHPD: khi có sao truy nã thì đuổi theo và bắn; hết sao thì rời đi.
 
 var _patrol_dir := Vector2.ZERO
+var may_fire := true  # Police chia lượt bắn (vài người gần nhất), kẻo cả đám cùng bắn một lúc
 
 
 func _ready() -> void:
@@ -35,7 +36,12 @@ func _think(delta: float) -> void:
 	_patrol_dir = Vector2.ZERO
 	var dist := global_position.distance_to(target.global_position)
 	if dist < Tuning.NPC_SHOOT_RANGE and can_see(target.global_position):
-		shoot_at(target.global_position, delta)
+		if may_fire:
+			shoot_at(target.global_position, delta)
+			return
+		_react = Tuning.NPC_REACTION  # chưa tới lượt: giữ vị trí, chĩa súng về phía Jay
+		walk_dir(Vector2.ZERO, delta)
+		face(lerp_angle(facing, (target.global_position - global_position).angle(), minf(12.0 * delta, 1.0)))
 	else:
 		_react = Tuning.NPC_REACTION
 		walk_to(target.global_position, Tuning.COP_SPEED, delta)
