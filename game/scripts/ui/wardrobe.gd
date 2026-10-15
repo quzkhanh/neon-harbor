@@ -27,8 +27,28 @@ func _build(content: VBoxContainer) -> void:
 			close(skin))
 		grid.add_child(b)
 		buttons.append(b)
+	var style := _hair_button("WARDROBE_HAIR", "HAIR_STYLE", Hair.STYLES, Game.hair, func(i: int) -> void: Game.set_hair(Hair.STYLES[i], Game.hair_color))
+	var tint := _hair_button("WARDROBE_HAIR_COLOR", "HAIR_COLOR", range(Palette.HAIR.size()), Game.hair_color, func(i: int) -> void: Game.set_hair(Game.hair, i))
+	content.add_child(style)
+	content.add_child(tint)
+	buttons.append_array([style, tint])
 	var back := Ui.button("SAFEHOUSE_LEAVE")
 	back.pressed.connect(close)
 	content.add_child(back)
 	buttons.append(back)
 	Ui.focus_chain.call_deferred(buttons.filter(func(b: Button) -> bool: return not b.disabled))
+
+
+## Nút xoay vòng qua `options`, hiện tên lựa chọn hiện tại (khoá nhóm `prefix_<số thứ tự từ 1>`) và gọi `apply(chỉ số)`.
+func _hair_button(key: String, prefix: String, options: Array, current: Variant, apply: Callable) -> Button:
+	var b := Ui.button("")
+	b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	var index := [options.find(current)]  # lambda bắt biến theo giá trị: giữ trong mảng để cộng dồn qua các lần bấm
+	var refresh := func() -> void:
+		b.text = I18n.fmt(key, {"name": tr("%s_%d" % [prefix, index[0] + 1])})
+	refresh.call()
+	b.pressed.connect(func() -> void:
+		index[0] = (index[0] + 1) % options.size()
+		apply.call(index[0])
+		refresh.call())
+	return b

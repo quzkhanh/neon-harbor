@@ -71,6 +71,7 @@ func _bail() -> void:
 		reward += pay
 		Game.add_money(pay)
 		Game.bump("criminals")
+		Game.deed("criminal")
 		Sfx.play("cash")
 		Game.notice.emit(I18n.fmt("NOTICE_CROOK_DOWN", {"money": I18n.money(pay)}))
 		_next())

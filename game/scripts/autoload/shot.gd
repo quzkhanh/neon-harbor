@@ -16,7 +16,7 @@ const DRIVE_CELL := Vector2i(-15, -11)
 const CORPSE_CELL := Vector2i(6, -9)
 const SCENARIOS := [
 	"menu", "settings", "help", "help_basics", "city_walk", "combat", "driving", "moto", "wanted3", "shop", "dialog",
-	"mission_complete", "death", "hospital", "pause", "touch", "corpses", "map",
+	"mission_complete", "death", "hospital", "jail", "pause", "touch", "corpses", "map",
 	"downtown", "market", "uptown", "marina", "tutorial",
 ]
 
@@ -112,8 +112,9 @@ func _city() -> void:
 		"mission_complete":
 			Game.missions_done.append(1)
 			city.overlays.show_mission_complete(1, 500, ["smg"])
-		"death", "hospital":
+		"death", "hospital", "jail":
 			city.missions.start(1, false)
+			Game.set_stars(2)
 			await _frames(5)
 			p.take_hit(500.0, Vector2.RIGHT, null)
 			while city.overlays.current == null:
@@ -121,6 +122,10 @@ func _city() -> void:
 			if _name == "hospital":
 				await _frames(10)
 				city.overlays.current.close(DeathScreen.Revive.HOSPITAL)
+				await _frames(30)
+			if _name == "jail":
+				await _frames(10)
+				city.overlays.current.close(DeathScreen.Revive.JAIL)
 				await _frames(30)
 		"pause":
 			city.overlays.show_pause()

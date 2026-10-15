@@ -49,6 +49,7 @@ HINT_RESPRAY,"[{key}] Repair and respray ({price}): good as new, the cops lose y
 DIALOG_CONTINUE,[{key}] or click to continue,[{key}] hoặc nhấp để tiếp tục
 SIGN_SHOP,GUN SHOP,CỬA HÀNG SÚNG
 SIGN_HOSPITAL,HOSPITAL,BỆNH VIỆN
+SIGN_POLICE,POLICE,CẢNH SÁT
 SIGN_GARAGE,GARAGE,GARA
 SIGN_RESPRAY,PAINT & FIX,SỬA XE
 NAME_ROSA,Rosa,Rosa
@@ -142,6 +143,7 @@ HINT_MAP_SHOPS,[{key}] City map. The blue gun icon on the map is a gun shop.,[{k
 LEGEND_MISSION,Mission,Nhiệm vụ
 LEGEND_SHOP,Gun shop,Cửa hàng súng
 LEGEND_HOSPITAL,Hospital,Bệnh viện
+LEGEND_POLICE,Police station,Đồn cảnh sát
 LEGEND_RESPRAY,Repair and respray (lose the cops),Sửa và sơn xe (cắt đuôi cảnh sát)
 LEGEND_GARAGE,Garage (sell cars),Gara (bán xe)
 DISTRICT_HILLSIDE,Hillside,Đồi Hillside
@@ -584,3 +586,53 @@ PED_LOITER_5,You're on our corner.,Cậu đang đứng trên góc phố của b�
 PED_LOITER_6,Got a light? No? Then move along.,Có lửa không? Không à? Vậy đi tiếp đi.
 PED_LOITER_7,Nobody here. Never was.,Ở đây chả có ai. Chưa bao giờ có.
 PED_LOITER_8,Hey. Walk faster.,Này. Đi nhanh lên.
+DEATH_JAIL,"Go to jail (free, wait 10s, wanted level cleared)","Ngồi tù (miễn phí, chờ 10 giây, xoá truy nã)"
+JAIL_TITLE,Serving time,Đang thụ án
+JAIL_COUNTDOWN,Released in {sec}s,Được thả sau {sec} giây
+NOTICE_JAIL_RELEASED,You served your time. The cops lost your trail.,Bạn đã mãn hạn tù. Cảnh sát đã mất dấu.
+WARDROBE_HAIR,Hair: {name},Kiểu tóc: {name}
+WARDROBE_HAIR_COLOR,Hair colour: {name},Màu tóc: {name}
+HAIR_STYLE_1,Short,Tóc ngắn
+HAIR_STYLE_2,Buzz cut,Đầu đinh
+HAIR_STYLE_3,Long,Tóc dài
+HAIR_STYLE_4,Bun,Búi tóc
+HAIR_STYLE_5,Cap,Mũ lưỡi trai
+HAIR_STYLE_6,Beanie,Mũ len
+HAIR_STYLE_7,Bald,Đầu trọc
+HAIR_COLOR_1,Black,Đen
+HAIR_COLOR_2,Brown,Nâu
+HAIR_COLOR_3,Blond,Vàng
+HAIR_COLOR_4,Auburn,Đỏ gạch
+HAIR_COLOR_5,Grey,Xám
+HAIR_COLOR_6,Blue,Xanh dương
+HAIR_COLOR_7,Green,Xanh lá
+HAIR_COLOR_8,Pink,Hồng
+FAME_GOODWILL,Goodwill,Thiện cảm
+FAME_NOTORIETY,Notoriety,Uy danh
+NOTICE_FAME,{kind}: {tier},{kind}: {tier}
+STATS_FAME,{kind}: {tier},{kind}: {tier}
+NOTICE_PROTECTION,Shop owners pay protection: {money},Chủ cửa hàng nộp tiền bảo kê: {money}
+FAME_GOODWILL_TIER_1,Stranger,Người lạ
+FAME_GOODWILL_TIER_2,Familiar face,Quen mặt
+FAME_GOODWILL_TIER_3,Well liked,Được mến
+FAME_GOODWILL_TIER_4,Local hero,Người hùng khu phố
+FAME_GOODWILL_TIER_5,Beloved,Được yêu quý
+FAME_GOODWILL_TIER_6,Saint of the harbor,Thánh bến cảng
+FAME_NOTORIETY_TIER_1,Nobody,Vô danh
+FAME_NOTORIETY_TIER_2,Known troublemaker,Có tiếng gây rối
+FAME_NOTORIETY_TIER_3,Feared,Đáng ngại
+FAME_NOTORIETY_TIER_4,Terrifying,Đáng sợ
+FAME_NOTORIETY_TIER_5,Infamous,Khét tiếng
+FAME_NOTORIETY_TIER_6,Harbor legend of fear,Nỗi kinh hoàng bến cảng
+PED_FRIEND_1,Hey Jay! Good to see you around.,Này Jay! Thấy cậu ở đây mừng thật.
+PED_FRIEND_2,You helped my neighbor once. We won't forget.,Cậu từng giúp hàng xóm tôi. Chúng tôi không quên đâu.
+PED_FRIEND_3,"Stay safe out there, friend.","Giữ an toàn nhé, bạn."
+PED_FRIEND_4,The harbor needs more people like you.,Bến cảng cần nhiều người như cậu.
+PED_FRIEND_5,Coffee's on me if you pass by!,Ghé qua thì cà phê tôi bao!
+PED_FRIEND_6,Everybody says good things about you.,Ai cũng nói tốt về cậu đó.
+PED_FEAR_1,"Please, I don't want any trouble.","Làm ơn, tôi không muốn rắc rối."
+PED_FEAR_2,That's him... don't make eye contact.,Hắn đó... đừng nhìn vào mắt.
+PED_FEAR_3,I saw nothing. I swear.,Tôi chả thấy gì cả. Thề đấy.
+PED_FEAR_4,"Keep walking, keep walking...","Cứ đi tiếp, cứ đi tiếp..."
+PED_FEAR_5,Everyone knows what you did.,Ai cũng biết cậu đã làm gì.
+PED_FEAR_6,"Please take whatever you want, just go.","Cứ lấy gì cậu muốn, làm ơn đi đi."

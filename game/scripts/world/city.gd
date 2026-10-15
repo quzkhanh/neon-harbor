@@ -186,20 +186,24 @@ func respawn(choice: DeathScreen.Revive) -> void:
 	if here:
 		Game.revive()
 		pos = nearest_land(pos)
-	elif choice == DeathScreen.Revive.RETRY or choice == DeathScreen.Revive.SAFEHOUSE:  # miễn phí, xoá truy nã
+	elif choice != DeathScreen.Revive.HOSPITAL:  # miễn phí, xoá truy nã
 		Game.clear_wanted()
 		Game.revive()
 		police.clear_all()
-		if choice == DeathScreen.Revive.RETRY:
-			pos = missions.giver_pos(missions.retry_mission)
-		else:
-			pos = properties.nearest_home(pos)
-			Game.notice.emit(tr("NOTICE_SAFEHOUSE_WAKE"))
+		match choice:
+			DeathScreen.Revive.RETRY:
+				pos = missions.giver_pos(missions.retry_mission)
+			DeathScreen.Revive.SAFEHOUSE:
+				pos = properties.nearest_home(pos)
+				Game.notice.emit(tr("NOTICE_SAFEHOUSE_WAKE"))
+			DeathScreen.Revive.JAIL:
+				pos = nearest_spot(pos, "L")
+				Game.notice.emit(tr("NOTICE_JAIL_RELEASED"))
 	else:
 		var fee := Game.hospital_respawn()
 		Game.notice.emit(I18n.fmt("NOTICE_HOSPITAL", {"fee": I18n.money(fee)}))
 		police.clear_all()
-		pos = nearest_hospital(pos)
+		pos = nearest_spot(pos, "H")
 	player.respawn(pos, Tuning.REVIVE_GRACE if here else 0.0)
 	camera.global_position = pos
 	player_respawned.emit()
@@ -223,9 +227,10 @@ func nearest_land(from: Vector2) -> Vector2:
 	return from
 
 
-func nearest_hospital(from: Vector2) -> Vector2:
+## Cửa gần nhất của loại `ch` trên bản đồ (H bệnh viện, L đồn cảnh sát).
+func nearest_spot(from: Vector2, ch: String) -> Vector2:
 	var best := Vector2.INF
-	for cell in data.find_all("H"):
+	for cell in data.find_all(ch):
 		var pos := MapData.cell_center(cell)
 		if from.distance_to(pos) < from.distance_to(best):
 			best = pos

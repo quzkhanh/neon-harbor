@@ -7,7 +7,8 @@ extends Node
 const GARAGE_RADIUS := 120.0
 const DOOR_RADIUS := 34.0
 const SIGNS := [["S", "SIGN_SHOP", Palette.CYAN, MapIcon.Kind.SHOP], ["H", "SIGN_HOSPITAL", Palette.HEALTH, MapIcon.Kind.HOSPITAL],
-	["G", "SIGN_GARAGE", Palette.GOLD, MapIcon.Kind.GARAGE], ["R", "SIGN_RESPRAY", Palette.ACCENT, MapIcon.Kind.RESPRAY]]
+	["G", "SIGN_GARAGE", Palette.GOLD, MapIcon.Kind.GARAGE], ["R", "SIGN_RESPRAY", Palette.ACCENT, MapIcon.Kind.RESPRAY],
+	["L", "SIGN_POLICE", Palette.SIREN_BLUE, MapIcon.Kind.POLICE]]
 
 var city: City
 var prompt := ""
@@ -57,7 +58,7 @@ func _process(_delta: float) -> void:
 		if price > 0 and v.global_position.distance_to(_garage_pos) < GARAGE_RADIUS:
 			_set_prompt("HINT_SELL", _sell.bind(v), {"price": I18n.money(price)})
 		elif _needs_shop(v) and _near(v.global_position, _resprays, GARAGE_RADIUS):
-			_set_prompt("HINT_RESPRAY", _respray.bind(v), {"price": I18n.money(Tuning.RESPRAY_PRICE)})
+			_set_prompt("HINT_RESPRAY", _respray.bind(v), {"price": I18n.money(Game.price(Tuning.RESPRAY_PRICE))})
 		elif not _job_prompt():
 			_set_prompt("HINT_EXIT", p.exit_vehicle)
 		return
@@ -163,7 +164,7 @@ func _needs_shop(v: Vehicle) -> bool:
 
 ## Tiệm sửa và sơn xe: trả tiền, xe đầy máu, vá lốp, đổi màu; cảnh sát mất dấu (xoá truy nã).
 func _respray(v: Vehicle) -> void:
-	if not Game.spend(Tuning.RESPRAY_PRICE):
+	if not Game.spend(Game.price(Tuning.RESPRAY_PRICE)):
 		return
 	var wanted := Game.stars > 0
 	v.repair()

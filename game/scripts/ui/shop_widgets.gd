@@ -58,7 +58,7 @@ static func update_row(b: Button, id: String, selected: bool) -> void:
 		status.text = b.tr("SHOP_OWNED")
 		status.add_theme_color_override("font_color", Palette.CYAN)
 	elif unlocked:
-		status.text = I18n.money(int(w.price))
+		status.text = I18n.money(Game.price(int(w.price)))
 		status.add_theme_color_override("font_color", Palette.MONEY)
 	else:
 		status.text = ""

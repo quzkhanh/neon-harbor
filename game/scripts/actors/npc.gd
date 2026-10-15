@@ -10,6 +10,8 @@ var city: City
 var gun: Gun
 var heat_on_hit := 0.0
 var heat_on_kill := 0.0
+var hit_deed := ""  # việc ghi vào tiếng tăm khi người chơi đánh/hạ gục (id trong Tuning.FAME_DEEDS)
+var kill_deed := ""
 var _hit_by_player := false
 var _path := PackedVector2Array()
 var _path_timer := 0.0
@@ -113,6 +115,8 @@ func _on_damaged(_amount: float, source: Node) -> void:
 	if source is Player and not _hit_by_player:
 		_hit_by_player = true
 		Game.add_heat(heat_on_hit)
+		if hit_deed != "":
+			Game.deed(hit_deed)
 	_on_attacked(source)
 
 
@@ -127,5 +131,7 @@ func _die(dir: Vector2, source: Node) -> void:
 	if source is Player:
 		Game.add_heat(heat_on_kill)
 		Game.bump("kills")
+		if kill_deed != "":
+			Game.deed(kill_deed)
 		Fx.kill_mark(global_position + Vector2(0, BAR_OFFSET.y))
 		Sfx.play("kill")

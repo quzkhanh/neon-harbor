@@ -39,7 +39,7 @@ func _spawn_badge(pos: Vector2) -> void:
 		Game.lose_star()
 		Sfx.play("pickup")
 		Game.notice.emit(tr("NOTICE_BRIBE"))
-		get_tree().create_timer(Tuning.BADGE_RESPAWN).timeout.connect(_spawn_badge.bind(pos)))
+		get_tree().create_timer(Tuning.BADGE_RESPAWN * (1.0 - Tuning.FAME_BADGE_FASTER * Game.fame.tier("goodwill"))).timeout.connect(_spawn_badge.bind(pos)))
 
 
 func _on_token(id: String, total: int) -> void:

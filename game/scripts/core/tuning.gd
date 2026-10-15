@@ -100,8 +100,6 @@ const RUNOVER_DAMAGE_PER_SPEED := 0.18
 # Xe
 const VEHICLE_SCALE := 0.78
 const CRASH_MIN_SPEED := 220.0
-const CRASH_SHOVE := 0.35  # phần vận tốc truyền sang xe bị đâm
-const PUSH_SHOVE := 0.5  # đẩy khi chỉ chạm nhẹ: phần vận tốc hướng vào xe kia truyền sang nó mỗi khung
 const CRASH_COOLDOWN := 0.35
 const CRASH_BOUNCE := 0.35
 const CRASH_DAMAGE_PER_SPEED := 0.08
@@ -188,6 +186,7 @@ const BADGE_RESPAWN := 180.0
 const START_MONEY := 300
 const DEATH_FEE := 0.10
 const REVIVE_HERE_FEE := 0.20  # hồi sinh tại chỗ: đắt hơn, giữ nguyên sao truy nã
+const JAIL_SECONDS := 10.0  # ngồi tù: miễn phí nhưng phải chờ
 const REVIVE_GRACE := 2.5  # giây bất tử sau khi hồi sinh tại chỗ
 const ARMOR_PRICE := 400
 const MEDKIT_PRICE := 150
@@ -205,6 +204,22 @@ const ALLY_MAX := 2
 const ALLY_HEALTH := 120.0
 const SKINS := ["hitman1", "manBrown", "manOld", "survivor1", "womanGreen", "soldier1", "robot1", "zombie1"]  # cuối: mở sau cốt truyện
 const STATS_FLUSH := 1.0  # giây giữa hai lần ghi quãng đường/thời gian chơi vào Game.stats
+
+# Tiếng tăm (xem Fame): điểm theo việc là [Thiện cảm, Uy danh]
+const FAME_MAX := 100.0
+const FAME_TIERS := [10.0, 25.0, 45.0, 70.0, 90.0]  # ngưỡng lên bậc 1..5
+const FAME_DEEDS := {
+	"ped_hit": [0.0, 2.0], "ped_kill": [-3.0, 8.0], "taxi_fare": [3.0, 0.0], "delivery": [3.0, 0.0],
+	"errand": [4.0, 0.0], "criminal": [4.0, 3.0],
+}
+const FAME_DECAY := 1.0 / 60.0  # điểm Uy danh mất mỗi giây chơi
+const FAME_DISCOUNT := 0.05  # giảm giá cửa hàng, tiệm sơn, viện phí mỗi bậc Thiện cảm (bậc 5: 25%)
+const FAME_TIP_BONUS := 0.2  # tip taxi tăng thêm mỗi bậc Thiện cảm
+const FAME_BADGE_FASTER := 0.1  # huy hiệu hối lộ hồi nhanh hơn mỗi bậc Thiện cảm
+const FAME_WITNESS_CUT := 0.15  # xác suất nhân chứng sợ không dám báo mỗi bậc Uy danh
+const FAME_FEAR_RADIUS := 0.15  # tầm nghe tiếng súng (để bỏ chạy) rộng thêm mỗi bậc Uy danh
+const FAME_PROTECTION := [0, 60, 120, 180, 250, 320]  # tiền bảo kê mỗi nửa đêm theo bậc Uy danh
+const FAME_CHAT_CHANCE := 0.4  # người đi đường nói câu theo tiếng tăm (từ bậc 2)
 
 # Việc phụ (đợt 8)
 const RACE_TIME_LIMIT := 240.0

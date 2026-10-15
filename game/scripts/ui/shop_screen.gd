@@ -108,10 +108,10 @@ func _refresh() -> void:
 	var owned_key := "SHOP_OWNED_MELEE" if w.kind == "melee" else "SHOP_OWNED_INFO"
 	_info.setup("SHOP_LOCKED" if not unlocked else (owned_key if owned else "SHOP_NOT_OWNED"))
 	_buy.visible = unlocked and not owned
-	_buy.text = I18n.fmt("SHOP_BUY", {"price": I18n.money(int(w.price))})
-	_armor.text = I18n.fmt("SHOP_ARMOR", {"price": I18n.money(Tuning.ARMOR_PRICE)})
+	_buy.text = I18n.fmt("SHOP_BUY", {"price": I18n.money(Game.price(int(w.price)))})
+	_armor.text = I18n.fmt("SHOP_ARMOR", {"price": I18n.money(Game.price(Tuning.ARMOR_PRICE))})
 	_armor.disabled = Game.armor >= Tuning.MAX_ARMOR
-	_medkit.text = I18n.fmt("SHOP_MEDKIT", {"price": I18n.money(Tuning.MEDKIT_PRICE)})
+	_medkit.text = I18n.fmt("SHOP_MEDKIT", {"price": I18n.money(Game.price(Tuning.MEDKIT_PRICE))})
 	_medkit.disabled = Game.health >= Tuning.MAX_HEALTH
 
 
@@ -127,14 +127,14 @@ func _purchase(ok: bool) -> void:
 
 
 func _buy_armor() -> void:
-	if Game.spend(Tuning.ARMOR_PRICE):
+	if Game.spend(Game.price(Tuning.ARMOR_PRICE)):
 		Game.add_armor(Tuning.MAX_ARMOR)
 		Game.save_game()
 		_purchase(true)
 
 
 func _buy_medkit() -> void:
-	if Game.spend(Tuning.MEDKIT_PRICE):
+	if Game.spend(Game.price(Tuning.MEDKIT_PRICE)):
 		Game.heal(Tuning.MAX_HEALTH)
 		Game.save_game()
 		_purchase(true)

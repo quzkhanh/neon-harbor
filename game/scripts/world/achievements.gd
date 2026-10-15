@@ -37,6 +37,7 @@ func _process(delta: float) -> void:
 	if _timer < Tuning.STATS_FLUSH:
 		return
 	Game.bump("play_s", roundi(_timer))
+	Game.fame.decay(_timer)
 	Game.bump("walk_px", roundi(_walk))
 	Game.bump("drive_px", roundi(_drive))
 	_timer = 0.0

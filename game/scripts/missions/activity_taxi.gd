@@ -60,11 +60,12 @@ func _process(delta: float) -> void:
 		Game.notice.emit(tr("NOTICE_TAXI_LATE"))
 		_new_fare()
 	elif stopped and _taxi.global_position.distance_to(_target) < BOARD_RADIUS:
-		var tip := Tuning.TAXI_TIP if _time > _limit * 0.5 else 0
+		var tip := int(Tuning.TAXI_TIP * (1.0 + Tuning.FAME_TIP_BONUS * Game.fame.tier("goodwill"))) if _time > _limit * 0.5 else 0
 		var pay := int(Tuning.TAXI_PAY_BASE + _dist * Tuning.TAXI_PAY_PER_PX) + tip
 		reward += pay
 		Game.add_money(pay)
 		Game.bump("fares")
+		Game.deed("taxi_fare")
 		Sfx.play("cash")
 		Game.notice.emit(I18n.fmt("NOTICE_FARE", {"money": I18n.money(pay)}))
 		_new_fare()

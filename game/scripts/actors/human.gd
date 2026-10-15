@@ -25,7 +25,14 @@ var knocked := 0.0
 var knock_velocity := Vector2.ZERO
 var facing := 0.0
 
+var hair_style := ""  # xem Hair; chỉ hiện với skin đầu trần (Hair.BARE_HEADS)
+var hair_color := Color.WHITE
+var hue := 0.0  # biến thể trang phục (xem flash.gdshader)
+var outfit_tint := Color.WHITE
+var outfit_mix := 0.0
+
 var body: Sprite2D
+var _hair: Hair
 var _flash := 0.0
 var _burn := 0.0
 var _burn_source: Node
@@ -51,12 +58,26 @@ func _ready() -> void:
 	body.material.shader = load(FLASH_SHADER)
 	add_child(body)
 	health = max_health
+	body.material.set_shader_parameter("hue_shift", hue)
+	body.material.set_shader_parameter("outfit_tint", outfit_tint)
+	body.material.set_shader_parameter("outfit_mix", outfit_mix)
 	set_pose(pose)
+	refresh_hair()
 
 
 func set_pose(new_pose: String) -> void:
 	pose = new_pose
 	body.texture = load(CHAR_DIR % [skin, pose])
+
+
+## Dựng lại tóc theo `hair_style`, `hair_color` và skin hiện tại.
+func refresh_hair() -> void:
+	if _hair:
+		_hair.queue_free()
+		_hair = null
+	if hair_style != "" and skin in Hair.BARE_HEADS:
+		_hair = Hair.new(hair_style, hair_color)
+		body.add_child(_hair)
 
 
 func muzzle_position() -> Vector2:
@@ -97,6 +118,8 @@ func _animate(delta: float, speed: float) -> void:
 		_apply_damage(Tuning.BURN_DPS * delta, Vector2.ZERO, Combat.source_or_null(_burn_source))
 	body.material.set_shader_parameter("flash", maxf(_flash, burn_pulse))
 	body.material.set_shader_parameter("flash_color", Palette.HIT_FLASH if _flash > burn_pulse else BURN_COLOR)
+	if _hair:
+		_hair.sync_flash(body.material)
 	if not alive or knocked > 0.0:
 		return
 	var moving := clampf(speed / Tuning.WALK_SPEED, 0.0, 1.0)

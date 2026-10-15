@@ -20,7 +20,7 @@ var swim := Swim.new()
 
 
 func _ready() -> void:
-	skin = Game.skin
+	_sync_look()
 	max_health = Tuning.MAX_HEALTH
 	super()
 	collision_mask = Tuning.MASK_SWIMMER
@@ -29,9 +29,16 @@ func _ready() -> void:
 	body.add_child(_held_bat)
 	Game.weapons_changed.connect(_sync_weapon)
 	Game.skin_changed.connect(func() -> void:
-		skin = Game.skin
-		set_pose(pose))
+		_sync_look()
+		set_pose(pose)
+		refresh_hair())
 	_sync_weapon()
+
+
+func _sync_look() -> void:
+	skin = Game.skin
+	hair_style = Game.hair
+	hair_color = Palette.HAIR[Game.hair_color]
 
 
 func _sync_weapon() -> void:

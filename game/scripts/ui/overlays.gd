@@ -70,4 +70,7 @@ func show_mission_complete(n: int, reward: int, unlocked: Array) -> void:
 
 
 func show_death() -> void:
-	city.respawn(await open(DeathScreen.new(city.missions.retry_mission > 0, city.properties.has_home())))
+	var choice: DeathScreen.Revive = await open(DeathScreen.new(city.missions.retry_mission > 0, city.properties.has_home()))
+	if choice == DeathScreen.Revive.JAIL:
+		await open(JailScreen.new())
+	city.respawn(choice)

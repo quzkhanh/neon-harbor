@@ -6,6 +6,7 @@ extends Npc
 ## Bị chĩa súng thì giơ tay; bị ngắm đủ lâu thì đánh rơi ví rồi chạy (ai thấy thì báo cảnh sát). Bắt chuyện: xem PedTalk.
 
 const SKINS := ["manBrown", "womanGreen", "survivor1"]
+const WALKER_SKINS := SKINS + ["hitman1"]  # người đi đường (xe máy chỉ dùng SKINS: hitman1 không có tóc trong sprite)
 const BRAWLER_CHANCE := 0.35
 const CHAT_TIME := 3.0
 ## [kiểu, xác suất]: người kỳ dị theo thời điểm. Ban đêm đổi hẳn dàn nhân vật: người say, người làm ca đêm, kẻ đứng ở góc phố.
@@ -42,14 +43,18 @@ static var _last_report_ms := -100000
 
 
 func _ready() -> void:
-	skin = SKINS[randi() % SKINS.size()]
+	skin = WALKER_SKINS.pick_random()
 	quirk = _roll_quirk()
 	skin = QUIRK_SKINS.get(quirk, skin)
+	if quirk == "":
+		_roll_look()
 	if quirk == "feeder":
 		add_to_group("feeders")
 	max_health = Tuning.PED_HEALTH
 	heat_on_hit = Tuning.HEAT_SHOOT_PED
 	heat_on_kill = Tuning.HEAT_KILL_PED
+	hit_deed = "ped_hit"
+	kill_deed = "ped_kill"
 	armed = randf() < Tuning.ARMED_PED_CHANCE
 	brawler = not armed and randf() < BRAWLER_CHANCE
 	if armed:
@@ -135,6 +140,8 @@ func zombify() -> void:
 	zombie = true
 	heat_on_hit = 0.0
 	heat_on_kill = 0.0
+	hit_deed = ""
+	kill_deed = ""
 	armed = false
 	gun = null
 	skin = "zombie1"
@@ -198,14 +205,25 @@ func chat_with(other: Pedestrian, seconds: float) -> void:
 
 
 ## Thấy Jay phạm tội ở `pos` (khi chưa bị truy nã, không trong lúc làm nhiệm vụ): vài giây sau gọi cảnh sát.
+## Tóc, màu tóc và màu áo ngẫu nhiên để người đi đường không giống nhau.
+func _roll_look() -> void:
+	var look := Hair.roll()
+	hair_style = look[0]
+	hair_color = Palette.HAIR[look[1]]
+	hue = randf()
+	outfit_tint = Palette.OUTFITS.pick_random()
+	outfit_mix = 1.0
+
+
 func witness(pos: Vector2) -> void:
 	var busy := city.missions.current != null or city.activities.current != null  # đang làm nhiệm vụ: không ai báo
-	if Game.stars == 0 and _report <= 0.0 and not busy and not zombie and can_see(pos):
+	var scared := randf() < Tuning.FAME_WITNESS_CUT * Game.fame.tier("notoriety")  # sợ Jay nên không dám báo
+	if Game.stars == 0 and _report <= 0.0 and not busy and not zombie and not scared and can_see(pos):
 		_report = Tuning.WITNESS_DELAY
 
 
 func hear_gunshot(pos: Vector2, shooter: Node) -> void:
-	if not alive or global_position.distance_to(pos) > Tuning.HEAR_GUNSHOT_RADIUS:
+	if not alive or global_position.distance_to(pos) > Tuning.HEAR_GUNSHOT_RADIUS * (1.0 + Tuning.FAME_FEAR_RADIUS * Game.fame.tier("notoriety")):
 		return
 	if shooter is Player:
 		witness(pos)

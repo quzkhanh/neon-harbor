@@ -51,6 +51,7 @@ func _process(delta: float) -> void:
 		reward += _pay
 		Game.add_money(_pay)
 		Game.bump("deliveries")
+		Game.deed("delivery")
 		Sfx.play("cash")
 		if _done >= Tuning.DELIVERY_DROPS:
 			reward += Tuning.DELIVERY_BONUS

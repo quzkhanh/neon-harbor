@@ -30,6 +30,9 @@ var heat := 0.0
 var stars := 0
 var settings := {"lang": "", "music": 0.7, "sfx": 0.8, "steering": "screen", "tutorial": true, "touch_scale": 1.0}
 var skin := "hitman1"  # trang phục của Jay (tủ đồ nhà an toàn)
+var fame := Fame.new()
+var hair := Hair.STYLES[0]  # kiểu tóc của Jay (tủ đồ)
+var hair_color := 0  # chỉ số trong Palette.HAIR
 var god := false  # mã gian lận bất tử (không lưu)
 var zombies := false  # mã gian lận đêm zombie (không lưu)
 var clock := Tuning.START_HOUR  # giờ trong game (0..24), DayNight cho chạy
@@ -56,12 +59,17 @@ func _ready() -> void:
 	UiTheme.install()
 	reset_progress()
 	load_game()
+	fame.tier_changed.connect(_on_fame_tier)
 	get_tree().auto_accept_quit = false
 	var timer := Timer.new()
 	timer.wait_time = Tuning.AUTOSAVE_INTERVAL
 	timer.autostart = true
 	timer.timeout.connect(_autosave)
 	add_child(timer)
+
+
+func _on_fame_tier(kind: String, tier: int) -> void:
+	notice.emit(I18n.fmt("NOTICE_FAME", {"kind": tr(Fame.KEYS[kind]), "tier": tr(fame.tier_key(kind, tier))}))
 
 
 func _notification(what: int) -> void:
@@ -92,6 +100,9 @@ func reset_progress() -> void:
 	stats = {}
 	clock = Tuning.START_HOUR
 	skin = Tuning.SKINS[0]
+	hair = Hair.STYLES[0]
+	hair_color = 0
+	fame.reset()
 	clear_objective()
 	clear_wanted()
 
@@ -104,6 +115,7 @@ func save_game() -> void:
 	SaveIO.write(save_path, {
 		"money": money, "owned": owned, "current": current,
 		"missions_done": missions_done, "settings": settings, "stats": stats, "clock": clock, "skin": skin,
+		"hair": hair, "hair_color": hair_color, "fame": fame.to_dict(),
 	})
 
 
@@ -125,6 +137,9 @@ func load_game() -> void:
 		stats = d.get("stats", {})
 		clock = float(d.get("clock", Tuning.START_HOUR))
 		skin = d.get("skin", Tuning.SKINS[0]) if d.get("skin", "") in Tuning.SKINS else Tuning.SKINS[0]
+		hair = d.get("hair", Hair.STYLES[0]) if d.get("hair", "") in Hair.STYLES else Hair.STYLES[0]
+		hair_color = clampi(int(d.get("hair_color", 0)), 0, Palette.HAIR.size() - 1)
+		fame.load_dict(d.get("fame", {}))
 	apply_settings()
 
 
@@ -188,9 +203,24 @@ func add_armor(amount: float) -> void:
 	vitals_changed.emit()
 
 
+## Hệ số giá theo Thiện cảm (1.0 = giá gốc).
+func discount() -> float:
+	return 1.0 - Tuning.FAME_DISCOUNT * fame.tier("goodwill")
+
+
+## Giá sau khi giảm theo Thiện cảm (cửa hàng, tiệm sơn xe).
+func price(base: int) -> int:
+	return roundi(base * discount())
+
+
+## Ghi một việc vừa làm vào tiếng tăm (id trong Tuning.FAME_DEEDS).
+func deed(id: String) -> void:
+	fame.deed(id)
+
+
 ## Trả phí hồi sinh theo tỉ lệ số tiền đang có. Trả về số tiền đã trả.
 func pay_fee(rate: float) -> int:
-	var fee := int(money * rate)
+	var fee := int(money * rate * discount())
 	add_money(-fee)
 	return fee
 
@@ -220,6 +250,14 @@ func stat(key: String) -> int:
 
 func skin_unlocked(id: String) -> bool:
 	return id != Tuning.SKINS[-1] or mission_count() in missions_done
+
+
+## Đổi kiểu tóc và/hoặc màu tóc của Jay (tủ đồ).
+func set_hair(style: String, color_index: int) -> void:
+	hair = style
+	hair_color = color_index
+	skin_changed.emit()
+	save_game()
 
 
 func set_skin(id: String) -> void:
@@ -293,7 +331,7 @@ func finish_reload() -> void:
 
 
 func buy_weapon(id: String) -> bool:
-	if owned.has(id) or not is_unlocked(id) or not spend(int(weapon_def(id).price)):
+	if owned.has(id) or not is_unlocked(id) or not spend(price(int(weapon_def(id).price))):
 		return false
 	_give_weapon(id)
 	select_weapon(id)

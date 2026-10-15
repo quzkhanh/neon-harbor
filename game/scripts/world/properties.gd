@@ -69,6 +69,7 @@ func _process(_delta: float) -> void:
 	var hour := int(Game.clock)
 	if _hour == 23 and hour == 0:
 		_pay_income()
+		_pay_protection()
 	_hour = hour
 
 
@@ -86,6 +87,14 @@ func _pay_income() -> void:
 		Game.add_money(total)
 		Sfx.play("cash")
 		Game.notice.emit(I18n.fmt("NOTICE_INCOME", {"money": I18n.money(total)}))
+
+
+## Uy danh cao thì các cửa hàng nộp tiền bảo kê mỗi nửa đêm.
+func _pay_protection() -> void:
+	var total: int = Tuning.FAME_PROTECTION[Game.fame.tier("notoriety")]
+	if total > 0:
+		Game.add_money(total)
+		Game.notice.emit(I18n.fmt("NOTICE_PROTECTION", {"money": I18n.money(total)}))
 
 
 ## Gợi ý + hành động ở cửa nhà an toàn / cơ sở kinh doanh (Interactions gọi): [khoá, Callable, tham số] hoặc [].

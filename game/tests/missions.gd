@@ -224,7 +224,7 @@ func _check_death(city: Node) -> void:
 	await _wait(func() -> bool: return city.overlays.current != null, "chết: không hiện màn chết")
 	city.overlays.current.close(REVIVE_HOSPITAL)
 	await frames(5)
-	var hospital: Vector2 = city.nearest_hospital(died_at)
+	var hospital: Vector2 = city.nearest_spot(died_at, "H")
 	expect(p.alive, "chết: không hồi sinh")
 	expect(p.global_position.distance_to(hospital) < 10.0, "chết: không về bệnh viện (%s)" % p.global_position)
 	expect(game.money == 900, "chết: tiền %d, mong đợi 900 (mất 10%%)" % game.money)
@@ -275,7 +275,7 @@ func _check_safehouse_revive(city: Node) -> void:
 	if city.missions.current:
 		city.missions.current.failed.emit("FAIL_DIED")
 	await close_overlays(city)
-	p.global_position = city.nearest_hospital(p.global_position) + Vector2(0, 128)
+	p.global_position = city.nearest_spot(p.global_position, "H") + Vector2(0, 128)
 	game.stats.erase("safehouses")
 	await physics(200)
 	p.take_hit(999.0, Vector2.RIGHT, null)

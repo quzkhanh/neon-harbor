@@ -55,6 +55,8 @@ EXTRA_PLACES = {
     (2, 7): "w", (6, 6): "y", (3, 9): "F", (9, 2): "i", (12, 0): "e", (0, 9): "t",
     (1, 7): "R",  # tiệm sơn xe cho khu Bãi Đường Ray (NV6, 8, 9 diễn ra ở đây)
 }
+# Đồn cảnh sát L (nơi thả người ngồi tù): dựng sau khi rải xu/huy hiệu để vị trí chúng không đổi.
+POLICE_STATIONS = [(2, 3), (6, 3), (10, 3), (8, 7)]
 TOKENS = 40  # xu neon sưu tầm "o"
 BADGES = 6  # huy hiệu hối lộ "W"
 SCATTER_ON = set(",:\".")
@@ -321,7 +323,7 @@ MERGED = {"park": park, "stadium": stadium, "yard": lambda c, r, rng: (warehouse
 
 
 def place(c, r, ch):
-    """Cửa (S/H/R) ở giữa mép dưới khối, trên vỉa hè; ngay sau cửa là toà nhà 3x2."""
+    """Cửa (S/H/R/L) ở giữa mép dưới khối, trên vỉa hè; ngay sau cửa là toà nhà 3x2."""
     x0, y0, x1, y1 = r
     cx = (x0 + x1) // 2
     c.fill(cx - 1, y1 - 1, cx + 1, y1, "#")
@@ -479,6 +481,8 @@ def extras(c):
         place(c, rects[(i, j)], ch)
     scatter(c, rng, "o", TOKENS)
     scatter(c, rng, "W", BADGES)
+    for ij in POLICE_STATIONS:
+        place(c, rects[ij], "L")
     edges = grid_edges(c)
     races = []
     for (i, j), ch in EXTRA_PLACES.items():

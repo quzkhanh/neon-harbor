@@ -49,6 +49,7 @@ func _process(_delta: float) -> void:
 		var pay := randi_range(REWARD.x, REWARD.y)
 		Game.add_money(pay)
 		Sfx.play("cash")
+		Game.deed("errand")
 		Speech.say(asker, "PED_ERRAND_THANKS")
 		Game.notice.emit(I18n.fmt("NOTICE_JOB_DONE", {"money": I18n.money(pay)}))
 		completed.emit()

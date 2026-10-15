@@ -32,6 +32,16 @@ static func talk(ped: Pedestrian, city: City) -> void:
 		Speech.say(ped, _line(city, ped))
 
 
+## Nhóm câu theo tiếng tăm của Jay (từ bậc 2): được mến thì chào thân thiện, đáng sợ thì run.
+static func _fame_topics() -> Array:
+	var out := []
+	if Game.fame.tier("goodwill") >= 2:
+		out.append("PED_FRIEND")
+	if Game.fame.tier("notoriety") >= 2:
+		out.append("PED_FEAR")
+	return out
+
+
 ## Câu hợp hoàn cảnh (đang bị truy nã, trời mưa, ban đêm) hoặc câu chào/tin đồn/mẹo thường.
 static func _line(city: City, ped: Pedestrian) -> String:
 	if ped.quirk != "" and randf() < QUIRK_CHANCE:
@@ -40,6 +50,8 @@ static func _line(city: City, ped: Pedestrian) -> String:
 	var weather: Weather = city.get_node_or_null("Weather")
 	if Game.stars > 0:
 		topics.append("PED_COPS")
+	if randf() < Tuning.FAME_CHAT_CHANCE:
+		topics.append_array(_fame_topics())
 	if weather and weather.raining:
 		topics.append("PED_RAIN")
 	if Game.is_night():

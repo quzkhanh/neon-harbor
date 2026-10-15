@@ -57,6 +57,14 @@ launch it from the new icon for a full-screen, installable web app. On Android C
   it. Press the interact key next to a pedestrian to talk: greetings, rumours, tips, and now and then a small errand
   (find a dropped package nearby and bring it back for a reward). Emote bubbles show surprise, fear and anger, and
   Red Fangs throw a taunt before they open fire.
+- Fame: two separate scores, **Goodwill** (taxi fares, deliveries, errands, catching criminals) and **Notoriety**
+  (hitting or killing pedestrians), each with five tiers (see the Stats screen). Goodwill gives discounts in shops,
+  at the respray shop and on hospital bills, bigger taxi tips, faster bribe badges and friendly chatter; Notoriety makes
+  people flee from gunfire from further away, fewer witnesses dare to phone the police, shops pay protection money at
+  midnight and pedestrians tremble. Notoriety fades with time, Goodwill does not. When the cops take you down and you
+  are wanted, "Go to jail" is a free way back: wait 10 seconds and you walk out of a police station (four on the map)
+  with your wanted level cleared. Pedestrians now have their own hair, hats and shirt colours, and Jay picks his
+  hairstyle in the safehouse wardrobe.
 - Lucky Live, a self-styled street "influencer" (shaved head, shades, gold chain, phone always recording), streams
   from a corner near the start under a neon sign. Walk close and he talks to his viewers; talk to him for his
   pavement philosophy, and now and then a thief snatches his phone: knock the thief down and bring the phone back
@@ -232,6 +240,7 @@ other districts, with a fixed seed so the output never changes; the script also 
 | `Z` | safehouse door | `B` | business door (`R` also appears in the Rail Yard since the expansion) |
 | `Q` | street race start | `J` | courier depot |
 | `K` | turf war start | `o` / `W` | neon token / bribe badge |
+| `L` | police station door (where you are released from jail) | | |
 
 The builder also writes `game/data/extras.json`: race checkpoints (intersection centres), stunt ramps (cell and
 direction) and boat moorings. New places are stamped on after the old layout with their own seed, so the original

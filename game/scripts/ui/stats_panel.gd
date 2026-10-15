@@ -28,6 +28,8 @@ func _build(content: VBoxContainer) -> void:
 	]
 	for r in rows:
 		left.add_child(_row(r[0], r[1]))
+	for kind in Fame.KINDS:
+		left.add_child(_fame_row(kind))
 	var right := Ui.vbox(4)
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_child(right)
@@ -50,3 +52,18 @@ func _row(key: String, value: String) -> Control:
 	v.text = value
 	row.add_child(v)
 	return row
+
+
+## Một chỉ số tiếng tăm: tên + tên bậc hiện tại, thanh tiến độ 0..FAME_MAX.
+func _fame_row(kind: String) -> Control:
+	var box := Ui.vbox(2)
+	var key: String = Fame.KEYS[kind]
+	box.add_child(Ui.live_label("STATS_FAME", func() -> Dictionary: return {"kind": tr(key), "tier": tr(Game.fame.tier_key(kind, Game.fame.tier(kind)))}, "SmallLabel", HORIZONTAL_ALIGNMENT_LEFT))
+	var bar := ProgressBar.new()
+	bar.max_value = Tuning.FAME_MAX
+	bar.value = Game.fame.value[kind]
+	bar.show_percentage = false
+	bar.custom_minimum_size.y = 8
+	bar.modulate = Palette.CYAN if kind == "goodwill" else Palette.HEALTH
+	box.add_child(bar)
+	return box

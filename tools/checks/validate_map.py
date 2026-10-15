@@ -4,10 +4,10 @@
 Dùng: python3 tools/checks/validate_map.py [đường_dẫn_map]   (mặc định game/maps/city.txt)
 Exit code khác 0 nếu có lỗi:
   - định dạng: các dòng dài bằng nhau, ký tự hợp lệ, đúng 1 P/G/r/d/k/m và đích NV4–9 (w/y/F/i/e/t), có ít nhất 1
-    S/H/R/Z/B/J/Q/K, đủ 1..9 (mỗi số đúng 1);
+    S/H/R/Z/B/J/Q/K/L, đủ 1..9 (mỗi số đúng 1);
   - mọi điểm quan trọng đi bộ tới được từ P (BFS qua ô không đặc);
   - lưới làn đường liên thông có hướng (xe tự lái không kẹt ngõ cụt) — cùng quy tắc với scripts/world/lanes.gd;
-  - cửa hàng, bệnh viện, gara, tiệm sơn xe, nhà an toàn, cơ sở kinh doanh, trạm việc phụ nằm cạnh vỉa hè;
+  - cửa hàng, bệnh viện, đồn cảnh sát, gara, tiệm sơn xe, nhà an toàn, cơ sở kinh doanh, trạm việc phụ nằm cạnh vỉa hè;
   - data/extras.json: tuyến đua chỉ đi trên đường (giữa hai checkpoint liền nhau là đường thẳng liền mạch),
     dốc nằm trên làn đúng hướng, thuyền nằm trên nước cạnh cầu tàu.
 """
@@ -25,11 +25,11 @@ LANES = {"<": (-1, 0), ">": (1, 0), "^": (0, -1), "v": (0, 1)}
 ROAD = set(LANES) | {"+", "="}
 FLOORS = set(",\".~_-:") | ROAD
 SPECIAL_ONE = "PGrdkmwyFiet"
-SPECIAL_SOME = "SHRZBJQK"
+SPECIAL_SOME = "SHRZBJQKL"
 MISSIONS = "123456789"
 SPECIAL_MANY = "cbMhaoW"
 VALID = FLOORS | SOLID | set(SPECIAL_ONE + SPECIAL_SOME + MISSIONS + SPECIAL_MANY)
-NEEDS_SIDEWALK = "SHGRZBJQK"
+NEEDS_SIDEWALK = "SHGRZBJQKL"
 DIRS = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 
 

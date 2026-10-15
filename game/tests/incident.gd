@@ -4,6 +4,7 @@ extends "res://tests/harness.gd"
 
 
 func _run() -> void:
+	watchdog_sec = 120.0  # chạy thật khoảng 59 giây, sát giới hạn mặc định 60 giây
 	var city := await open_city()
 	city.population.set_process(false)
 	var spawner: Node = city.get_node("RoadIncidents")

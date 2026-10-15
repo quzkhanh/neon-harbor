@@ -18,6 +18,11 @@ const MONEY := Color("7ee081")
 const HEALTH := Color("ff4d5e")
 const ARMOR := Color("4da3ff")
 const GOLD := Color("ffd23f")
+## Màu tóc: NATURAL_COLORS màu đầu tự nhiên, còn lại là màu nhuộm/mũ (xem Hair).
+const HAIR: Array[Color] = [Color("2b2118"), Color("5b3a22"), Color("d8b45a"), Color("a8431f"), Color("b9b9b9"),
+	Color("2f6fd0"), Color("2fae6a"), Color("e0489a")]
+const OUTFITS: Array[Color] = [Color("d94b4b"), Color("e0a030"), Color("3b8ed8"), Color("8a5cd0"), Color("2fae8a"),
+	Color("e8e8e8"), Color("d96aa8")]  # nhuộm áo xám/đen của người đi đường
 const ICON_WELL := Color("9fb2c4")
 const SHADOW := Color(0, 0, 0, 0.45)
 const OUTLINE := Color(0.03, 0.035, 0.07, 0.9)

@@ -2,7 +2,7 @@ class_name MapIcon
 extends Object
 ## Biểu tượng trên minimap và bản đồ thành phố: mỗi loại điểm một hình (khớp chú thích ở MapScreen).
 
-enum Kind { MISSION, SHOP, HOSPITAL, GARAGE, RESPRAY, RACE, JOB, SWEEP, SAFEHOUSE, BUSINESS, STREAMER }
+enum Kind { MISSION, SHOP, HOSPITAL, GARAGE, RESPRAY, RACE, JOB, SWEEP, SAFEHOUSE, BUSINESS, STREAMER, POLICE }
 
 const RADIUS := 8.0
 const LEGEND := [
@@ -17,6 +17,7 @@ const LEGEND := [
 	[Kind.SAFEHOUSE, Palette.MONEY, "LEGEND_SAFEHOUSE"],
 	[Kind.BUSINESS, Palette.ICON_BUSINESS, "LEGEND_BUSINESS"],
 	[Kind.STREAMER, Palette.ICON_STREAMER, "LEGEND_STREAMER"],
+	[Kind.POLICE, Palette.SIREN_BLUE, "LEGEND_POLICE"],
 ]
 
 
@@ -56,6 +57,8 @@ static func draw(ci: CanvasItem, pos: Vector2, kind: Kind, color: Color, r := RA
 			ci.draw_rect(Rect2(pos + Vector2(-3.5, -0.5) * u, Vector2(7, 5) * u), ink)
 		Kind.STREAMER:  # nút phát
 			ci.draw_colored_polygon(PackedVector2Array([pos + Vector2(-2.5, -4.5) * u, pos + Vector2(4.5, 0) * u, pos + Vector2(-2.5, 4.5) * u]), Color.WHITE)
+		Kind.POLICE:  # huy hiệu hình khiên
+			ci.draw_colored_polygon(PackedVector2Array([pos + Vector2(-4.5, -5) * u, pos + Vector2(4.5, -5) * u, pos + Vector2(4.5, 0.5) * u, pos + Vector2(0, 5.5) * u, pos + Vector2(-4.5, 0.5) * u]), Color.WHITE)
 		Kind.BUSINESS:  # cột biểu đồ đi lên
 			for i in 3:
 				ci.draw_rect(Rect2(pos + Vector2(-4.5 + i * 3.5, 4 - (i + 1) * 2.8) * u, Vector2(2.4, (i + 1) * 2.8) * u), ink)
