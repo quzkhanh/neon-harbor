@@ -297,6 +297,10 @@ func _check_crashes(before: Vector2) -> void:
 	for i in get_slide_collision_count():
 		var n := get_slide_collision(i).get_normal()
 		velocity -= n * minf(velocity.dot(n), 0.0)
+	for i in get_slide_collision_count():  # đẩy nhau cả khi chỉ chạm nhẹ, không cần đủ nhanh để thành cú đâm
+		var touched := get_slide_collision(i)
+		if touched.get_collider() is Vehicle:
+			touched.get_collider().shove(-touched.get_normal() * maxf(-before.dot(touched.get_normal()), 0.0) * Tuning.PUSH_SHOVE)
 	if _crash_cooldown > 0.0:
 		return
 	for i in get_slide_collision_count():
@@ -311,11 +315,19 @@ func _check_crashes(before: Vector2) -> void:
 		var other := c.get_collider()
 		if other is Vehicle:
 			other.take_hit(damage * other._crash_scale() * float(spec.get("ram", 1.0)), -c.get_normal(), driver if driver else self)
-			other.velocity += before * 0.35
+			other.shove(before * Tuning.CRASH_SHOVE)
 		Sfx.play_at("crash", c.get_position(), clampf((impact - 300.0) / 40.0, -12.0, 0.0))
 		Fx.impact(c.get_position())
 		if is_player_driven():
 			Fx.shake(impact / 60.0)
+
+
+## Bị xe khác đâm hoặc đẩy: cộng vào vận tốc (xe tự lái có đường riêng, xem TrafficDriver.shove).
+func shove(impulse: Vector2) -> void:
+	if autopilot is TrafficDriver:
+		autopilot.shove(impulse)
+	else:
+		velocity = (velocity + impulse).limit_length(float(spec.max_speed))
 
 
 func _crash_scale() -> float:

@@ -100,6 +100,8 @@ const RUNOVER_DAMAGE_PER_SPEED := 0.18
 # Xe
 const VEHICLE_SCALE := 0.78
 const CRASH_MIN_SPEED := 220.0
+const CRASH_SHOVE := 0.35  # phần vận tốc truyền sang xe bị đâm
+const PUSH_SHOVE := 0.5  # đẩy khi chỉ chạm nhẹ: phần vận tốc hướng vào xe kia truyền sang nó mỗi khung
 const CRASH_COOLDOWN := 0.35
 const CRASH_BOUNCE := 0.35
 const CRASH_DAMAGE_PER_SPEED := 0.08
