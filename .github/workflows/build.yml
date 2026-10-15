@@ -4,9 +4,14 @@ name: Build and test
 #  - Linux: toàn bộ tools/checks/check_all.sh, export Linux/Web/Android, chạy bản Linux vào thành phố.
 #  - Windows, macOS: test smoke + 9 nhiệm vụ trên đúng hệ điều hành, export, chạy bản export vào thành phố.
 #  - iOS: export dự án Xcode, build + chạy trong iOS Simulator, đóng gói .ipa chưa ký.
+# Chạy cho mỗi lần đẩy lên main và mỗi pull request. Đẩy tag vX.Y.Z: APK ký bằng khoá release (GitHub Secrets) và job
+# `release` tạo GitHub Release kèm bản Windows, macOS, Android, Linux (tag phải khớp config/version trong project.godot).
 
 on:
   push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -44,7 +49,11 @@ jobs:
       - name: Run the Linux build in the city
         run: tools/ci/run_exported.sh build/linux/NeonHarbor.x86_64
 
-      - name: Export Android (debug-signed APK)
+      - name: Export Android (release key on tags, debug key otherwise)
+        env:
+          KEYSTORE_BASE64: ${{ startsWith(github.ref, 'refs/tags/v') && secrets.ANDROID_KEYSTORE_BASE64 || '' }}
+          KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           keytool -genkeypair -keystore "$RUNNER_TEMP/debug.keystore" -storepass android -keypass android \
             -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
@@ -59,9 +68,17 @@ jobs:
           export/android/debug_keystore_user = "androiddebugkey"
           export/android/debug_keystore_pass = "android"
           TRES
-          "$GODOT" --headless --path game --export-debug "Android" ../build/android/NeonHarbor.apk
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            GODOT_ANDROID_KEYSTORE_RELEASE_PATH="$RUNNER_TEMP/release.keystore" GODOT_ANDROID_KEYSTORE_RELEASE_USER="$KEYSTORE_ALIAS" \
+              GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD="$KEYSTORE_PASSWORD" \
+              "$GODOT" --headless --path game --export-release "Android" ../build/android/NeonHarbor.apk
+            rm "$RUNNER_TEMP/release.keystore"
+          else
+            "$GODOT" --headless --path game --export-debug "Android" ../build/android/NeonHarbor.apk
+          fi
           BT=$(ls -d "$ANDROID_SDK_ROOT"/build-tools/* | sort -V | tail -1)
-          "$BT/apksigner" verify build/android/NeonHarbor.apk
+          "$BT/apksigner" verify --print-certs build/android/NeonHarbor.apk | grep -E "DN|SHA-256"
           "$BT/aapt" dump badging build/android/NeonHarbor.apk | grep -E "^package|launchable-activity|native-code"
 
       - uses: actions/upload-artifact@v4
@@ -188,3 +205,39 @@ jobs:
             build/macos/NeonHarbor.zip
             build/ios/NeonHarbor-unsigned.ipa
             build/ios/ios_simulator.png
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [linux, windows, macos]
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Package the builds
+        run: |
+          V="$GITHUB_REF_NAME"
+          grep -q "config/version=\"${V#v}\"" game/project.godot || { echo "tag $V khác config/version trong project.godot"; exit 1; }
+          find dist -type f | sort
+          mkdir out
+          cp "$(find dist -name NeonHarbor.exe | head -1)" "out/NeonHarbor-$V-windows.exe"
+          cp "$(find dist -name NeonHarbor.zip | head -1)" "out/NeonHarbor-$V-macos.zip"
+          cp "$(find dist -name NeonHarbor.apk | head -1)" "out/NeonHarbor-$V-android.apk"
+          LINUX="$(find dist -name NeonHarbor.x86_64 | head -1)"
+          chmod +x "$LINUX"  # artifact không giữ quyền chạy
+          tar -C "$(dirname "$LINUX")" -czf "out/NeonHarbor-$V-linux.tar.gz" NeonHarbor.x86_64
+          ls -la out
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="$GITHUB_REF_NAME"
+          pre=""
+          case "$V" in v0.*|*-*) pre="--prerelease" ;; esac
+          gh release create "$V" out/* --title "Neon Harbor $V" --notes-file tools/ci/release_notes.txt $pre

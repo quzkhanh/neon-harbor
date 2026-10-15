@@ -10,6 +10,7 @@ __pycache__/
 # Notes and docs that are not part of the game
 *.md
 !README.md
+!CONTRIBUTING.md
 /docs/
 
 # Local reference material and verification screenshots

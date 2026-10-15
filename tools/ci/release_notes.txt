@@ -1,0 +1,19 @@
+A top-down open-world action game: nine story missions, a five-star wanted system, street races, side jobs,
+safehouses and businesses, day and night with rain, English and Vietnamese. Play in the browser:
+https://quzkhanh.github.io/neon-harbor-web/
+
+## Download
+
+| System | File | How to run |
+|---|---|---|
+| Windows 10/11 (64-bit) | `NeonHarbor-*-windows.exe` | Double-click. The file is not code-signed, so SmartScreen may warn: click **More info → Run anyway**. |
+| macOS 11+ (Intel and Apple Silicon) | `NeonHarbor-*-macos.zip` | Unzip and move **Neon Harbor.app** to Applications. The app is not notarized: the first time, right-click → **Open**; if macOS still refuses, open **System Settings → Privacy & Security** and click **Open Anyway** (or run `xattr -cr "/Applications/Neon Harbor.app"`). |
+| Android 7+ (arm64 or x86_64) | `NeonHarbor-*-android.apk` | Open the file on the phone and allow installing apps from this source. Later versions install over this one and keep your save. |
+| Linux (x86_64) | `NeonHarbor-*-linux.tar.gz` | `tar xzf NeonHarbor-*-linux.tar.gz && ./NeonHarbor.x86_64` |
+
+Saves stay on your device. This is a beta: please report bugs in the Issues tab.
+
+## License
+
+Free to play and share for noncommercial use. Code: PolyForm Noncommercial 1.0.0; game content: CC BY-NC 4.0.
+See LICENSE and README.md in the repository.
