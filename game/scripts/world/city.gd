@@ -179,11 +179,15 @@ func respawn(choice: DeathScreen.Revive) -> void:
 	if here:
 		Game.revive()
 		pos = nearest_land(pos)
-	elif choice == DeathScreen.Revive.RETRY:  # làm lại nhiệm vụ: miễn phí, xoá truy nã
+	elif choice == DeathScreen.Revive.RETRY or choice == DeathScreen.Revive.SAFEHOUSE:  # miễn phí, xoá truy nã
 		Game.clear_wanted()
 		Game.revive()
 		police.clear_all()
-		pos = missions.giver_pos(missions.retry_mission)
+		if choice == DeathScreen.Revive.RETRY:
+			pos = missions.giver_pos(missions.retry_mission)
+		else:
+			pos = properties.nearest_home(pos)
+			Game.notice.emit(tr("NOTICE_SAFEHOUSE_WAKE"))
 	else:
 		var fee := Game.hospital_respawn()
 		Game.notice.emit(I18n.fmt("NOTICE_HOSPITAL", {"fee": I18n.money(fee)}))
@@ -197,15 +201,18 @@ func respawn(choice: DeathScreen.Revive) -> void:
 	missions.retry_mission = 0
 
 
-## Ô đi được gần nhất (hồi sinh tại chỗ khi chết đuối: đưa lên bờ).
+## Hồi sinh tại chỗ khi chết đuối: đưa lên ô đi được gần nhất. Không ở dưới nước thì giữ nguyên chỗ
+## (đứng sát gốc cây/thùng vẫn là chỗ hợp lệ dù ô đó tính là "đặc").
 func nearest_land(from: Vector2) -> Vector2:
 	var c0 := MapData.world_to_cell(from)
-	for r in 40:
+	if data.at(c0) != "~":
+		return from
+	for r in range(1, 40):
 		for dy in range(-r, r + 1):
 			for dx in range(-r, r + 1):
 				var c := c0 + Vector2i(dx, dy)
 				if maxi(absi(dx), absi(dy)) == r and data.in_bounds(c) and not data.is_solid(c):
-					return from if r == 0 else MapData.cell_center(c)
+					return MapData.cell_center(c)
 	return from
 
 

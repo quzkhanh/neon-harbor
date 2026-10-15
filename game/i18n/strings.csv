@@ -325,3 +325,5 @@ CHEAT_ZOMBIES_ON,Cheat: dead town. Watch your neck!,Gian lận: phố xác sốn
 CHEAT_ZOMBIES_OFF,Cheat: the dead go back to sleep,Gian lận: xác sống đã ngủ yên
 NOTICE_ROSA_CREW,"Rosa sent a rifle, body armor and two of her crew with you","Rosa đưa súng trường, áo giáp và cử hai đàn em đi cùng bạn"
 NOTICE_RACE_STOP,Street race: stop on the flag to start.,Đua xe: dừng xe trên cờ để xuất phát.
+DEATH_SAFEHOUSE,"Wake up at your safehouse (free, wanted level cleared)","Về nhà an toàn (miễn phí, xoá truy nã)"
+NOTICE_SAFEHOUSE_WAKE,You woke up at your safehouse. The cops lost your trail.,Bạn tỉnh dậy ở nhà an toàn. Cảnh sát đã mất dấu.

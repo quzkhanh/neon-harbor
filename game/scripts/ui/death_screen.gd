@@ -1,17 +1,20 @@
 class_name DeathScreen
 extends Modal
 ## Màn chết. Kết quả (Revive): làm lại nhiệm vụ vừa thất bại (miễn phí, chỉ khi chết giữa nhiệm vụ),
-## hồi sinh tại chỗ (trả phí, giữ sao), hoặc về bệnh viện gần nhất (mất 10% tiền, mất sao).
+## về nhà an toàn gần nhất (miễn phí, xoá truy nã, chỉ khi đã mua nhà), hồi sinh tại chỗ (trả phí, giữ sao),
+## hoặc về bệnh viện gần nhất (mất 10% tiền, mất sao).
 
-enum Revive { HOSPITAL, HERE, RETRY }
+enum Revive { HOSPITAL, HERE, RETRY, SAFEHOUSE }
 
 var _retry: bool
+var _home: bool
 
 
-func _init(can_retry: bool) -> void:
+func _init(can_retry: bool, has_home := false) -> void:
 	super()
 	cancellable = false
 	_retry = can_retry
+	_home = has_home
 
 
 func _build(content: VBoxContainer) -> void:
@@ -23,11 +26,14 @@ func _build(content: VBoxContainer) -> void:
 	var retry := Ui.button("DEATH_RETRY", "AccentButton")
 	retry.visible = _retry
 	retry.pressed.connect(close.bind(Revive.RETRY))
+	var home := Ui.button("DEATH_SAFEHOUSE", "AccentButton")
+	home.visible = _home
+	home.pressed.connect(close.bind(Revive.SAFEHOUSE))
 	var hospital := _fee_button("DEATH_HOSPITAL", Tuning.DEATH_FEE, Revive.HOSPITAL)
-	for b in [retry, here, hospital]:
+	for b in [retry, home, here, hospital]:
 		content.add_child(b)
 	content.add_child(Ui.label("DEATH_WANTED_NOTE", "SmallLabel"))
-	Ui.focus_chain.call_deferred([retry, here, hospital])
+	Ui.focus_chain.call_deferred([retry, home, here, hospital])
 
 
 ## Nút có phí kèm theo; màn chết không đổi ngôn ngữ khi đang mở nên dịch một lần là đủ.

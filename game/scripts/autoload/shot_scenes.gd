@@ -2,7 +2,7 @@ class_name ShotScenes
 extends RefCounted
 ## Tình huống chụp ảnh của đợt mở rộng (Shot gọi sang để shot.gd không phình ra).
 
-const NAMES := ["nitro", "wanted5", "roadblock", "race", "noon", "dusk", "rain", "wheel", "stats", "safehouse", "wardrobe", "boat", "zombies"]
+const NAMES := ["nitro", "wanted5", "roadblock", "race", "noon", "dusk", "rain", "wheel", "stats", "safehouse", "wardrobe", "boat", "zombies", "death_home"]
 
 
 static func run(scene_name: String, city: City, shot: Node) -> void:
@@ -58,6 +58,14 @@ static func run(scene_name: String, city: City, shot: Node) -> void:
 				var z := city.spawn_npc(Pedestrian, city.player.global_position + Vector2.from_angle(i * 1.1) * randf_range(160, 300))
 				z.add_to_group("peds")
 			await shot._frames(60)
+		"death_home":
+			Game.mark("safehouses", "0")
+			city.missions.start(1, false)
+			await shot._frames(5)
+			city.player.take_hit(500.0, Vector2.RIGHT, null)
+			while city.overlays.current == null:
+				await shot._frames(1)
+			await shot._frames(10)
 		"noon", "dusk", "rain":
 			Game.clock = {"noon": 12.0, "dusk": 18.6, "rain": 22.0}[scene_name]
 			if scene_name == "rain":

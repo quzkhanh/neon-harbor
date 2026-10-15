@@ -1,0 +1,190 @@
+name: Build and test
+
+# Build và chạy thử trên máy thật của từng hệ điều hành (không tin một bản export chưa chạy thử):
+#  - Linux: toàn bộ tools/checks/check_all.sh, export Linux/Web/Android, chạy bản Linux vào thành phố.
+#  - Windows, macOS: test smoke + 9 nhiệm vụ trên đúng hệ điều hành, export, chạy bản export vào thành phố.
+#  - iOS: export dự án Xcode, build + chạy trong iOS Simulator, đóng gói .ipa chưa ký.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.7.2"
+
+jobs:
+  linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-ci
+            ~/.local/share/godot/export_templates
+          key: godot-linux-${{ env.GODOT_VERSION }}
+
+      - name: Install Godot
+        run: echo "GODOT=$(tools/ci/install_godot.sh linux | tail -1)" >> "$GITHUB_ENV"
+
+      - name: All checks (import, map, i18n, fonts, smoke, missions, features, touch, playtest, bots, reverse tests)
+        run: tools/checks/check_all.sh
+
+      - name: Export Linux and Web
+        run: |
+          mkdir -p build/linux build/web
+          "$GODOT" --headless --path game --export-release "Linux" ../build/linux/NeonHarbor.x86_64
+          "$GODOT" --headless --path game --export-release "Web" ../build/web/index.html
+          test -x build/linux/NeonHarbor.x86_64 && test -f build/web/index.wasm && test -f build/web/index.pck
+
+      - name: Run the Linux build in the city
+        run: tools/ci/run_exported.sh build/linux/NeonHarbor.x86_64
+
+      - name: Export Android (debug-signed APK)
+        run: |
+          keytool -genkeypair -keystore "$RUNNER_TEMP/debug.keystore" -storepass android -keypass android \
+            -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          mkdir -p ~/.config/godot build/android
+          cat > ~/.config/godot/editor_settings-4.7.tres <<TRES
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_SDK_ROOT"
+          export/android/java_sdk_path = "$JAVA_HOME_17_X64"
+          export/android/debug_keystore = "$RUNNER_TEMP/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          TRES
+          "$GODOT" --headless --path game --export-debug "Android" ../build/android/NeonHarbor.apk
+          BT=$(ls -d "$ANDROID_SDK_ROOT"/build-tools/* | sort -V | tail -1)
+          "$BT/apksigner" verify build/android/NeonHarbor.apk
+          "$BT/aapt" dump badging build/android/NeonHarbor.apk | grep -E "^package|launchable-activity|native-code"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neon-harbor-linux-web-android
+          path: |
+            build/linux/NeonHarbor.x86_64
+            build/web
+            build/android/NeonHarbor.apk
+
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-ci
+            ~/AppData/Roaming/Godot/export_templates
+          key: godot-windows-${{ env.GODOT_VERSION }}
+
+      - name: Install Godot
+        run: |
+          $v = $env:GODOT_VERSION
+          $base = "https://github.com/godotengine/godot-builds/releases/download/$v-stable"
+          $dest = "$HOME/godot-ci"
+          New-Item -ItemType Directory -Force $dest | Out-Null
+          if (-not (Test-Path "$dest/Godot_v$v-stable_win64_console.exe")) {
+            Invoke-WebRequest "$base/Godot_v$v-stable_win64.exe.zip" -OutFile "$dest/g.zip"
+            Expand-Archive "$dest/g.zip" -DestinationPath $dest -Force
+          }
+          $templates = "$env:APPDATA/Godot/export_templates/$v.stable"
+          if (-not (Test-Path "$templates/version.txt")) {
+            Invoke-WebRequest "$base/Godot_v$v-stable_export_templates.tpz" -OutFile "$dest/t.zip"
+            Expand-Archive "$dest/t.zip" -DestinationPath "$dest/t" -Force
+            New-Item -ItemType Directory -Force $templates | Out-Null
+            Move-Item "$dest/t/templates/*" $templates -Force
+          }
+          "GODOT=$dest/Godot_v$v-stable_win64_console.exe" >> $env:GITHUB_ENV
+
+      - name: Import project
+        run: |
+          & $env:GODOT --headless --path game --import 2>&1 | Select-String "ERROR" | Select-Object -First 10
+          $global:LASTEXITCODE = 0
+
+      - name: Smoke and story tests on Windows
+        run: |
+          foreach ($t in "smoke", "missions") {
+            $out = & $env:GODOT --headless --path game -s "res://tests/$t.gd" 2>&1 | Out-String
+            $out -split "`n" | Select-String -Pattern "PASS|FAIL" | Select-Object -First 20
+            if ($LASTEXITCODE -ne 0 -or $out -notmatch "PASS") { throw "test $t failed on Windows" }
+          }
+
+      - name: Export Windows
+        run: |
+          New-Item -ItemType Directory -Force build/windows | Out-Null
+          & $env:GODOT --headless --path game --export-release "Windows Desktop" ../build/windows/NeonHarbor.exe
+          if (-not (Test-Path build/windows/NeonHarbor.exe)) { throw "no Windows exe" }
+          Get-ChildItem build/windows
+
+      - name: Run the Windows build in the city
+        run: |
+          $out = & ./build/windows/NeonHarbor.console.exe --headless -- --shot=perf 2>&1 | Out-String
+          $out -split "`n" | Select-String -Pattern "PERF|ERROR" | Select-Object -First 20
+          if ($out -notmatch "(?m)^PERF " -or $out -match "SCRIPT ERROR") { throw "Windows build did not reach the city cleanly" }
+          "PASS: Windows build entered the city, ran the 5-star + rain scenario and quit"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neon-harbor-windows
+          path: build/windows
+
+  macos:
+    runs-on: macos-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-ci
+            ~/Library/Application Support/Godot/export_templates
+          key: godot-macos-${{ env.GODOT_VERSION }}
+
+      - name: Install Godot
+        run: echo "GODOT=$(tools/ci/install_godot.sh macos | tail -1)" >> "$GITHUB_ENV"
+
+      - name: Import project
+        run: '"$GODOT" --headless --path game --import 2>&1 | grep ERROR | head -10 || true'
+
+      - name: Smoke and story tests on macOS
+        run: |
+          for t in smoke missions; do
+            out=$("$GODOT" --headless --path game -s "res://tests/$t.gd" 2>&1); code=$?
+            echo "$out" | grep -E "PASS|FAIL" | head -20
+            [ $code -eq 0 ] || { echo "test $t failed on macOS"; exit 1; }
+          done
+
+      - name: Export macOS (ad-hoc signed)
+        run: |
+          mkdir -p build/macos
+          "$GODOT" --headless --path game --export-release "macOS" ../build/macos/NeonHarbor.zip
+          cd build/macos && unzip -q NeonHarbor.zip && ls
+
+      - name: Run the macOS build in the city
+        run: tools/ci/run_exported.sh "build/macos/Neon Harbor.app/Contents/MacOS/Neon Harbor"
+
+      - name: iOS (Simulator run + unsigned .ipa)
+        run: tools/ci/ios_build.sh "$GODOT"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: neon-harbor-macos-ios
+          path: |
+            build/macos/NeonHarbor.zip
+            build/ios/NeonHarbor-unsigned.ipa
+            build/ios/ios_simulator.png

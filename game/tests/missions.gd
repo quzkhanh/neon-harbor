@@ -11,6 +11,7 @@ const MAX_WAIT := 300
 const REVIVE_HOSPITAL := 0  # khớp DeathScreen.Revive (test không được tham chiếu class_name của game)
 const REVIVE_HERE := 1
 const REVIVE_RETRY := 2
+const REVIVE_SAFEHOUSE := 3
 
 
 func _run() -> void:
@@ -254,6 +255,50 @@ func _check_death(city: Node) -> void:
 	expect(game.money == 800 and game.stars == 2, "hồi sinh tại chỗ: tiền %d (mong 800), sao %d (mong 2)" % [game.money, game.stars])
 	p.take_hit(999.0, Vector2.RIGHT, null)
 	expect(p.alive, "hồi sinh tại chỗ: không có thời gian bất tử")
+	await _check_safehouse_revive(city)
+	# Đứng sát gốc cây (ô "đặc" nhưng vẫn đứng được) thì không bị dời; dưới nước thì được kéo lên bờ.
+	var tree: Vector2i = city.data.find("T")
+	var beside := (Vector2(tree) + Vector2(0.5, 0.5)) * 64.0 + Vector2(28, 0)
+	expect(city.nearest_land(beside) == beside, "hồi sinh cạnh gốc cây mà bị dời đi")
+	var sea := (Vector2(city.data.find("~")) + Vector2(0.5, 0.5)) * 64.0
+	expect(city.data.at(Vector2i(city.nearest_land(sea) / 64.0)) != "~", "chết đuối hồi sinh tại chỗ mà vẫn ở dưới nước")
+
+
+## Đã mua nhà an toàn: màn chết có thêm "Về nhà an toàn" (miễn phí, xoá truy nã); chưa mua thì nút ẩn.
+func _check_safehouse_revive(city: Node) -> void:
+	var p: Node = city.player
+	await physics(200)  # hết thời gian bất tử của lần hồi sinh tại chỗ trước
+	game.missions_done = range(1, 10)  # không để nhiệm vụ nào tự mở khi đứng cạnh điểm nhận
+	await close_overlays(city)
+	if city.missions.current:
+		city.missions.current.failed.emit("FAIL_DIED")
+	await close_overlays(city)
+	p.global_position = city.nearest_hospital(p.global_position) + Vector2(0, 128)
+	game.stats.erase("safehouses")
+	await physics(200)
+	p.take_hit(999.0, Vector2.RIGHT, null)
+	await _wait(func() -> bool: return city.overlays.current is CanvasLayer and city.overlays.current.has_method("_fee_button"), "chết lần 4: không hiện màn chết")
+	expect(not _home_button(city.overlays.current).visible, "chưa mua nhà mà màn chết có nút về nhà an toàn")
+	city.overlays.current.close(REVIVE_HERE)
+	await physics(200)
+	game.mark("safehouses", "0")
+	game.money = 1000
+	game.set_stars(3)
+	p.take_hit(999.0, Vector2.RIGHT, null)
+	await _wait(func() -> bool: return city.overlays.current is CanvasLayer and city.overlays.current.has_method("_fee_button"), "chết lần 5: không hiện màn chết")
+	expect(_home_button(city.overlays.current).visible, "đã mua nhà mà màn chết không có nút về nhà an toàn")
+	city.overlays.current.close(REVIVE_SAFEHOUSE)
+	await frames(5)
+	var home: Vector2 = city.properties.safehouses[0]
+	expect(p.alive and p.global_position.distance_to(home) < 10.0, "về nhà an toàn: không hồi sinh ở cửa nhà (%s)" % p.global_position)
+	expect(game.money == 1000 and game.stars == 0, "về nhà an toàn: tiền %d (mong 1000), sao %d (mong 0)" % [game.money, game.stars])
+
+
+func _home_button(screen: Node) -> Button:
+	for b in screen.find_children("*", "Button", true, false):
+		if b.text == "DEATH_SAFEHOUSE":
+			return b
+	return Button.new()
 
 
 func _wait(cond: Callable, message: String) -> void:

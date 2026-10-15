@@ -39,6 +39,21 @@ func owns(kind: String, i: int) -> bool:
 	return Game.marked(kind).has(str(i))
 
 
+func has_home() -> bool:
+	return range(safehouses.size()).any(func(i: int) -> bool: return owns("safehouses", i))
+
+
+## Cửa nhà an toàn đã mua gần `from` nhất (dùng khi hồi sinh); chưa có nhà thì trả về `from`.
+func nearest_home(from: Vector2) -> Vector2:
+	var best := from
+	var best_d := INF
+	for i in safehouses.size():
+		if owns("safehouses", i) and from.distance_to(safehouses[i]) < best_d:
+			best = safehouses[i]
+			best_d = from.distance_to(safehouses[i])
+	return best
+
+
 ## Ô đỗ xe của gara: trên đường gần cửa nhà an toàn nhất.
 func _garage_spot(i: int) -> Vector2:
 	var c0 := MapData.world_to_cell(safehouses[i])

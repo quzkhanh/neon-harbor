@@ -6,6 +6,7 @@ config_version=5
 config/name="Neon Harbor"
 run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://assets/icon.png"
 boot_splash/bg_color=Color(0.051, 0.059, 0.098, 1)
 boot_splash/show_image=false
 
@@ -57,4 +58,5 @@ renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 renderer/rendering_method.web="gl_compatibility"
 textures/canvas_textures/default_texture_filter=1
+textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.051, 0.059, 0.098, 1)

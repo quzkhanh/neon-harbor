@@ -8,6 +8,7 @@ Tạo ra trong game/assets/sprites/:
   world/spikes.png, world/ramp.png         dải đinh của rào chắn, dốc nhảy
   world/heli.png, world/rotor.png          trực thăng cảnh sát (thân hướng sang phải) và cánh quạt
   world/boat_red.png, world/boat_blue.png  thuyền máy (mũi hướng sang phải)
+  icon.png                                 icon ứng dụng 512×512 (xe thể thao Kenney trên nền neon, không có chữ)
 
 Chạy từ gốc repo:  python3 tools/assets/make_world_sprites.py   (tất định)
 """
@@ -189,6 +190,25 @@ SPRITES = {
     "world/boat_red.png": lambda: boat(RED, RED_DARK),
     "world/boat_blue.png": lambda: boat(BLUE, BLUE_DARK),
 }
+
+
+def app_icon():
+    from PIL import Image, ImageDraw, ImageFilter
+    size = 512
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([0, 0, size - 1, size - 1], 96, fill="#0d0f19")
+    ring = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    ImageDraw.Draw(ring).ellipse([70, 70, 442, 442], outline="#ff3d7f", width=26)
+    img.alpha_composite(ring.filter(ImageFilter.GaussianBlur(18)))
+    img.alpha_composite(ring)
+    car = Image.open(ROOT / "game/assets/vendor/cars/car_red_5.png").convert("RGBA")
+    car = car.resize((car.width * 3, car.height * 3), Image.LANCZOS).rotate(-35, expand=True, resample=Image.BICUBIC)
+    img.alpha_composite(car, ((size - car.width) // 2, (size - car.height) // 2))
+    return img
+
+
+SPRITES["../icon.png"] = app_icon
 
 
 def main():

@@ -78,8 +78,9 @@ Made with Godot 4.7.2 (GDScript, Compatibility renderer).
 - Beginner guide on the first game: walk, shoot, open the map, start the first mission, get on the bike, drive,
   where to buy guns. Each step clears when you do it; optional steps time out, and doing something later in the
   list skips ahead. It can be turned back on in Settings.
-- When you go down you choose: retry the mission you were on (free), get up right there (20% of your cash,
-  wanted level kept, a few seconds of protection), or wake up at the nearest of five hospitals (10%, stars cleared).
+- When you go down you choose: retry the mission you were on (free), wake up at your nearest safehouse (free,
+  stars cleared; only once you own one), get up right there (20% of your cash, wanted level kept, a few seconds of
+  protection), or wake up at the nearest of five hospitals (10%, stars cleared).
   You keep your guns. No game over.
 - Save in `user://save.json` (IndexedDB on the Web): money, guns, loaded rounds, finished missions, settings,
   time of day, outfit, property, the parked car, stats and achievements.
@@ -131,6 +132,16 @@ Godot 4.7.2 is expected at `~/games/tools/godot/godot` (or set `GODOT=/path/to/g
 tools/checks/export.sh    # exports Linux (build/linux/NeonHarbor.x86_64) and Web (build/web/index.html), then tests both
 tools/deploy_web.sh       # exports Web and pushes the build to the public GitHub Pages repo
 ```
+
+Windows and Android presets also exist (`Windows Desktop`, `Android`):
+
+```bash
+godot --headless --path game --export-release "Windows Desktop" ../build/windows/NeonHarbor.exe
+godot --headless --path game --export-debug "Android" ../build/android/NeonHarbor.apk   # needs the Android SDK + debug keystore in Godot's editor settings
+```
+
+The Android build was checked in the emulator (menu, city, touch sticks); it needs a real GPU (the software-only
+emulator GPU fails to compile Godot's canvas shader). The Windows build is exported but not run here.
 
 Export templates for 4.7.2 must be installed. The Web build uses `variant/thread_support=false`, so it needs no
 special HTTP headers. `include_filter` packs the non-resource files read at runtime (`maps/*.txt`, `data/*.json`).
