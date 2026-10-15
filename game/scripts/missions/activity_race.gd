@@ -43,6 +43,7 @@ func _place(v: Vehicle, pos: Vector2, heading: Vector2) -> void:
 	v.global_position = pos
 	v.rotation = heading.angle()
 	v.velocity = Vector2.ZERO
+	v.reset_physics_interpolation()
 
 
 func _countdown() -> void:

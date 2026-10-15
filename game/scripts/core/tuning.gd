@@ -37,6 +37,7 @@ const INTERACT_RADIUS := 90.0
 const LOOK_AHEAD := 150.0
 const LOOK_AHEAD_DRIVING := 0.45  # giây nhìn trước theo vận tốc xe
 const CAMERA_SMOOTH := 6.0
+const LOOK_SMOOTH := 2.5  # điểm nhìn trước đổi dần: xe bật ngược khi đâm không quét cả khung hình theo
 # Điều khiển cảm ứng (đơn vị khung 1280×720; nhân Game.settings.touch_scale)
 const TOUCH_STICK_RADIUS := 110.0
 const TOUCH_KNOB := 46.0
@@ -274,6 +275,7 @@ const RAIN_GRIP := 0.72  # đường ướt: độ bám còn lại
 # Hiệu ứng
 const SHAKE_DECAY := 2.2
 const SHAKE_MAX_OFFSET := 18.0
+const SHAKE_FREQ := 14.0  # rung theo nhiễu mượt chừng này nhịp mỗi giây, không nhảy ngẫu nhiên từng frame
 const TRACER_TIME := 0.06
 const MUZZLE_TIME := 0.05
 

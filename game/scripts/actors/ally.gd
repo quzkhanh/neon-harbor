@@ -45,6 +45,7 @@ func _ride(on: bool) -> void:
 	if not on:
 		var spot := player().global_position + Vector2(randf_range(-40, 40), 40)
 		global_position = spot if not city.data.is_solid(MapData.world_to_cell(spot)) else player().global_position
+		reset_physics_interpolation()
 
 
 func _enemy() -> Node2D:

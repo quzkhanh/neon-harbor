@@ -20,6 +20,8 @@ func _ready() -> void:
 		g.scale = Vector2.ONE * 0.8
 		add_child(g)
 		_glows.append(g)
+	_glows[0].position = Vector2(-2, -BAR.y * 0.35)
+	_glows[1].position = Vector2(-2, BAR.y * 0.35)
 
 
 func set_active(on: bool) -> void:
@@ -39,8 +41,6 @@ func _process(_delta: float) -> void:
 	var red_on := active and fmod(Time.get_ticks_msec() / 1000.0, PERIOD * 2.0) < PERIOD
 	_glows[0].modulate.a = 0.8 if red_on else 0.0
 	_glows[1].modulate.a = 0.8 if active and not red_on else 0.0
-	_glows[0].position = Vector2(-2, -BAR.y * 0.35)
-	_glows[1].position = Vector2(-2, BAR.y * 0.35)
 	queue_redraw()
 
 

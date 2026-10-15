@@ -20,6 +20,7 @@ func _ready() -> void:
 	add_child(tint)
 	_camera = Camera2D.new()
 	_camera.zoom = Vector2.ONE * ZOOM
+	_camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	add_child(_camera)
 	_camera.make_current()
 	var rect := map.data.world_rect()

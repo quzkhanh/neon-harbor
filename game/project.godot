@@ -52,6 +52,7 @@ pseudolocalization/skip_placeholders=true
 
 2d/default_gravity=0.0
 common/physics_ticks_per_second=60
+common/physics_interpolation=true
 
 [rendering]
 

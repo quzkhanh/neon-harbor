@@ -172,6 +172,7 @@ func exit_vehicle() -> void:
 	var v := vehicle
 	vehicle = null
 	global_position = v.exit_point()
+	reset_physics_interpolation()
 	if v.velocity.length() > Tuning.BAIL_SPEED:
 		knocked = Tuning.KNOCKDOWN_TIME * 0.5
 		knock_velocity = v.velocity * 0.5
@@ -198,6 +199,7 @@ func respawn(pos: Vector2, grace := 0.0) -> void:
 	if vehicle:
 		exit_vehicle()
 	global_position = pos
+	reset_physics_interpolation()
 	alive = true
 	knocked = 0.0
 	knock_velocity = Vector2.ZERO

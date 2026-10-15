@@ -38,6 +38,7 @@ func _ready() -> void:
 	add_child(Ramps.new())
 	effects = Node2D.new()
 	effects.name = "Effects"
+	effects.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF  # vòng nhiệm vụ, vật phẩm, hiệu ứng: dịch theo frame hoặc đứng yên
 	add_child(effects)
 	Fx.root = effects
 	actors = Node2D.new()

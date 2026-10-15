@@ -30,7 +30,7 @@ static func show_on(who: Node2D, emote_kind: Kind) -> void:
 
 
 func _ready() -> void:
-	var t := create_tween()
+	var t := create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
 	t.tween_property(self, "scale", Vector2.ONE, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	t.tween_interval(LIFE)
 	t.tween_property(self, "modulate:a", 0.0, 0.3)

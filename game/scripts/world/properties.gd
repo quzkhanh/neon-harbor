@@ -32,6 +32,7 @@ func _ready() -> void:
 		if owns("safehouses", i) and not stored.is_empty() and DataDB.vehicles().has(stored.kind):
 			var v := city.spawn_vehicle(stored.kind, MapData.world_to_cell(safehouses[i]), 0.0, stored.sprite)
 			v.global_position = _garage_spot(i)
+			v.reset_physics_interpolation()
 			v.set_meta("garage", i)
 
 

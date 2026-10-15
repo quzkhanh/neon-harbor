@@ -169,7 +169,7 @@ func _die(dir: Vector2, _source: Node) -> void:
 	body.scale = Vector2.ONE
 	var slide := dir.normalized() * Tuning.CORPSE_SLIDE
 	Fx.blood_pool(global_position + slide)
-	var tween := create_tween().set_parallel()
+	var tween := create_tween().set_parallel().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
 	tween.tween_property(body, "rotation", facing + PI * 0.5 * signf(dir.x + 0.01), 0.25)
 	tween.tween_property(body, "position", slide, 0.25).set_ease(Tween.EASE_OUT)
 	died.emit(self)

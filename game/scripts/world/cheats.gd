@@ -54,6 +54,7 @@ func _car() -> void:
 	var p := city.player
 	var v := city.spawn_vehicle("super", MapData.world_to_cell(p.global_position), p.facing)
 	v.global_position = p.global_position + Vector2.from_angle(p.facing) * Tuning.TILE * 1.5
+	v.reset_physics_interpolation()
 	Game.notice.emit(tr("CHEAT_CAR"))
 
 

@@ -143,7 +143,7 @@ func _crash(source: Node) -> void:
 	Fx.shake(8.0)
 	_spot.visible = false
 	downed.emit()
-	var t := create_tween().set_parallel()
+	var t := create_tween().set_parallel().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
 	t.tween_property(_body, "scale", Vector2.ONE * 0.55, 1.2)
 	t.tween_property(_body, "rotation", _body.rotation + 6.0, 1.2)
 	t.tween_property(_body, "position", Vector2.ZERO, 1.2)

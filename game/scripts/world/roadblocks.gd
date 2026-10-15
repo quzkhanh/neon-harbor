@@ -51,6 +51,7 @@ func _build(spot: Dictionary) -> void:
 	var across: Vector2 = spot.across
 	var car := city.spawn_vehicle("police", MapData.world_to_cell(center), across.angle())
 	car.global_position = center
+	car.reset_physics_interpolation()
 	city.police._cars.append(car)  # còi/đèn và dọn xe theo Police như xe cảnh sát khác
 	var nodes: Array = [car, SpikeStrip.make(city.effects, center - along * Tuning.TILE * 1.6, across.angle(), Tuning.TILE * 2.0)]
 	for s in [-1.0, 1.0].slice(0, maxi(city.police.room(), 0)):

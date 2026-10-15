@@ -23,7 +23,8 @@ static func fire(shooter: Node2D, w: Dictionary, origin: Vector2, angle: float, 
 			_flame(shooter, w, origin, angle)
 	if w.kind != "flame" or randf() < 0.2:
 		Sfx.play_at(w.sound, origin, 0.0, randf_range(0.94, 1.06))
-	Fx.shake(float(w.shake))
+	if shooter is Player:
+		Fx.shake(float(w.shake))
 	shooter.get_tree().call_group("listeners", "hear_gunshot", origin, shooter)
 
 

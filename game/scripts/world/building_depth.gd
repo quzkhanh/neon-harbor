@@ -16,6 +16,7 @@ var _source: TileSetAtlasSource
 
 func build(data: MapData, tileset: TileSet, walls: TileMapLayer, wall_table: Dictionary) -> void:
 	process_priority = 1  # sau CameraRig: dùng tâm camera (kể cả rung) của chính frame này
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF  # tự đặt transform từng frame qua RenderingServer
 	_source = tileset.get_source(0)
 	walls.modulate = Palette.WALL_BASE
 	var heights := [Tuning.BUILDING_RISE_LOW, Tuning.BUILDING_RISE_HIGH]

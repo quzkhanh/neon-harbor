@@ -65,6 +65,7 @@ func _refresh_marker() -> void:
 	_rosa.visible = n > 0
 	if n > 0:
 		_rosa.global_position = giver_pos(n) + GIVER_OFFSET
+		_rosa.reset_physics_interpolation()
 
 
 func _process(_delta: float) -> void:
@@ -126,6 +127,7 @@ func _on_failed(reason_key: String, mission: MissionBase) -> void:
 		if city.player.vehicle:
 			city.player.exit_vehicle()
 		city.player.global_position = giver_pos(n)
+		city.player.reset_physics_interpolation()
 		start(n, false)
 
 
