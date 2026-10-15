@@ -6,8 +6,6 @@ const LOOKAHEAD := 3
 const REACH := 26.0
 const TURN_RATE := 6.0
 const TURN_SLOWDOWN := 0.55
-const SHOVE_DECAY := 520.0  # px/s^2: vận tốc bị đẩy tắt dần
-const SHOVE_MAX := 420.0
 const STOP_DIST := 80.0  # cách giao lộ chừng này mà chưa được vào thì dừng chờ
 const CLAIM_TIMEOUT_MS := 8000  # xe giữ giao lộ quá lâu (bị chặn, bị tông) thì xe khác được vào
 
@@ -19,7 +17,6 @@ var speed := 0.0
 var _plan: Array[Vector2i] = []
 var _blocked := 0.0
 var _inside := false
-var _shove := Vector2.ZERO  # vận tốc bị xe khác đâm/đẩy, cộng thêm vào vận tốc tự lái
 var _held := Vector2i(-1, -1)
 
 ## Giao lộ -> [mã xe đang giữ, thời điểm giữ]: mỗi giao lộ chỉ một xe tự lái vào một lúc, tránh hai xe cắt mặt nhau rồi kẹt.
@@ -55,8 +52,7 @@ func update(v: Vehicle, delta: float) -> bool:
 		_blocked = 0.0
 	speed = move_toward(speed, target, Tuning.TRAFFIC_ACCEL * (3.0 if target < speed else 1.0) * delta)
 	v.rotation = lerp_angle(v.rotation, to.angle(), minf(TURN_RATE * delta, 1.0))
-	v.velocity = v.forward() * speed + _shove
-	_shove = _shove.move_toward(Vector2.ZERO, SHOVE_DECAY * delta)
+	v.velocity = v.forward() * speed
 	return true
 
 
@@ -122,8 +118,3 @@ func _release(v: Vehicle) -> void:
 	var held: Array = _claims.get(_held, [])
 	if not held.is_empty() and held[0] == v.get_instance_id():
 		_claims.erase(_held)
-
-
-## Bị xe khác đâm hoặc đẩy: xe tự lái điều khiển vận tốc từng khung nên phải cộng cú đẩy riêng, nếu không bị ghi đè ngay.
-func shove(impulse: Vector2) -> void:
-	_shove = (_shove + impulse).limit_length(SHOVE_MAX)

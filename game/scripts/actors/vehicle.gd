@@ -10,6 +10,7 @@ static var map: MapData  # bản đồ của cảnh thành phố (thuyền cần
 const CAR_DIR := "res://assets/vendor/cars/%s.png"
 const SKID_TEX := "res://assets/vendor/objects/skidmark_short_1.png"
 const SHADOW_DROP := 0.4  # bóng xe ngắn hơn bóng nhà (`Tuning.SHADOW_OFFSET`) vì xe thấp
+const SHOVE_MAX := 420.0
 
 var kind := "car"
 var spec: Dictionary
@@ -43,6 +44,7 @@ var _burn_left := 0.0
 var _skid_timer := 0.0
 var _flash := 0.0
 var _crash_cooldown := 0.0
+var _shove := Vector2.ZERO  # vận tốc bị xe khác đâm/đẩy, chờ cộng vào ở tick vật lý kế
 var _input_reader := DriveInput.new()
 
 
@@ -184,7 +186,7 @@ func set_siren(on: bool) -> void:
 
 func _physics_process(delta: float) -> void:
 	_shadow.position = (Tuning.SHADOW_OFFSET * SHADOW_DROP).rotated(-rotation)
-	if driver == null and autopilot == null and not burning and _flash <= 0.0 and stunt.air <= 0.0 and velocity.length_squared() < 4.0:
+	if driver == null and autopilot == null and not burning and _flash <= 0.0 and stunt.air <= 0.0 and velocity.length_squared() < 4.0 and _shove == Vector2.ZERO:
 		velocity = Vector2.ZERO
 		return  # xe đỗ / xác xe đứng yên: bỏ qua vật lý (bị tông thì có vận tốc và chạy lại)
 	_flash = maxf(_flash - delta / Tuning.FLASH_TIME, 0.0)
@@ -210,8 +212,12 @@ func _physics_process(delta: float) -> void:
 		throttle = 0.0
 		steer = 0.0
 		boost = false
-		handbrake = true
-	if not kinematic:
+		handbrake = driver != null  # xe đỗ không người: bị đẩy thì lăn, chỉ chịu lực cản lăn
+	velocity += _shove
+	if kinematic:  # tự lái đặt lại vận tốc mỗi tick: cú đẩy phải cộng lại tới khi tắt dần như xe thả trôi, không thì bị ghi đè ngay
+		_shove = _shove.move_toward(Vector2.ZERO, Tuning.VEHICLE_DRAG * delta)
+	else:  # vật lý xe tự giữ đà: cộng một lần
+		_shove = Vector2.ZERO
 		_drive(delta)
 	var before := velocity
 	var was_at := global_position
@@ -295,39 +301,54 @@ func _leave_skid(side: Vector2) -> void:
 ## nên xe đứng yên vẫn "đâm" ở tốc độ tối đa sau mỗi lần hồi và tự nổ.
 func _check_crashes(before: Vector2) -> void:
 	for i in get_slide_collision_count():
-		var n := get_slide_collision(i).get_normal()
-		velocity -= n * minf(velocity.dot(n), 0.0)
-	for i in get_slide_collision_count():  # đẩy nhau cả khi chỉ chạm nhẹ, không cần đủ nhanh để thành cú đâm
 		var touched := get_slide_collision(i)
+		var n := touched.get_normal()
 		if touched.get_collider() is Vehicle:
-			touched.get_collider().shove(-touched.get_normal() * maxf(-before.dot(touched.get_normal()), 0.0) * Tuning.PUSH_SHOVE)
+			_push(touched.get_collider(), n)
+		else:
+			velocity -= n * minf(velocity.dot(n), 0.0)
 	if _crash_cooldown > 0.0:
 		return
 	for i in get_slide_collision_count():
 		var c := get_slide_collision(i)
-		var impact := -before.dot(c.get_normal())
+		var other := c.get_collider()
+		var other_velocity: Vector2 = other.velocity if other is Vehicle else Vector2.ZERO
+		var impact := -(before - other_velocity).dot(c.get_normal())  # tốc độ áp sát: hai xe đẩy nhau cùng đi không phải cú đâm
 		if impact < Tuning.CRASH_MIN_SPEED:
 			continue
 		_crash_cooldown = Tuning.CRASH_COOLDOWN
 		velocity += c.get_normal() * impact * Tuning.CRASH_BOUNCE
 		var damage := (impact - Tuning.CRASH_MIN_SPEED) * Tuning.CRASH_DAMAGE_PER_SPEED + 4.0
 		take_hit(damage * _crash_scale(), c.get_normal(), driver)
-		var other := c.get_collider()
 		if other is Vehicle:
 			other.take_hit(damage * other._crash_scale() * float(spec.get("ram", 1.0)), -c.get_normal(), driver if driver else self)
-			other.shove(before * Tuning.CRASH_SHOVE)
 		Sfx.play_at("crash", c.get_position(), clampf((impact - 300.0) / 40.0, -12.0, 0.0))
 		Fx.impact(c.get_position())
 		if is_player_driven():
 			Fx.shake(impact / 60.0)
 
 
-## Bị xe khác đâm hoặc đẩy: cộng vào vận tốc (xe tự lái có đường riêng, xem TrafficDriver.shove).
+## Tì vào xe khác (`n`: pháp tuyến va chạm, hướng từ xe kia về xe này): hai xe chia động lượng theo hướng va chạm như
+## va chạm mềm, cùng đi tiếp với một vận tốc chung (xe nặng như pickup, SWAT đẩy mạnh hơn). Xe này vẫn mất phần
+## vận tốc dồn vào xe kia, nên tì vào xe đứng yên không còn bị tính là cú đâm mạnh lặp lại sau mỗi lần hồi.
+func _push(other: Vehicle, n: Vector2) -> void:
+	var mine := -velocity.dot(n)
+	var theirs := -other.velocity.dot(n)
+	if mine <= theirs:
+		return
+	var weight := _mass()
+	var shared := (mine * weight + theirs * other._mass()) / (weight + other._mass())
+	velocity += n * (mine - shared)
+	other.shove(-n * (shared - theirs))
+
+
+## Bị xe khác đâm hoặc đẩy: cộng vào vận tốc ở tick vật lý kế (xem `_physics_process`).
 func shove(impulse: Vector2) -> void:
-	if autopilot is TrafficDriver:
-		autopilot.shove(impulse)
-	else:
-		velocity = (velocity + impulse).limit_length(float(spec.max_speed))
+	_shove = (_shove + impulse).limit_length(SHOVE_MAX)
+
+
+func _mass() -> float:
+	return float(spec.get("ram", 1.0))
 
 
 func _crash_scale() -> float:

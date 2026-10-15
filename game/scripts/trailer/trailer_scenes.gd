@@ -200,11 +200,15 @@ static func _night(t: Trailer) -> void:
 	t.mark("walk")
 	var move := &"move_right" if along.x > 0.0 else &"move_left"
 	Input.action_press(move)
+	var last: Pedestrian = null
 	for i in MAX_WAIT:
 		if waiting.is_empty():
 			break
 		for ped in waiting:
 			if ped.global_position.distance_to(p.global_position) < LINE_RANGE:
+				if last:
+					Speech.clear(last)  # mỗi lúc một người nói: bong bóng thoại dài (tiếng Anh) không đè lên nhau
+				last = ped
 				Speech.say(ped, Speech.pick(PedTalk.QUIRK_LINES[ped.quirk]))
 				t.mark("line_" + ped.quirk)
 				waiting.erase(ped)

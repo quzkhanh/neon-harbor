@@ -182,6 +182,18 @@ NH_HEADED=1 node tools/checks/web_play.mjs http://localhost:8060/index.html refe
 NH_HEADED=1 node tools/checks/web_play.mjs http://localhost:8060/index.html reference/shots persist  # save survives a reload
 ```
 
+## Trailer clips
+
+```bash
+tools/trailer/render.sh             # every scene in 9:16, 4:5 and 16:9 → ../neon-harbor-trailer/clips/
+ASPECTS=9x16 LANG_CODE=en tools/trailer/render.sh chase dog   # only some scenes, aspects or the English build
+```
+
+Scripted scenes (`pigeons`, `incident`, `chase`, `dog`, `night`) recorded with Godot's Movie Maker at a fixed 60 FPS,
+so the video is smooth however slow the machine is. The HUD is hidden, the camera zooms for each aspect ratio and the
+music is off (game sounds stay). Each MP4 comes with a JSON file of event frames (`honk`, `flock_up`, `stars_3`,
+`explosion`...) for placing cuts, captions and sound effects when editing. Needs `ffmpeg` with libx264.
+
 ## Web performance and saves
 
 - Measured on an Intel UHD 630 in Chrome with hardware acceleration on an idle machine: 74.7 FPS on average
@@ -246,6 +258,7 @@ game/
     core/        Tuning (all gameplay numbers), InputSetup, DataDB, SaveIO
     missions/    mission runner, the nine missions, side jobs (Activities: race, courier, taxi, vigilante, turf war, errand, phone chase)
     screens/     menu, ending
+    trailer/     Trailer (Movie Maker recording run), TrailerScenes, TrailerPilot (drives with real physics)
     ui/          theme, HUD, minimap, shop, dialog, overlays, touch controls
     world/       City, CityMap, MapData, lanes, traffic/chase/race/flee drivers, population, police (roadblocks,
                  helicopter), day/night, weather, ramps, properties, achievements, cheats, camera
@@ -257,6 +270,7 @@ tools/
                  (copy_vendor.sh needs the original Kenney packs in vendor/, which is not in the repository)
   checks/        check_all.sh, validate_map.py, check_i18n.py, take_shots.sh, export.sh, web_play.mjs
   maps/          build_city.py and the hand-drawn harbor.txt
+  trailer/       render.sh (trailer clips, see above)
 ```
 
 All gameplay numbers live in `game/scripts/core/tuning.gd`. Adding a weapon or vehicle is a data change.
