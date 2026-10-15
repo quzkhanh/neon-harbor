@@ -149,6 +149,8 @@ func _play_mission(city: Node, n: int) -> Node:
 			v.global_position = mission.cell_pos("e")
 			v.velocity = Vector2.ZERO
 		8:
+			game.clear_wanted()  # NV7 dịch chuyển xe đè người đi đường: sao còn sót không phải do NV8
+			await frames(2)
 			p.enter_vehicle(mission.truck)
 			await frames(5)
 			expect(game.stars == 0, "NV8: vừa lên xe tải, chưa chạy khỏi bãi đã bị truy nã")

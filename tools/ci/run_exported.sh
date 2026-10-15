@@ -8,6 +8,7 @@ out=$("${limit[@]}" "$1" --headless -- --shot=perf 2>&1)
 code=$?
 echo "$out" | grep -E "PERF|SCRIPT ERROR|ERROR" | head -20
 if [ $code -ne 0 ] || ! echo "$out" | grep -q "^PERF " || echo "$out" | grep -q "SCRIPT ERROR"; then
+  echo "$out" | tail -40
   echo "FAIL: bản export không chạy được tới thành phố (exit $code)"
   exit 1
 fi
