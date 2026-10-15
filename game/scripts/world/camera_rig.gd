@@ -12,6 +12,7 @@ const TELEPORT := 256.0  # mục tiêu nhảy xa hơn chừng này trong một t
 
 var target: Player
 var trauma := 0.0
+var zoom_scale := 1.0  # nhân thêm vào zoom tự động (quay trailer: khung dọc cần zoom gần hơn)
 var _bounds := Rect2()
 var _tick_from := Vector2.ZERO
 var _tick_to := Vector2.ZERO
@@ -73,7 +74,7 @@ func _process(delta: float) -> void:
 		look = target.aim_vector() * Tuning.LOOK_AHEAD
 	_look = _look.lerp(look, 1.0 - exp(-Tuning.LOOK_SMOOTH * delta))
 	var goal := _tick_from.lerp(_tick_to, Engine.get_physics_interpolation_fraction()) + _look
-	zoom = zoom.lerp(Vector2.ONE * zoom_goal, minf(ZOOM_SMOOTH * delta, 1.0))
+	zoom = zoom.lerp(Vector2.ONE * zoom_goal * zoom_scale, minf(ZOOM_SMOOTH * delta, 1.0))
 	var half := get_viewport_rect().size / zoom * 0.5
 	goal = goal.clamp(_bounds.position + half, (_bounds.end - half).max(_bounds.position + half))
 	global_position = global_position.lerp(goal, 1.0 - exp(-Tuning.CAMERA_SMOOTH * delta))

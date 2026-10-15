@@ -3,6 +3,7 @@ extends Node
 ## dựng sẵn tình huống, chụp viewport rồi thoát. Dùng save tạm để không đụng save thật.
 ## `--shot=perf` (trên Web: `index.html?shot=perf`): thành phố với dân/xe tối đa, truy nã 5 sao (trực thăng, đặc nhiệm,
 ## rào chắn) và trời mưa, in FPS trung bình.
+## `-- --trailer=<cảnh>`: quay clip trailer (xem Trailer).
 
 const DEFAULT_DIR := "user://shots"
 const SHOT_SAVE := "user://shot_save.json"
@@ -32,6 +33,9 @@ func _ready() -> void:
 		var query := str(JavaScriptBridge.eval("location.search")).trim_prefix("?")
 		for part in query.split("&", false):
 			args.append("--" + part)
+	if Array(args).any(func(a: String) -> bool: return a.begins_with("--trailer=")):
+		add_child(Trailer.new(args))
+		return
 	for arg in args:
 		if arg.begins_with("--shot="):
 			_name = arg.trim_prefix("--shot=")
