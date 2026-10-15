@@ -4,7 +4,7 @@
 set -uo pipefail
 limit=()  # macOS không có sẵn `timeout`
 if command -v timeout >/dev/null; then limit=(timeout 300); elif command -v gtimeout >/dev/null; then limit=(gtimeout 300); fi
-out=$("${limit[@]}" "$1" --headless -- --shot=perf 2>&1)
+out=$(${limit[@]+"${limit[@]}"} "$1" --headless -- --shot=perf 2>&1)  # dạng này chạy được cả với mảng rỗng trên bash 3.2
 code=$?
 echo "$out" | grep -E "PERF|SCRIPT ERROR|ERROR" | head -20
 if [ $code -ne 0 ] || ! echo "$out" | grep -q "^PERF " || echo "$out" | grep -q "SCRIPT ERROR"; then
