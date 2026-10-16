@@ -113,11 +113,15 @@ launch it from the new icon for a full-screen, installable web app. On Android C
   time of day, outfit, property, the parked car, stats and achievements.
 - English and Vietnamese, switchable at runtime. All on-screen text comes from `game/i18n/strings.csv`.
 - No ads in this version.
-- Phones (Web): floating sticks that appear under your thumb (left half walks, right half aims and shoots, with aim
-  assist on gang members and, when wanted, cops), big round Use / Swap / Reload / Pause buttons, a control-size
-  slider in Settings, tap the minimap to open the city map (tap anywhere to close it), and hints/guide that name the touch buttons. Holding the
-  phone upright pauses the game and asks you to turn it sideways; the menu has a Full screen button (Android Chrome
-  also locks landscape).
+- Phones (Web): laid out around the thumbs. A floating stick under your left thumb walks or steers; dragging the right
+  half aims (aim assist on gang members and, when wanted, cops); a big Fire button sits in the bottom corner with the
+  other buttons in an arc around it, so you can reload or swap without lifting a finger. The buttons follow the
+  situation: on foot Reload / Swap and a Use button that only appears when there is something to use; in a car Drift
+  (handbrake) / Nitro / Exit / Horn. Pause sits alone at the top centre. The buttons handle several fingers at once
+  (a plain Godot Button only sees the first one, so it ignored taps while a stick was held) and are drawn with code
+  icons. Settings → Touch controls: button size, opacity, left-handed layout and vibration. Tap the minimap to open the
+  city map (tap anywhere to close it). Holding the phone upright pauses the game and asks you to turn it sideways;
+  the menu has a Full screen button (Android Chrome also locks landscape).
 
 ## Controls
 
@@ -140,7 +144,7 @@ launch it from the new icon for a full-screen, installable web app. On Android C
 Walk into a gun shop door to open the shop. Walk into a pink marker to start a mission. Stop your car on a race flag for
 a second to start a street race; press E at a courier depot or a turf-war sign to start those jobs, and at a safehouse
 or business door to buy it. In a car, E always gets you out.
-On phones the Nitro button appears while you drive, and holding Swap opens the weapon wheel.
+On phones holding Swap opens the weapon wheel; the Drift, Nitro, Exit and Horn buttons appear while you drive.
 With the Classic driving scheme, W/S (or RT/LT) accelerate and brake and A/D turn the car.
 
 ## Running

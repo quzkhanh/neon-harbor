@@ -14,6 +14,8 @@ const PHONE := Vector2i(915, 412)  # điện thoại cầm ngang (px CSS)
 const MIN_TAP := 56.0  # cỡ chạm tối thiểu trên màn thật
 const PORTRAIT := Vector2i(412, 915)
 const INPUT_SETUP := "res://scripts/core/input_setup.gd"
+const REACH := 360.0  # px canvas: tầm ngón cái từ nút BẮN tới các nút phụ
+const PAUSE_CLEAR := 200.0  # px canvas: nút Tạm dừng cách xa mọi nút khác
 
 
 func _run() -> void:
@@ -127,8 +129,9 @@ func _wall_pair(city: Node) -> Array:
 	return [Vector2.ZERO, Vector2.ZERO]
 
 
-## Ở khung 915×412: joystick nổi đặt dưới ngón tay, hai ngón độc lập; chạm vào nút không mở joystick ngắm;
-## nút đủ to trên màn thật; thanh trượt "Cỡ nút điều khiển" phóng to nút.
+## Ở khung 915×412: joystick nổi đặt dưới ngón tay, hai ngón độc lập; nút nhận được ngón thứ ba lúc hai joystick đang giữ
+## (Godot chỉ giả lập chuột cho ngón đầu nên Button thường không làm được); nút đủ to, không chồng nhau, nằm trong tầm ngón cái;
+## nút đổi theo ngữ cảnh (đi bộ/lái xe, Dùng chỉ khi có gì để dùng); thuận tay trái lật bố cục; thanh trượt cỡ nút phóng to nút.
 func _check_touch_controls(city: Node) -> void:
 	root.size = PHONE
 	var tc: Node = load(TOUCH_CONTROLS).new()
@@ -136,10 +139,10 @@ func _check_touch_controls(city: Node) -> void:
 	await frames(3)
 	var screen: Transform2D = root.get_final_transform()
 	var view: Vector2 = root.get_visible_rect().size
-	var move := _stick(tc, &"")
-	var aim := _stick(tc, &"fire")
+	var move: Node = tc.move_stick
+	var aim: Node = tc.aim_stick
 	var left := view * Vector2(0.2, 0.7)
-	var right := view * Vector2(0.6, 0.7)
+	var right := view * Vector2(0.6, 0.45)
 	_touch(screen, 0, left, true)
 	_touch(screen, 1, right, true)
 	await frames(1)
@@ -148,11 +151,19 @@ func _check_touch_controls(city: Node) -> void:
 	_drag(screen, 1, right + Vector2(0, -100))
 	await frames(1)
 	expect(Input.get_action_strength(&"move_right") > 0.5, "kéo joystick trái sang phải mà không đi")
-	expect(Input.get_action_strength(&"aim_up") > 0.5 and Input.is_action_pressed(&"fire"), "ngón thứ hai kéo lên mà không ngắm/bắn")
+	expect(Input.get_action_strength(&"aim_up") > 0.5, "ngón thứ hai kéo lên mà không ngắm")
+	expect(not Input.is_action_pressed(&"fire"), "kéo ngắm mà tự bắn: bắn phải là nút riêng")
+	var fire: Node = tc.buttons.FIRE
+	_touch(screen, 2, fire.get_global_rect().get_center(), true)
+	await frames(2)
+	expect(Input.is_action_pressed(&"fire"), "ngón thứ ba bấm nút BẮN lúc hai joystick đang giữ mà không bắn")
+	_touch(screen, 2, fire.get_global_rect().get_center(), false)
+	await frames(2)
+	expect(not Input.is_action_pressed(&"fire"), "nhả nút BẮN mà vẫn bắn")
 	_touch(screen, 0, left + Vector2(100, 0), false)
 	_touch(screen, 1, right + Vector2(0, -100), false)
 	await frames(1)
-	expect(not Input.is_action_pressed(&"move_right") and not Input.is_action_pressed(&"fire"), "nhả tay mà action vẫn nhấn")
+	expect(not Input.is_action_pressed(&"move_right") and not Input.is_action_pressed(&"aim_up"), "nhả tay mà action vẫn nhấn")
 	# Đang giữ joystick thì game tạm dừng (hộp thoại, bản đồ, xoay dọc) và ngón tay nhấc ra lúc đó: không được kẹt.
 	_touch(screen, 0, left, true)
 	_drag(screen, 0, left + Vector2(100, 0))
@@ -170,43 +181,102 @@ func _check_touch_controls(city: Node) -> void:
 	expect(Input.get_action_strength(&"move_right") > 0.5, "sau khi tạm dừng, chạm lại joystick không còn tác dụng")
 	_touch(screen, 0, left + Vector2(100, 0), false)
 	await frames(1)
-	var reload := _button(tc, "TOUCH_RELOAD")
+	# Giữ nút BẮN lúc game tạm dừng rồi nhấc ngón: nút phải nhả.
+	_touch(screen, 3, fire.get_global_rect().get_center(), true)
+	await frames(1)
+	paused = true
+	await frames(1)
+	paused = false
+	await frames(1)
+	expect(not Input.is_action_pressed(&"fire"), "nút BẮN kẹt sau khi tạm dừng")
+	_touch(screen, 3, fire.get_global_rect().get_center(), false)
+	await frames(1)
+	# Nút phụ không mở joystick ngắm.
+	var reload: Node = tc.buttons.TOUCH_RELOAD
 	_touch(screen, 2, reload.get_global_rect().get_center(), true)
 	await frames(2)
-	expect(aim._touch == -1 and not Input.is_action_pressed(&"fire"), "chạm nút Nạp đạn mà mở joystick ngắm")
+	expect(aim._touch == -1 and Input.is_action_pressed(&"reload"), "chạm nút Nạp đạn mà mở joystick ngắm hoặc không nạp")
 	_touch(screen, 2, reload.get_global_rect().get_center(), false)
 	await frames(2)
-	for b in tc.find_children("*", "Button", true, false):
-		var tap: Vector2 = b.size * minf(screen.get_scale().x, screen.get_scale().y)
-		expect(minf(tap.x, tap.y) >= MIN_TAP, "nút %s chỉ %s px trên màn thật" % [b.text, tap])
-	var before: float = reload.size.x
+	await _check_button_layout(tc, city, screen, view)
+	await _check_left_hand(tc, screen)
+	var before: float = tc.buttons.TOUCH_RELOAD.size.x
 	game.settings.touch_scale = load("res://scripts/core/tuning.gd").TOUCH_SCALE_RANGE.x  # mức nhỏ nhất của thanh trượt
 	get_nodes_in_group("touch_controls")[0].rebuild()
 	await frames(3)
-	var smallest: Vector2 = _button(tc, "TOUCH_RELOAD").size * minf(screen.get_scale().x, screen.get_scale().y)
+	var smallest: Vector2 = tc.buttons.TOUCH_RELOAD.size * minf(screen.get_scale().x, screen.get_scale().y)
 	expect(smallest.x >= MIN_TAP, "cỡ nút nhỏ nhất chỉ %.0f px trên màn thật" % smallest.x)
 	game.settings.touch_scale = 1.4
 	get_nodes_in_group("touch_controls")[0].rebuild()
 	await frames(3)
-	expect(_button(tc, "TOUCH_RELOAD").size.x > before * 1.3, "cỡ nút 140%% mà nút không to lên")
+	expect(tc.buttons.TOUCH_RELOAD.size.x > before * 1.3, "cỡ nút 140%% mà nút không to lên")
 	game.settings.touch_scale = 1.0
 	tc.queue_free()
 	root.size = Vector2i(1280, 720)
 	await frames(2)
 
 
-func _stick(tc: Node, fire: StringName) -> Node:
-	for c in tc.get_children():
-		if "fire_action" in c and c.fire_action == fire:
-			return c
-	return null
+## Mọi nút hiện ra (đi bộ có Dùng, lái xe) đủ to trên màn thật, không chồng nhau, nút phụ nằm trong tầm ngón cái quanh nút BẮN;
+## Dùng chỉ hiện khi có gì để dùng; đi bộ không có nút lái xe và ngược lại; tạm dừng xa các nút khác.
+func _check_button_layout(tc: Node, city: Node, screen: Transform2D, view: Vector2) -> void:
+	var scale: float = minf(screen.get_scale().x, screen.get_scale().y)
+	city.interactions.prompt = ""
+	tc._in_car = false
+	tc._show_for_mode()
+	expect(not tc.buttons.TOUCH_INTERACT.visible, "đi bộ mà không có gì để dùng nhưng nút Dùng vẫn hiện")
+	city.interactions.prompt = "HINT_EXIT"
+	tc._show_for_mode()
+	expect(tc.buttons.TOUCH_INTERACT.visible, "có gì để dùng mà nút Dùng không hiện")
+	expect(not tc.buttons.TOUCH_HANDBRAKE.visible and not tc.buttons.TOUCH_HORN.visible, "đi bộ mà hiện nút phanh tay/còi")
+	_expect_spread(tc, scale, view, "đi bộ")
+	tc._in_car = true
+	tc._show_for_mode()
+	expect(tc.buttons.TOUCH_HANDBRAKE.visible and tc.buttons.TOUCH_NITRO.visible and tc.buttons.TOUCH_EXIT.visible and tc.buttons.TOUCH_HORN.visible,
+		"đang lái mà thiếu nút phanh tay/nitro/xuống xe/còi")
+	expect(not tc.buttons.TOUCH_RELOAD.visible and not tc.buttons.TOUCH_SWAP.visible and not tc.buttons.TOUCH_INTERACT.visible, "đang lái mà còn nút đi bộ")
+	_expect_spread(tc, scale, view, "lái xe")
+	tc._in_car = false
+	city.interactions.prompt = ""
+	tc._show_for_mode()
 
 
-func _button(tc: Node, key: String) -> Button:
-	for b in tc.find_children("*", "Button", true, false):
-		if b.text == key:
-			return b
-	return null
+func _expect_spread(tc: Node, scale: float, view: Vector2, mode: String) -> void:
+	var shown: Array = tc.buttons.values().filter(func(b: Node) -> bool: return b.visible)
+	var fire_at: Vector2 = tc.buttons.FIRE.get_global_rect().get_center()
+	for b in shown:
+		var tap: Vector2 = b.size * scale
+		expect(minf(tap.x, tap.y) >= MIN_TAP, "%s: nút %s chỉ %s px trên màn thật" % [mode, b.caption, tap])
+		expect(Rect2(Vector2.ZERO, view).encloses(b.get_global_rect()), "%s: nút %s tràn ra ngoài màn hình" % [mode, b.caption])
+		if b != tc.buttons.PAUSE and b != tc.buttons.FIRE:
+			expect(b.get_global_rect().get_center().distance_to(fire_at) <= REACH, "%s: nút %s ngoài tầm ngón cái quanh nút BẮN" % [mode, b.caption])
+	for i in shown.size():
+		for j in range(i + 1, shown.size()):
+			var a: Rect2 = shown[i].get_global_rect()
+			var c: Rect2 = shown[j].get_global_rect()
+			var touching: bool = a.get_center().distance_to(c.get_center()) < (a.size.x + c.size.x) * 0.5
+			expect(not touching, "%s: nút %s và %s chồng nhau" % [mode, shown[i].caption, shown[j].caption])
+	var pause_at: Vector2 = tc.buttons.PAUSE.get_global_rect().get_center()
+	for b in shown:
+		if b != tc.buttons.PAUSE:
+			expect(b.get_global_rect().get_center().distance_to(pause_at) >= PAUSE_CLEAR, "%s: nút %s quá gần nút Tạm dừng" % [mode, b.caption])
+
+
+## Thuận tay trái: nút BẮN sang góc dưới trái, joystick di chuyển sang nửa phải.
+func _check_left_hand(tc: Node, screen: Transform2D) -> void:
+	game.settings.touch_left = true
+	get_nodes_in_group("touch_controls")[0].rebuild()
+	await frames(3)
+	var view: Vector2 = root.get_visible_rect().size
+	expect(tc.buttons.FIRE.get_global_rect().get_center().x < view.x * 0.5, "thuận tay trái mà nút BẮN vẫn bên phải")
+	expect(tc.move_stick.anchor_left >= 0.5 and tc.aim_stick.anchor_left < 0.5, "thuận tay trái mà joystick di chuyển vẫn bên trái")
+	_touch(screen, 4, tc.buttons.FIRE.get_global_rect().get_center(), true)
+	await frames(2)
+	expect(Input.is_action_pressed(&"fire"), "thuận tay trái: bấm nút BẮN không bắn")
+	_touch(screen, 4, tc.buttons.FIRE.get_global_rect().get_center(), false)
+	await frames(2)
+	game.settings.touch_left = false
+	get_nodes_in_group("touch_controls")[0].rebuild()
+	await frames(3)
 
 
 ## Chạm/kéo như ngón tay thật: toạ độ cửa sổ (Input.parse_input_event đi qua phép co giãn màn hình).
@@ -274,7 +344,7 @@ func _check_touch_hints() -> void:
 		await frames(2)
 		var opened: Node = city.overlays.current
 		expect(opened != null and opened.get_script().resource_path.ends_with("map_screen.gd"), "chạm bản đồ nhỏ không mở bản đồ")
-		var move := _stick(get_nodes_in_group("touch_controls")[0], &"")
+		var move: Node = get_nodes_in_group("touch_controls")[0].move_stick
 		expect(move._touch == -1, "chạm bản đồ nhỏ mà joystick trái cũng bắt ngón tay")
 		_touch(screen, 1, root.get_visible_rect().get_center(), true)
 		await frames(2)

@@ -1,11 +1,10 @@
 class_name VirtualStick
 extends Control
 ## Joystick nổi: chạm vào vùng của nó (trừ các nút trong `blocked`) thì tâm joystick đặt ngay dưới ngón tay; kéo để nhấn
-## các action theo hướng (có độ lớn). `fire_action` (nếu có) được nhấn khi kéo quá nửa bán kính.
+## các action theo hướng (có độ lớn).
 ## Lúc chưa chạm vẽ mờ ở góc dưới của vùng (`mirror`: góc phải) để người chơi biết chỗ đặt ngón.
 
 var actions: Array[StringName] = []  # trái, phải, lên, xuống
-var fire_action := &""
 var mirror := false
 var inset := 0.0  # lùi chỗ vẽ mờ vào trong chừng này (chừa chỗ cho nút ở mép)
 var blocked: Array[Control] = []
@@ -16,9 +15,8 @@ var _center := Vector2.ZERO
 var _vector := Vector2.ZERO
 
 
-func setup(dirs: Array[StringName], fire := &"", scale := 1.0) -> VirtualStick:
+func setup(dirs: Array[StringName], scale := 1.0) -> VirtualStick:
 	actions = dirs
-	fire_action = fire
 	radius *= scale
 	knob *= scale
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -61,11 +59,6 @@ func _update(pos: Vector2) -> void:
 			Input.action_press(actions[i], strengths[i])
 		else:
 			Input.action_release(actions[i])
-	if fire_action != &"":
-		if _vector.length() > 0.5:
-			Input.action_press(fire_action)
-		else:
-			Input.action_release(fire_action)
 	queue_redraw()
 
 

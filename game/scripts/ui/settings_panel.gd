@@ -1,12 +1,12 @@
 class_name SettingsPanel
 extends Modal
 ## Cài đặt: ngôn ngữ (đổi ngay, không khởi động lại), kiểu lái xe, hướng dẫn người mới, âm lượng nhạc và hiệu ứng,
-## cỡ nút điều khiển (chỉ trên máy cảm ứng).
+## và (chỉ trên máy cảm ứng) nút mở panel điều khiển cảm ứng (TouchSettings).
 
 const LANG_KEYS := {"en": "LANG_EN", "vi": "LANG_VI"}
 const STEERING_KEYS := {DriveInput.SCREEN: "STEERING_SCREEN", DriveInput.CLASSIC: "STEERING_CLASSIC"}
 const TUTORIAL_KEYS := {true: "TUTORIAL_ON", false: "TUTORIAL_OFF"}
-const TOUCH_SEPARATION := 12  # thêm hàng cỡ nút: thu khoảng cách để khung vẫn vừa 720px cả khi chữ dài
+const TOUCH_SEPARATION := 10  # thêm hàng nút cảm ứng: thu khoảng cách để khung vẫn vừa 720px cả khi chữ dài
 
 
 func _build(content: VBoxContainer) -> void:
@@ -16,14 +16,15 @@ func _build(content: VBoxContainer) -> void:
 		_choices(content, "SETTINGS_LANGUAGE", "lang", LANG_KEYS, I18n.language),
 		_choices(content, "SETTINGS_STEERING", "steering", STEERING_KEYS, Game.settings.steering),
 		_choices(content, "SETTINGS_TUTORIAL", "tutorial", TUTORIAL_KEYS, Game.settings.tutorial),
-		[_slider(content, "SETTINGS_MUSIC", "music")],
-		[_slider(content, "SETTINGS_SFX", "sfx")],
+		[slider(content, "SETTINGS_MUSIC", "music")],
+		[slider(content, "SETTINGS_SFX", "sfx")],
 	]
 	if TouchControls.wanted():
 		content.add_theme_constant_override("separation", TOUCH_SEPARATION)
-		var size := _slider(content, "SETTINGS_TOUCH_SIZE", "touch_scale", Tuning.TOUCH_SCALE_RANGE.x, Tuning.TOUCH_SCALE_RANGE.y)
-		size.value_changed.connect(func(_v: float) -> void: get_tree().call_group("touch_controls", "rebuild"))
-		rows.append([size])
+		var touch := Ui.button("SETTINGS_TOUCH")
+		content.add_child(touch)
+		touch.pressed.connect(func() -> void: add_sibling(TouchSettings.new()))
+		rows.append([touch])
 	var back := Ui.button("SETTINGS_BACK", "AccentButton")
 	content.add_child(back)
 	back.pressed.connect(close)
@@ -51,8 +52,25 @@ func _choices(content: VBoxContainer, title_key: String, setting: String, option
 	return buttons
 
 
+## Một hàng các nút bật/tắt (`options`: cài đặt -> khoá dịch); đổi là dựng lại nút cảm ứng ngay.
+static func toggles(content: VBoxContainer, options: Dictionary) -> Array:
+	var row := Ui.hbox(12)
+	content.add_child(row)
+	var buttons: Array = []
+	for setting in options:
+		var b := Ui.button(options[setting])
+		b.toggle_mode = true
+		b.button_pressed = Game.settings[setting]
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.toggled.connect(func(on: bool) -> void: Game.set_setting(setting, on))
+		row.add_child(b)
+		buttons.append(b)
+	return buttons
+
+
 ## Nhãn và thanh trượt chung một hàng (khung cài đặt phải vừa màn hình 720px cả khi chữ dài).
-func _slider(content: VBoxContainer, key: String, setting: String, low := 0.0, high := 1.0) -> HSlider:
+static func slider(content: VBoxContainer, key: String, setting: String, low := 0.0, high := 1.0) -> HSlider:
 	var row := Ui.hbox(16)
 	content.add_child(row)
 	row.add_child(Ui.label(key, "SubLabel", HORIZONTAL_ALIGNMENT_LEFT))

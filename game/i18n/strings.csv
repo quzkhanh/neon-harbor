@@ -28,7 +28,7 @@ TUT_HOW_TO_OFF,Turn the guide off: [{key}] then Settings,Tắt hướng dẫn: [
 TUT_MOVE,Walk with W A S D or the arrow keys,Di chuyển bằng W A S D hoặc phím mũi tên
 TUT_MOVE_TOUCH,Drag the left stick to walk,Kéo joystick bên trái để di chuyển
 TUT_SHOOT,"Aim with the mouse, left click to shoot","Ngắm bằng chuột, bấm chuột trái để bắn"
-TUT_SHOOT_TOUCH,"Drag the right stick to aim, drag further to shoot (it locks onto nearby enemies)","Kéo joystick bên phải để ngắm, kéo xa hơn để bắn (tự hút tâm vào kẻ địch gần)"
+TUT_SHOOT_TOUCH,"Drag on the right side to aim, hold Fire to shoot (it locks onto nearby enemies)","Kéo ở nửa phải để ngắm, giữ nút Bắn để bắn (tự hút tâm vào kẻ địch gần)"
 TUT_MAP,[{key}] Open the city map,[{key}] Mở bản đồ thành phố
 TUT_MISSION,Follow the arrow and the line on the minimap to the pink circle to start a mission,Đi theo mũi tên và đường kẻ trên bản đồ nhỏ tới vòng tròn hồng để nhận nhiệm vụ
 TUT_VEHICLE,[{key}] Get on the motorbike,[{key}] Lên xe máy
@@ -398,10 +398,10 @@ HELP_KEY_HORN,H,H
 HELP_KEY_MAP,M / Tab,M / Tab
 HELP_KEY_PAUSE,Esc / P,Esc / P
 HELP_TOUCH_LEFT,Left stick,Joystick trái
-HELP_TOUCH_RIGHT,Right stick,Joystick phải
+HELP_TOUCH_RIGHT,Right side (drag),Nửa phải (kéo)
 HELP_DO_MOVE,"Walk, or steer the car (the car turns the way you press)","Đi bộ, hoặc lái xe (bấm hướng muốn đi, xe tự rẽ theo)"
 HELP_DO_AIM,Aim and shoot (or swing a melee weapon),Ngắm và bắn (hoặc vung vũ khí cận chiến)
-HELP_DO_AIM_TOUCH,Aim; drag further to shoot (it locks onto nearby enemies),Ngắm; kéo xa hơn để bắn (tự hút tâm vào kẻ địch gần)
+HELP_DO_AIM_TOUCH,Aim; it locks onto nearby enemies,Ngắm; tự hút tâm vào kẻ địch gần
 HELP_DO_RELOAD,Reload,Nạp đạn
 HELP_DO_SWAP,Next weapon (hold to open the weapon wheel),Đổi súng kế tiếp (giữ để mở vòng chọn súng)
 HELP_DO_SWAP_TOUCH,Switch to the next weapon,Đổi sang súng kế tiếp
@@ -636,3 +636,13 @@ PED_FEAR_3,I saw nothing. I swear.,Tôi chả thấy gì cả. Thề đấy.
 PED_FEAR_4,"Keep walking, keep walking...","Cứ đi tiếp, cứ đi tiếp..."
 PED_FEAR_5,Everyone knows what you did.,Ai cũng biết cậu đã làm gì.
 PED_FEAR_6,"Please take whatever you want, just go.","Cứ lấy gì cậu muốn, làm ơn đi đi."
+TOUCH_FIRE,Fire,Bắn
+TOUCH_HANDBRAKE,Drift,Drift
+TOUCH_HORN,Horn,Còi
+TOUCH_EXIT,Exit,Xuống xe
+HELP_DO_FIRE_TOUCH,Hold to shoot while you aim with the other thumb,Giữ để bắn trong lúc ngón kia ngắm
+HELP_DO_EXIT_TOUCH,Appears when there is something to use; in a car it gets you out,Chỉ hiện khi có gì để dùng; trên xe là nút xuống xe
+SETTINGS_TOUCH_OPACITY,Button opacity,Độ đậm của nút
+SETTINGS_TOUCH_LEFT,Left-handed,Thuận tay trái
+SETTINGS_TOUCH_HAPTIC,Vibration,Rung
+SETTINGS_TOUCH,Touch controls,Điều khiển cảm ứng

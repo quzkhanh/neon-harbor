@@ -28,7 +28,8 @@ var objective := ""
 var objective_params := {}
 var heat := 0.0
 var stars := 0
-var settings := {"lang": "", "music": 0.7, "sfx": 0.8, "steering": "screen", "tutorial": true, "touch_scale": 1.0}
+var settings := {"lang": "", "music": 0.7, "sfx": 0.8, "steering": "screen", "tutorial": true, "touch_scale": 1.0,
+	"touch_opacity": 0.9, "touch_left": false, "touch_haptics": true}
 var skin := "hitman1"  # trang phục của Jay (tủ đồ nhà an toàn)
 var fame := Fame.new()
 var hair := Hair.STYLES[0]  # kiểu tóc của Jay (tủ đồ)
